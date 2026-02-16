@@ -7,7 +7,9 @@ from sqlalchemy.sql import func
 import os
 import uuid
 from datetime import datetime, timedelta
-from typing import Optional
+from typing import Optional, List
+from pydantic import EmailStr, ValidationError
+
 from ..db import database, schemas, models
 from ..core import security as auth, utils
 
@@ -34,6 +36,7 @@ async def register(
     mobile_number: str = Form(...),
     address: str = Form(...),
     password: str = Form(...),
+    confirm_password: str = Form(...),
     # Caterer fields
     business_name: str = Form(None),
     business_type: str = Form(None),
@@ -50,11 +53,44 @@ async def register(
     next_url: Optional[str] = Form(None),
     db: Session = Depends(database.get_db)
 ):
+    # server‑side validation
+    errors: List[str] = []
+    try:
+        from pydantic import TypeAdapter
+        TypeAdapter(EmailStr).validate_python(email)
+    except ValidationError:
+        errors.append("Invalid email address")
+
+    if not full_name.strip():
+        errors.append("Full name is required")
+
+    if not mobile_number.isdigit():
+        errors.append("Mobile number must contain only digits")
+
+    if len(password) < 8:
+        errors.append("Password must be at least 8 characters")
+    if password != confirm_password:
+        errors.append("Passwords do not match")
+
+    if role == "caterer":
+        if not business_name or not business_name.strip():
+            errors.append("Business name is required for caterers")
+        if not coverage_area or not coverage_area.strip():
+            errors.append("Coverage area is required for caterers")
+
+    if errors:
+        context = {"request": request, "error": "; ".join(errors), "next_url": next_url, "role": role}
+        template = "auth/register_caterer.html" if role == "caterer" else "auth/register.html"
+        return templates.TemplateResponse(template, context)
+
     user = db.query(models.User).filter(models.User.email == email).first()
     if user:
-        return templates.TemplateResponse("auth/register.html", {
+        template = "auth/register_caterer.html" if role == "caterer" else "auth/register.html"
+        return templates.TemplateResponse(template, {
             "request": request,
-            "error": "Email already registered"
+            "error": "Email already registered",
+            "next_url": next_url,
+            "role": role
         })
     
     hashed_password = auth.get_password_hash(password)
@@ -286,6 +322,23 @@ def login(
     next_url: Optional[str] = Form(None),
     db: Session = Depends(database.get_db)
 ):
+    # basic validation
+    if not email or not password:
+        return templates.TemplateResponse("auth/login.html", {
+            "request": request,
+            "error": "Email and password are required",
+            "next_url": next_url
+        })
+    try:
+        from pydantic import TypeAdapter
+        TypeAdapter(EmailStr).validate_python(email)
+    except ValidationError:
+        return templates.TemplateResponse("auth/login.html", {
+            "request": request,
+            "error": "Invalid email address",
+            "next_url": next_url
+        })
+
     search_email = email
     if email.lower() == "admin":
         search_email = "admin@occaserve.com"
