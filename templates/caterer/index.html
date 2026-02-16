@@ -1,0 +1,168 @@
+{% extends "caterer/layout.html" %}
+
+{% block title %}Overview - Caterer Dashboard{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Welcome back, {{ user.first_name }}!</h1>
+    <p>Monitor your performance and manage your upcoming events.</p>
+</div>
+
+<!-- Stats Dashboard -->
+<div
+    style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 2rem; margin-bottom: 3.5rem;">
+    <!-- Revenue Card -->
+    <div
+        style="background: linear-gradient(135deg, #10b981, #059669); color: white; padding: 2rem; border-radius: 1.5rem; box-shadow: var(--shadow-md); position: relative; overflow: hidden;">
+        <i class="fas fa-coins"
+            style="position: absolute; top: 1.5rem; right: 1.5rem; font-size: 3rem; opacity: 0.2;"></i>
+        <div
+            style="font-size: 0.9rem; font-weight: 600; text-transform: uppercase; margin-bottom: 0.5rem; opacity: 0.9; letter-spacing: 0.05em;">
+            Total Revenue</div>
+        <div style="font-size: 2.25rem; font-weight: 700;">₱{{ "{:,.2f}".format(total_revenue) }}</div>
+    </div>
+
+    <!-- Active Bookings Card -->
+    <div
+        style="background: var(--white); padding: 2rem; border-radius: 1.5rem; border: 1px solid var(--border-color); box-shadow: var(--shadow-sm); position: relative; overflow: hidden;">
+        <i class="fas fa-calendar-check"
+            style="position: absolute; top: 1.5rem; right: 1.5rem; font-size: 3.2rem; opacity: 0.05; color: var(--primary-color);"></i>
+        <div
+            style="color: var(--text-light); font-size: 0.9rem; font-weight: 600; text-transform: uppercase; margin-bottom: 0.5rem; letter-spacing: 0.05em;">
+            Active Bookings</div>
+        <div style="font-size: 2.25rem; font-weight: 700; color: var(--secondary-color);">{{ active_bookings_count }}
+        </div>
+    </div>
+
+    <!-- Total Bookings Card -->
+    <div
+        style="background: var(--white); padding: 2rem; border-radius: 1.5rem; border: 1px solid var(--border-color); box-shadow: var(--shadow-sm); position: relative; overflow: hidden;">
+        <i class="fas fa-history"
+            style="position: absolute; top: 1.5rem; right: 1.5rem; font-size: 3.2rem; opacity: 0.05; color: var(--primary-color);"></i>
+        <div
+            style="color: var(--text-light); font-size: 0.9rem; font-weight: 600; text-transform: uppercase; margin-bottom: 0.5rem; letter-spacing: 0.05em;">
+            Total Bookings</div>
+        <div style="font-size: 2.25rem; font-weight: 700; color: var(--secondary-color);">{{ total_bookings_count }}
+        </div>
+    </div>
+
+    <!-- Average Rating Card -->
+    <div
+        style="background: var(--white); padding: 2rem; border-radius: 1.5rem; border: 1px solid var(--border-color); box-shadow: var(--shadow-sm); position: relative; overflow: hidden;">
+        <i class="fas fa-star"
+            style="position: absolute; top: 1.5rem; right: 1.5rem; font-size: 3.2rem; opacity: 0.05; color: #f59e0b;"></i>
+        <div
+            style="color: var(--text-light); font-size: 0.9rem; font-weight: 600; text-transform: uppercase; margin-bottom: 0.5rem; letter-spacing: 0.05em;">
+            Avg Rating</div>
+        <div style="font-size: 2.25rem; font-weight: 700; color: var(--secondary-color);">
+            {% if profile.reviews %}
+            {{ "%.1f"|format(profile.reviews|map(attribute='rating')|sum / profile.reviews|length) }}
+            {% else %}
+            N/A
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<div style="display: grid; grid-template-columns: 2fr 1fr; gap: 2.5rem;">
+    <!-- Recent Bookings Table -->
+    <div
+        style="background: var(--white); border-radius: 2rem; padding: 2.5rem; border: 1px solid var(--border-color); box-shadow: var(--shadow-md);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+            <h3 style="font-size: 1.5rem;"><i class="fas fa-clock"></i> Recent Requests</h3>
+            <a href="/caterer/bookings" class="btn-text-arrow">View All <i class="fas fa-arrow-right"></i></a>
+        </div>
+
+        {% if bookings %}
+        <div style="overflow-x: auto;">
+            <table style="width: 100%; border-collapse: separate; border-spacing: 0 0.75rem;">
+                <thead>
+                    <tr
+                        style="text-align: left; color: var(--text-light); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em;">
+                        <th style="padding: 0 1rem;">Customer</th>
+                        <th style="padding: 0 1rem;">Event Date</th>
+                        <th style="padding: 0 1rem;">Amount</th>
+                        <th style="padding: 0 1rem;">Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for booking in bookings %}
+                    <tr style="background: #f8fafc; border-radius: 0.75rem;">
+                        <td style="padding: 1.25rem; border-radius: 0.75rem 0 0 0.75rem;">
+                            <div style="font-weight: 600; color: var(--secondary-color);">{{ booking.user.first_name }}
+                                {{ booking.user.last_name }}</div>
+                        </td>
+                        <td style="padding: 1.25rem; color: var(--text-light);">
+                            {{ booking.event_date.strftime('%b %d, %Y') }}
+                        </td>
+                        <td style="padding: 1.25rem; font-weight: 700; color: var(--secondary-color);">
+                            ₱{{ "{:,.2f}".format(booking.total_amount) if booking.total_amount else 'TBD' }}
+                        </td>
+                        <td style="padding: 1.25rem; border-radius: 0 0.75rem 0.75rem 0;">
+                            {% if booking.status == 'pending' %}
+                            <div style="display: flex; gap: 0.5rem; align-items: center;">
+                                <form action="/caterer/bookings/{{ booking.id }}/accept" method="POST"
+                                    style="margin: 0;">
+                                    <button type="submit" class="btn-primary"
+                                        style="padding: 0.4rem 0.8rem; font-size: 0.7rem; background: #166534;">Accept</button>
+                                </form>
+                                <form action="/caterer/bookings/{{ booking.id }}/reject" method="POST"
+                                    style="margin: 0;">
+                                    <button type="submit" class="btn-outline"
+                                        style="padding: 0.4rem 0.8rem; font-size: 0.7rem; color: #991b1b; border-color: #fecaca;">Reject</button>
+                                </form>
+                            </div>
+                            {% else %}
+                            {% set status_colors = {
+                            'confirmed': '#166534; background: #dcfce7;',
+                            'completed': '#1e40af; background: #dbeafe;',
+                            'cancelled': '#991b1b; background: #fee2e2;'
+                            } %}
+                            {% set style = status_colors.get(booking.status, '#374151; background: #f1f5f9;') %}
+                            <span
+                                style="padding: 0.4rem 0.85rem; border-radius: 2rem; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; {{ style }}">
+                                {{ booking.status }}
+                            </span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div style="text-align: center; padding: 4rem;">
+            <p style="color: var(--text-light);">No recent requests found.</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Quick Actions / Mini Calendar -->
+    <div style="display: flex; flex-direction: column; gap: 2.5rem;">
+        <div
+            style="background: var(--white); border-radius: 2rem; padding: 2.5rem; border: 1px solid var(--border-color); box-shadow: var(--shadow-md);">
+            <h3 style="font-size: 1.25rem; margin-bottom: 1.5rem;">Quick Actions</h3>
+            <div style="display: flex; flex-direction: column; gap: 1rem;">
+                <a href="/caterer/packages" class="btn-outline" style="text-align: center;">Manage Packages</a>
+                <a href="/caterer/profile" class="btn-outline" style="text-align: center;">Edit Profile</a>
+            </div>
+        </div>
+
+        <div
+            style="background: var(--white); border-radius: 2rem; padding: 2.5rem; border: 1px solid var(--border-color); box-shadow: var(--shadow-md);">
+            <h3 style="font-size: 1.25rem; margin-bottom: 1.5rem;">Top Packages</h3>
+            {% if profile.packages %}
+            {% for pkg in profile.packages[:3] %}
+            <div
+                style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 1px solid var(--border-color);">
+                <div style="font-weight: 600; font-size: 0.95rem;">{{ pkg.name }}</div>
+                <div style="color: var(--primary-color); font-weight: 700;">₱{{ "{:,.2f}".format(pkg.price) }}</div>
+            </div>
+            {% endfor %}
+            {% else %}
+            <p style="color: var(--text-light); font-size: 0.9rem;">No packages added yet.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

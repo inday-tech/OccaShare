@@ -1,0 +1,83 @@
+{% extends "caterer/layout.html" %}
+
+{% block title %}Notifications - Caterer Dashboard{% endblock %}
+
+{% block extra_css %}
+<style>
+    .notif-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 1rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+        flex-shrink: 0;
+    }
+
+    .notif-success {
+        background: #dcfce7;
+        color: #16a34a;
+    }
+
+    .notif-warning {
+        background: #fef9c3;
+        color: #ca8a04;
+    }
+
+    .notif-reminder {
+        background: #e0e7ff;
+        color: #4f46e5;
+    }
+
+    .notif-info {
+        background: #f1f5f9;
+        color: #64748b;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Notifications</h1>
+    <p>Stay updated with your bookings, payments, and reminders.</p>
+</div>
+
+<div
+    style="background: var(--white); border-radius: 2rem; border: 1px solid var(--border-color); box-shadow: var(--shadow-md); overflow: hidden;">
+    {% if notifications %}
+    <div style="display: grid;">
+        {% for notif in notifications %}
+        <div style="padding: 2rem; border-bottom: 1px solid var(--border-color); display: flex; gap: 1.5rem; transition: background 0.2s;"
+            onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='white'">
+            <div
+                class="notif-icon notif-{% if notif.type == 'success' %}success{% elif notif.type == 'warning' %}warning{% elif notif.type == 'reminder' %}reminder{% else %}info{% endif %}">
+                <i
+                    class="fas {% if notif.type == 'success' %}fa-check-circle{% elif notif.type == 'warning' %}fa-exclamation-triangle{% elif notif.type == 'reminder' %}fa-clock{% else %}fa-info-circle{% endif %}"></i>
+            </div>
+            <div style="flex: 1;">
+                <div
+                    style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem;">
+                    <h4 style="margin: 0; font-size: 1.1rem; color: var(--secondary-color);">{{ notif.title }}</h4>
+                    <span style="font-size: 0.8rem; color: var(--text-light);">{{ notif.created_at.strftime('%b %d,
+                        %H:%M') }}</span>
+                </div>
+                <p style="margin: 0; color: var(--text-light); line-height: 1.5;">{{ notif.message }}</p>
+            </div>
+            {% if not notif.is_read %}
+            <div
+                style="width: 10px; height: 10px; border-radius: 50%; background: var(--primary-color); align-self: center;">
+            </div>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div style="padding: 6rem 2rem; text-align: center;">
+        <i class="fas fa-bell-slash" style="font-size: 4rem; color: #f1f5f9; margin-bottom: 1.5rem;"></i>
+        <h3 style="color: var(--secondary-color); margin-bottom: 0.5rem;">No notifications yet</h3>
+        <p style="color: var(--text-light);">We'll notify you when something important happens.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

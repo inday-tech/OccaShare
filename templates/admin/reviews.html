@@ -1,0 +1,51 @@
+{% extends "admin/layout.html" %}
+
+{% block title %}Reviews - Admin Dashboard{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Review Moderation</h1>
+    <p>Monitor and manage all customer feedback across the platform.</p>
+</div>
+
+<div
+    style="background: var(--white); border-radius: 2rem; padding: 2.5rem; border: 1px solid var(--border-color); box-shadow: var(--shadow-md);">
+    <h3 style="font-size: 1.5rem; margin-bottom: 2rem;"><i class="fas fa-star"></i> All Platform Reviews</h3>
+
+    {% if reviews %}
+    <div style="display: grid; gap: 2rem;">
+        {% for review in reviews %}
+        <div style="background: #f8fafc; padding: 2rem; border-radius: 1.5rem; border: 1px solid var(--border-color);">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 1.25rem;">
+                <div>
+                    <div style="font-weight: 700; font-size: 1.1rem; color: var(--secondary-color);">{{
+                        review.user.first_name }} {{ review.user.last_name }}</div>
+                    <div style="font-size: 0.85rem; color: var(--text-light);">Reviewed <span
+                            style="font-weight: 600;">{{ review.caterer_profile.business_name if review.caterer_profile
+                            else 'Unknown Caterer' }}</span></div>
+                </div>
+                <div style="text-align: right;">
+                    <div style="color: #f59e0b; margin-bottom: 0.25rem;">
+                        {% for _ in range(review.rating) %}<i class="fas fa-star"></i>{% endfor %}
+                        {% for _ in range(5 - review.rating) %}<i class="far fa-star"></i>{% endfor %}
+                    </div>
+                    <div style="font-size: 0.75rem; color: var(--text-light);">{{ review.created_at.strftime('%b %d,
+                        %Y') if review.created_at else 'N/A' }}</div>
+                </div>
+            </div>
+            <p style="color: var(--text-color); line-height: 1.6; margin-bottom: 1.5rem; font-style: italic;">"{{
+                review.comment }}"</p>
+            <div style="display: flex; gap: 0.75rem; justify-content: flex-end;">
+                <button class="btn-outline"
+                    style="padding: 0.5rem 1rem; font-size: 0.8rem; color: #dc2626; border-color: #fecaca;">Delete
+                    Review</button>
+                <button class="btn-outline" style="padding: 0.5rem 1rem; font-size: 0.8rem;">Highlight</button>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <p style="text-align: center; color: var(--text-light); padding: 4rem;">No reviews have been posted yet.</p>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,44 @@
+{% extends "caterer/layout.html" %}
+
+{% block title %}Reports - Caterer Dashboard{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Business Reports</h1>
+    <p>Analyze your business growth and performance metrics.</p>
+</div>
+
+<div
+    style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; margin-bottom: 3.5rem;">
+    <div
+        style="background: var(--white); padding: 2.5rem; border-radius: 2rem; border: 1px solid var(--border-color); box-shadow: var(--shadow-sm);">
+        <h3 style="color: var(--text-light); font-size: 0.9rem; text-transform: uppercase; margin-bottom: 1rem;">
+            Popularity Score</h3>
+        <div style="font-size: 2.5rem; font-weight: 700;">84%</div>
+        <div style="font-size: 0.85rem; color: #10b981; margin-top: 0.5rem;"><i class="fas fa-arrow-up"></i> 12% from
+            last month</div>
+    </div>
+
+    <div
+        style="background: var(--white); padding: 2.5rem; border-radius: 2rem; border: 1px solid var(--border-color); box-shadow: var(--shadow-sm);">
+        <h3 style="color: var(--text-light); font-size: 0.9rem; text-transform: uppercase; margin-bottom: 1rem;">Booking
+            Rate</h3>
+        <div style="font-size: 2.5rem; font-weight: 700;">{{ bookings|length }} events</div>
+        <div style="font-size: 0.85rem; color: #10b981; margin-top: 0.5rem;"><i class="fas fa-arrow-up"></i> 5% growth
+        </div>
+    </div>
+</div>
+
+<div
+    style="background: var(--white); border-radius: 2rem; padding: 3rem; border: 1px solid var(--border-color); box-shadow: var(--shadow-md);">
+    <h3 style="font-size: 1.5rem; margin-bottom: 2rem;"><i class="fas fa-chart-bar"></i> Performance Summary</h3>
+
+    <div
+        style="height: 300px; background: #f8fafc; border-radius: 1.5rem; display: flex; align-items: center; justify-content: center; color: var(--text-light); border: 2px dashed var(--border-color);">
+        <div style="text-align: center;">
+            <i class="fas fa-chart-area" style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.2;"></i>
+            <p>Interactive performance charts will appear here as more data is collected.</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,84 @@
+{% extends "customer/layout.html" %}
+
+{% block title %}Payments - OccaServe Dashboard{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Payments & Billing</h1>
+    <p>Manage your invoices and track payment history for your events.</p>
+</div>
+
+<!-- Financial Summary (Optional/Placeholder) -->
+<div
+    style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; margin-bottom: 3rem;">
+    <div
+        style="background: linear-gradient(135deg, var(--primary-color), #6366f1); color: white; padding: 2rem; border-radius: 1.5rem; box-shadow: var(--shadow-md);">
+        <div style="font-size: 0.9rem; font-weight: 500; opacity: 0.9; margin-bottom: 0.5rem;">Ongoing Bookings Total
+        </div>
+        <div style="font-size: 2.25rem; font-weight: 700;">
+            ₱{% set total = 0 %}{% for b in bookings %}{% if b.status != 'cancelled' %}{% set total = total +
+            (b.total_amount or 0) %}{% endif %}{% endfor %}{{ "{:,.2f}".format(total) }}
+        </div>
+    </div>
+</div>
+
+<div
+    style="background: var(--white); border-radius: 2rem; padding: 2.5rem; box-shadow: var(--shadow-md); border: 1px solid var(--border-color);">
+    <h3 style="font-size: 1.5rem; margin-bottom: 2rem; display: flex; align-items: center; gap: 0.75rem;">
+        <i class="fas fa-file-invoice-dollar"></i> Transaction History
+    </h3>
+
+    {% if bookings %}
+    <div style="overflow-x: auto;">
+        <table style="width: 100%; border-collapse: separate; border-spacing: 0 1rem;">
+            <thead>
+                <tr style="text-align: left; color: var(--text-light); font-size: 0.9rem; text-transform: uppercase;">
+                    <th style="padding: 0 1.5rem;">Reference</th>
+                    <th style="padding: 0 1.5rem;">Caterer</th>
+                    <th style="padding: 0 1.5rem;">Amount</th>
+                    <th style="padding: 0 1.5rem;">Payment Status</th>
+                    <th style="padding: 0 1.5rem; text-align: right;">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for booking in bookings %}
+                <tr style="background: #f8fafc; border-radius: 1rem;">
+                    <td style="padding: 1.5rem; border-radius: 1rem 0 0 1rem;">
+                        <div style="font-weight: 600;">#BK-{{ booking.id }}</div>
+                        <div style="font-size: 0.8rem; color: var(--text-light);">{{ booking.created_at.strftime('%b %d,
+                            %Y') }}</div>
+                    </td>
+                    <td style="padding: 1.5rem;">
+                        <div style="font-weight: 600;">{{ booking.caterer.business_name }}</div>
+                    </td>
+                    <td style="padding: 1.5rem; font-weight: 700; color: var(--secondary-color);">
+                        ₱{{ "{:,.2f}".format(booking.total_amount) if booking.total_amount else 'TBD' }}
+                    </td>
+                    <td style="padding: 1.5rem;">
+                        {% set status_colors = {
+                        'pending': '#92400e; background: #fef3c7;',
+                        'paid': '#166534; background: #dcfce7;',
+                        'deposit_paid': '#1e40af; background: #dbeafe;'
+                        } %}
+                        {% set style = status_colors.get(booking.payment_status, '#374151; background: #f1f5f9;') %}
+                        <span
+                            style="padding: 0.5rem 1rem; border-radius: 2rem; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; {{ style }}">
+                            {{ booking.payment_status }}
+                        </span>
+                    </td>
+                    <td style="padding: 1.5rem; border-radius: 0 1rem 1rem 0; text-align: right;">
+                        <button class="btn-outline" style="padding: 0.5rem 1rem; font-size: 0.85rem;">View
+                            Invoice</button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div style="text-align: center; padding: 4rem;">
+        <p style="color: var(--text-light);">No transaction records found.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

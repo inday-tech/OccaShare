@@ -1,0 +1,50 @@
+{% extends "customer/layout.html" %}
+
+{% block title %}Special Offers - OccaServe{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Special Offers & Promotions</h1>
+    <p>Exclusive deals and discounts from our partner caterers.</p>
+</div>
+
+<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 2.5rem;">
+    {% if promotions %}
+    {% for promo in promotions %}
+    <div style="background: var(--white); border-radius: 2rem; overflow: hidden; box-shadow: var(--shadow-md); border: 1px solid var(--border-color); transition: transform 0.3s ease;"
+        onmouseover="this.style.transform='translateY(-10px)'" onmouseout="this.style.transform='translateY(0)'">
+        <div style="background: var(--premium-gradient); padding: 2rem; color: white; position: relative;">
+            <div
+                style="position: absolute; top: 1rem; right: 1.5rem; background: rgba(255,255,255,0.2); padding: 0.5rem 1rem; border-radius: 2rem; font-size: 0.8rem; font-weight: 700; backdrop-filter: blur(5px);">
+                {{ promo.discount_value|int }}{{ '%' if promo.discount_type == 'percentage' else ' OFF' }}
+            </div>
+            <h3 style="margin: 0; font-size: 1.5rem; margin-top: 1rem;">{{ promo.title }}</h3>
+            <p style="opacity: 0.9; margin-top: 0.5rem; font-size: 0.9rem;">By {{ promo.caterer.business_name }}</p>
+        </div>
+        <div style="padding: 2rem;">
+            <p style="color: var(--text-light); line-height: 1.6; margin-bottom: 2rem; min-height: 60px;">{{
+                promo.description }}</p>
+
+            <div
+                style="display: flex; align-items: center; gap: 1rem; margin-bottom: 2rem; font-size: 0.85rem; color: var(--text-light);">
+                <i class="far fa-calendar-alt"></i>
+                <span>Ends on {{ promo.end_date.strftime('%B %d, %Y') }}</span>
+            </div>
+
+            <a href="/caterers/{{ promo.caterer_id }}" class="btn-primary"
+                style="display: block; text-align: center; width: 100%;">View Packages</a>
+        </div>
+    </div>
+    {% endfor %}
+    {% else %}
+    <div style="grid-column: 1/-1; text-align: center; padding: 6rem 2rem;">
+        <img src="https://illustrations.popsy.co/gray/shopping-cart.svg" alt="Empty"
+            style="width: 250px; margin-bottom: 2rem; opacity: 0.5;">
+        <h2 style="color: var(--secondary-color); margin-bottom: 1rem;">No Active Promotions</h2>
+        <p style="color: var(--text-light); font-size: 1.1rem;">Check back soon for exclusive deals from our elite
+            caterers!</p>
+        <a href="/caterers" class="btn-outline" style="margin-top: 2rem; display: inline-block;">Browse Marketplace</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

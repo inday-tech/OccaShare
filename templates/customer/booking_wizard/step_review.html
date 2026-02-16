@@ -1,0 +1,112 @@
+{% extends "customer/booking_wizard/wizard_base.html" %}
+
+{% block title %}Review Your Booking - OccaServe{% endblock %}
+
+{% block content %}
+<div class="wizard-header-content">
+    <h2 class="wizard-title font-playfair">Review Your Booking</h2>
+    <p class="wizard-subtitle">Please double-check your event details before proceeding to verification.</p>
+</div>
+
+<div class="review-details-container" style="max-width: 600px; margin: 0 auto;">
+    <div class="review-section"
+        style="margin-bottom: 2.5rem; padding-bottom: 2rem; border-bottom: 1px dashed var(--border-color);">
+        <h4
+            style="font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-light); margin-bottom: 1.25rem;">
+            Catering Partner</h4>
+        <div style="display: flex; align-items: center; gap: 1rem;">
+            <div
+                style="width: 50px; height: 50px; background: #f1f5f9; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--primary-color);">
+                <i class="fas fa-store"></i>
+            </div>
+            <div>
+                <h3 style="margin: 0; font-size: 1.25rem;">{{ caterer.business_name }}</h3>
+                <span style="font-size: 0.85rem; color: var(--text-light);">Verified Partner</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="review-section"
+        style="margin-bottom: 2.5rem; padding-bottom: 2rem; border-bottom: 1px dashed var(--border-color);">
+        <h4
+            style="font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-light); margin-bottom: 1.25rem;">
+            Selected Package</h4>
+        {% if package %}
+        <div style="background: #f8fafc; padding: 1.5rem; border-radius: 1rem; border: 1px solid var(--border-color);">
+            <h4 style="margin: 0 0 0.5rem; color: var(--secondary-color);">{{ package.name }}</h4>
+            <p style="margin: 0; font-size: 0.95rem; color: var(--text-light); line-height: 1.5;">{{ package.description
+                }}</p>
+        </div>
+        {% else %}
+        <p style="color: #ef4444; font-weight: 600;">No package selected</p>
+        {% endif %}
+    </div>
+
+    <div class="review-section" style="margin-bottom: 3rem;">
+        <h4
+            style="font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-light); margin-bottom: 1.25rem;">
+            Event Information</h4>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+            <div
+                style="background: white; padding: 1.25rem; border-radius: 1rem; border: 1px solid var(--border-color); display: flex; align-items: center; gap: 1rem; grid-column: span 2;">
+                <i class="fas fa-magic" style="color: var(--primary-color); font-size: 1.25rem;"></i>
+                <div>
+                    <span style="display: block; font-size: 0.75rem; color: var(--text-light);">Event Name & Type</span>
+                    <span style="font-weight: 600;">{{ data.event_name }} ({{ data.event_type }})</span>
+                </div>
+            </div>
+            <div
+                style="background: white; padding: 1.25rem; border-radius: 1rem; border: 1px solid var(--border-color); display: flex; align-items: center; gap: 1rem;">
+                <i class="far fa-calendar-check" style="color: var(--primary-color); font-size: 1.25rem;"></i>
+                <div>
+                    <span style="display: block; font-size: 0.75rem; color: var(--text-light);">Date & Time</span>
+                    <span style="font-weight: 600;">{{ data.event_date }} at {{ data.event_time }}</span>
+                </div>
+            </div>
+            <div
+                style="background: white; padding: 1.25rem; border-radius: 1rem; border: 1px solid var(--border-color); display: flex; align-items: center; gap: 1rem;">
+                <i class="fas fa-users" style="color: var(--primary-color); font-size: 1.25rem;"></i>
+                <div>
+                    <span style="display: block; font-size: 0.75rem; color: var(--text-light);">Guest Count</span>
+                    <span style="font-weight: 600;">{{ data.guest_count }} guests</span>
+                </div>
+            </div>
+            <div
+                style="background: white; padding: 1.25rem; border-radius: 1rem; border: 1px solid var(--border-color); display: flex; align-items: center; gap: 1rem; grid-column: span 2;">
+                <i class="fas fa-map-marker-alt" style="color: var(--primary-color); font-size: 1.25rem;"></i>
+                <div>
+                    <span style="display: block; font-size: 0.75rem; color: var(--text-light);">Venue / Address</span>
+                    <span style="font-weight: 600;">{{ data.venue_address }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="total-summary"
+        style="background: var(--secondary-color); padding: 2.5rem; border-radius: 1.5rem; color: white; margin-bottom: 4rem; position: relative; overflow: hidden;">
+        <i class="fas fa-receipt"
+            style="position: absolute; right: -20px; bottom: -20px; font-size: 8rem; opacity: 0.05;"></i>
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <span style="font-size: 1rem; opacity: 0.8; display: block; margin-bottom: 0.25rem;">Estimated
+                    Total</span>
+                <h2 style="margin: 0; font-size: 2.5rem; color: white;">₱{{ "{:,.2f}".format(total_price) }}</h2>
+            </div>
+            <div style="text-align: right;">
+                <span style="display: block; font-size: 0.9rem; opacity: 0.8;">Payment Schedule</span>
+                <span style="font-weight: 600;">Full amount due after approval</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="wizard-actions">
+        <a href="/bookings/step/details" class="btn-prev">
+            <i class="fas fa-edit"></i> Edit Details
+        </a>
+        <a href="/bookings/step/verify" class="btn-primary"
+            style="padding: 1.25rem 2.5rem; border-radius: 1rem; font-weight: 700; text-decoration: none; text-align: center;">
+            Confirm & Verify <i class="fas fa-shield-alt" style="margin-left: 0.5rem; font-size: 0.8rem;"></i>
+        </a>
+    </div>
+</div>
+{% endblock %}

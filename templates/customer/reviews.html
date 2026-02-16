@@ -1,0 +1,46 @@
+{% extends "customer/layout.html" %}
+
+{% block title %}Reviews - OccaServe Dashboard{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>My Reviews</h1>
+    <p>Share your experiences and help others find the best caterers.</p>
+</div>
+
+<div
+    style="background: var(--white); border-radius: 2rem; padding: 2.5rem; box-shadow: var(--shadow-md); border: 1px solid var(--border-color);">
+    <h3 style="font-size: 1.5rem; margin-bottom: 2rem; display: flex; align-items: center; gap: 0.75rem;">
+        <i class="fas fa-star"></i> Reviews You've Shared
+    </h3>
+
+    {% if reviews %}
+    <div style="display: grid; gap: 2rem;">
+        {% for review in reviews %}
+        <div style="background: #f8fafc; padding: 2rem; border-radius: 1.5rem; border: 1px solid var(--border-color);">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 1rem;">
+                <div style="font-weight: 700; font-size: 1.1rem;">{{ review.caterer.business_name }}</div>
+                <div style="color: #f59e0b;">
+                    {% for _ in range(review.rating) %}<i class="fas fa-star"></i>{% endfor %}
+                    {% for _ in range(5 - review.rating) %}<i class="far fa-star"></i>{% endfor %}
+                </div>
+            </div>
+            <p style="color: var(--text-color); line-height: 1.6; margin-bottom: 1.5rem;">"{{ review.comment }}"</p>
+            <div style="font-size: 0.85rem; color: var(--text-light); text-align: right;">
+                Reviewed on {{ review.created_at.strftime('%b %d, %Y') }}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div style="text-align: center; padding: 5rem 2rem;">
+        <img src="https://illustrations.popsy.co/gray/chatting.svg" alt="Empty"
+            style="width: 180px; margin-bottom: 2rem; opacity: 0.5;">
+        <h3 style="color: var(--secondary-color); font-size: 1.5rem; margin-bottom: 1rem;">No reviews yet</h3>
+        <p style="color: var(--text-light); margin-bottom: 2rem;">After your event is completed, you'll be able to leave
+            a review for your caterer here.</p>
+        <a href="/customer/bookings" class="btn-outline">Go to My Bookings</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

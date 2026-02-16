@@ -1,0 +1,208 @@
+{% extends "customer/layout.html" %}
+
+{% block title %}My Profile - OccaServe Dashboard{% endblock %}
+
+{% block content %}
+<div class="page-header" style="margin-bottom: 3rem;">
+    <h1>Account Settings</h1>
+    <p>Manage your account information, profile photo, and security settings.</p>
+</div>
+
+{% if request.query_params.get('success') %}
+<div
+    style="background: #f0fdf4; border: 1px solid #bbf7d0; color: #166534; padding: 1rem 1.5rem; border-radius: 1rem; margin-bottom: 2rem; display: flex; align-items: center; gap: 0.75rem;">
+    <i class="fas fa-check-circle"></i>
+    {% if request.query_params.get('success') == 'profile_updated' %}
+    <span>Your profile has been updated successfully!</span>
+    {% elif request.query_params.get('success') == 'photo_updated' %}
+    <span>Profile photo updated successfully!</span>
+    {% endif %}
+</div>
+{% endif %}
+
+<div style="display: grid; grid-template-columns: 320px 1fr; gap: 2.5rem; align-items: flex-start;">
+    <!-- Profile Sidebar -->
+    <div style="display: flex; flex-direction: column; gap: 2rem;">
+        <!-- Avatar Card -->
+        <div
+            style="background: var(--white); padding: 2.5rem 2rem; border-radius: 2rem; border: 1px solid var(--border-color); text-align: center; box-shadow: var(--shadow-sm);">
+            <div style="position: relative; display: inline-block; margin-bottom: 1.5rem;">
+                <div
+                    style="width: 140px; height: 140px; border-radius: 50%; overflow: hidden; border: 4px solid var(--white); box-shadow: 0 0 0 1px var(--border-color);">
+                    {% if user.profile_image_url %}
+                    <img src="{{ user.profile_image_url }}" alt="{{ user.first_name }}"
+                        style="width: 100%; height: 100%; object-fit: cover;">
+                    {% else %}
+                    <div
+                        style="width: 100%; height: 100%; background: var(--premium-gradient); color: white; display: flex; align-items: center; justify-content: center; font-size: 3.5rem; font-weight: 700; font-family: 'Playfair Display', serif;">
+                        {{ user.first_name[0] if user.first_name else '?' }}{{ user.last_name[0] if user.last_name else
+                        '' }}
+                    </div>
+                    {% endif %}
+                </div>
+                <!-- Camera Icon Sub-form -->
+                <form action="/customer/profile/photo" method="POST" enctype="multipart/form-data" id="photoForm"
+                    style="position: absolute; bottom: 5px; right: 5px;">
+                    <label for="photoInput"
+                        style="width: 40px; height: 40px; border-radius: 50%; background: var(--white); display: flex; align-items: center; justify-content: center; cursor: pointer; border: 1px solid var(--border-color); box-shadow: var(--shadow-sm); color: var(--primary-color); transition: all 0.2s;">
+                        <i class="fas fa-camera"></i>
+                        <input type="file" id="photoInput" name="file" hidden
+                            onchange="document.getElementById('photoForm').submit()">
+                    </label>
+                </form>
+            </div>
+
+            <h3
+                style="font-size: 1.4rem; margin-bottom: 0.1rem; color: var(--secondary-color); font-family: 'Playfair Display', serif;">
+                {{ user.first_name }} {{ user.last_name }}</h3>
+            <p style="color: var(--primary-color); font-size: 0.85rem; font-weight: 600; margin-bottom: 0.75rem;">@{{
+                user.first_name|lower }}{{ user.id }}</p>
+            <p style="color: var(--text-light); font-size: 0.85rem; margin-bottom: 1.5rem;"><i
+                    class="far fa-calendar-alt" style="margin-right: 0.25rem;"></i> Joined {{
+                user.created_at.strftime('%B %Y') }}</p>
+
+            <div
+                style="display: inline-flex; align-items: center; gap: 0.5rem; background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%); color: #0369a1; padding: 0.5rem 1.25rem; border-radius: 2rem; font-size: 0.8rem; font-weight: 700; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
+                <i class="fas fa-check-circle"></i> Verified {{ user.role|capitalize }}
+            </div>
+        </div>
+
+        <!-- Quick Stats -->
+        <div
+            style="background: var(--white); padding: 2rem; border-radius: 2rem; border: 1px solid var(--border-color); box-shadow: var(--shadow-sm); position: relative; overflow: hidden;">
+            <div
+                style="position: absolute; top: 0; right: 0; width: 80px; height: 80px; background: var(--premium-gradient); opacity: 0.05; border-radius: 0 0 0 100%;">
+            </div>
+            <h4 style="font-size: 1.1rem; margin-bottom: 1.5rem; color: var(--secondary-color); font-weight: 700;">
+                Account Activity</h4>
+            <div style="display: flex; flex-direction: column; gap: 1.25rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span style="color: var(--text-light); font-size: 0.95rem;">Total Bookings</span>
+                    <span
+                        style="font-weight: 700; color: var(--secondary-color); background: #f1f5f9; padding: 0.2rem 0.6rem; border-radius: 0.5rem;">{{
+                        user.bookings|length }}</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span style="color: var(--text-light); font-size: 0.95rem;">Reviews Given</span>
+                    <span
+                        style="font-weight: 700; color: var(--secondary-color); background: #f1f5f9; padding: 0.2rem 0.6rem; border-radius: 0.5rem;">{{
+                        user.reviews|length }}</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span style="color: var(--text-light); font-size: 0.95rem;">Identity Status</span>
+                    <span
+                        style="font-weight: 700; color: #166534; display: flex; align-items: center; gap: 0.25rem; font-size: 0.85rem;">
+                        <i class="fas fa-check-circle"></i> Verified
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Profile Form Container -->
+    <div style="display: flex; flex-direction: column; gap: 2.5rem;">
+        <div
+            style="background: var(--white); padding: 3rem; border-radius: 2rem; border: 1px solid var(--border-color); box-shadow: var(--shadow-sm);">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 2.5rem;">
+                <div>
+                    <h3 style="font-size: 1.5rem; margin-bottom: 0.5rem; color: var(--secondary-color);">Personal
+                        Information</h3>
+                    <p style="color: var(--text-light); font-size: 0.95rem;">Update your name and primary contact
+                        details.</p>
+                </div>
+                <div
+                    style="width: 45px; height: 45px; background: #f5f3ff; color: var(--primary-color); border-radius: 1rem; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">
+                    <i class="fas fa-user-edit"></i>
+                </div>
+            </div>
+
+            <form action="/customer/profile/update" method="POST">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 2rem;">
+                    <div class="form-group">
+                        <label
+                            style="display: block; font-weight: 600; margin-bottom: 0.75rem; font-size: 0.95rem; color: var(--secondary-color);">First
+                            Name</label>
+                        <input type="text" name="first_name" value="{{ user.first_name }}" required
+                            style="width: 100%; padding: 1rem 1.25rem; border: 1.5px solid var(--border-color); border-radius: 1rem; font-size: 1rem; transition: all 0.2s; outline: none;">
+                    </div>
+                    <div class="form-group">
+                        <label
+                            style="display: block; font-weight: 600; margin-bottom: 0.75rem; font-size: 0.95rem; color: var(--secondary-color);">Last
+                            Name</label>
+                        <input type="text" name="last_name" value="{{ user.last_name }}" required
+                            style="width: 100%; padding: 1rem 1.25rem; border: 1.5px solid var(--border-color); border-radius: 1rem; font-size: 1rem; transition: all 0.2s; outline: none;">
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 3rem;">
+                    <div class="form-group">
+                        <label
+                            style="display: block; font-weight: 600; margin-bottom: 0.75rem; font-size: 0.95rem; color: var(--secondary-color);">Email
+                            Address <span
+                                style="color: var(--text-light); font-weight: 400; font-size: 0.75rem;">(Permanent)</span></label>
+                        <div style="position: relative;">
+                            <input type="email" value="{{ user.email }}" disabled
+                                style="width: 100%; padding: 1rem 1.25rem 1rem 2.8rem; border: 1.5px solid var(--border-color); border-radius: 1rem; font-size: 1rem; background: #f8fafc; color: #64748b; cursor: not-allowed;">
+                            <i class="fas fa-lock"
+                                style="position: absolute; left: 1.2rem; top: 50%; transform: translateY(-50%); color: #cbd5e1;"></i>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label
+                            style="display: block; font-weight: 600; margin-bottom: 0.75rem; font-size: 0.95rem; color: var(--secondary-color);">Phone
+                            Number</label>
+                        <div style="position: relative;">
+                            <input type="text" name="phone_number" value="{{ user.phone_number or '' }}"
+                                placeholder="+63 9XX XXX XXXX"
+                                style="width: 100%; padding: 1rem 1.25rem 1rem 2.8rem; border: 1.5px solid var(--border-color); border-radius: 1rem; font-size: 1rem; outline: none; transition: all 0.2s;">
+                            <i class="fas fa-phone-alt"
+                                style="position: absolute; left: 1.2rem; top: 50%; transform: translateY(-50%); color: var(--text-light);"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div
+                    style="display: flex; justify-content: flex-end; gap: 1rem; border-top: 1px solid var(--border-color); padding-top: 2rem;">
+                    <button type="reset" class="btn-outline" style="padding: 0.9rem 2rem; border-radius: 1rem;">Reset
+                        Changes</button>
+                    <button type="submit" class="btn-primary"
+                        style="padding: 0.9rem 2.5rem; border-radius: 1rem; box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25);">Save
+                        Profile</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Security Card -->
+        <div
+            style="background: white; padding: 2.5rem 3rem; border-radius: 2rem; border: 1px solid var(--border-color); box-shadow: var(--shadow-sm); display: flex; justify-content: space-between; align-items: center; border-left: 6px solid #ef4444;">
+            <div>
+                <h3 style="font-size: 1.2rem; color: var(--secondary-color); margin-bottom: 0.5rem;">Account Security
+                </h3>
+                <p style="color: var(--text-light); font-size: 0.9rem;">Feeling your account is insecure? Change your
+                    password or update recovery options.</p>
+            </div>
+            <button class="btn-outline"
+                style="color: #ef4444; border-color: #ef4444; border-radius: 0.75rem; min-width: 180px;">
+                Update Security
+            </button>
+        </div>
+    </div>
+</div>
+
+<style>
+    .form-group input:focus {
+        border-color: var(--primary-color) !important;
+        box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
+    }
+
+    label i {
+        pointer-events: none;
+    }
+
+    #photoInput+label:hover {
+        transform: scale(1.1);
+        background: var(--primary-color) !important;
+        color: white !important;
+    }
+</style>
+{% endblock %}

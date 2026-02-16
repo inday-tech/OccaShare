@@ -1,0 +1,103 @@
+{% extends "admin/layout.html" %}
+
+{% block title %}Verification Detail - Admin Dashboard{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div style="display: flex; align-items: center; gap: 1rem;">
+        <a href="/admin/{{ 'caterers' if target_user.role == 'caterer' else 'customers' }}" style="color: #64748b;"><i
+                class="fas fa-arrow-left"></i></a>
+        <div>
+            <h1>Verification Review: {{ target_user.first_name }} {{ target_user.last_name }}</h1>
+            <p>Verification details for {{ target_user.role }} account.</p>
+        </div>
+    </div>
+</div>
+
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+    <!-- Document Display -->
+    <div
+        style="background: white; border-radius: 1.5rem; padding: 2.5rem; border: 1px solid var(--border-color); box-shadow: var(--shadow-md);">
+        <h3 style="margin-bottom: 2rem;"><i class="fas fa-file-alt" style="color: var(--primary-color);"></i> Submitted
+            Documents</h3>
+
+        {% if caterer_profile and caterer_profile.logo_url %}
+        <div style="margin-bottom: 2rem;">
+            <p style="font-weight: 700; margin-bottom: 1rem;">Business Permit / Logo</p>
+            <img src="{{ caterer_profile.logo_url }}"
+                style="width: 100%; border-radius: 1rem; border: 1px solid #e2e8f0; max-height: 400px; object-fit: contain;"
+                alt="Business Document">
+        </div>
+        {% elif verification %}
+        <div style="margin-bottom: 2rem;">
+            <p style="font-weight: 700; margin-bottom: 1rem;">Government ID</p>
+            <img src="{{ verification.document_url }}"
+                style="width: 100%; border-radius: 1rem; border: 1px solid #e2e8f0; max-height: 400px; object-fit: contain;"
+                alt="ID Document">
+        </div>
+        <div style="margin-bottom: 2rem;">
+            <p style="font-weight: 700; margin-bottom: 1rem;">Liveness Selfie</p>
+            <img src="{{ verification.selfie_url }}"
+                style="width: 100%; border-radius: 1rem; border: 1px solid #e2e8f0; max-height: 400px; object-fit: contain;"
+                alt="Liveness Selfie">
+        </div>
+        {% else %}
+        <p style="padding: 3rem; text-align: center; color: #94a3b8;">No documents uploaded yet.</p>
+        {% endif %}
+    </div>
+
+    <!-- Data & Actions -->
+    <div>
+        <div
+            style="background: white; border-radius: 1.5rem; padding: 2.5rem; border: 1px solid var(--border-color); box-shadow: var(--shadow-md); margin-bottom: 2rem;">
+            <h3 style="margin-bottom: 2rem;"><i class="fas fa-microchip" style="color: #6366f1;"></i> OCR Data
+                Extraction</h3>
+
+            {% if (verification and verification.ocr_data) %}
+            <div style="display: grid; gap: 1rem;">
+                {% for key, val in verification.ocr_data.items() %}
+                <div
+                    style="display: flex; justify-content: space-between; padding: 0.75rem; background: #f8fafc; border-radius: 0.5rem;">
+                    <span style="color: #64748b; font-size: 0.8rem; font-weight: 600; text-transform: uppercase;">{{
+                        key.replace('_', ' ') }}</span>
+                    <span style="font-weight: 700;">{{ val }}</span>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p style="color: #94a3b8; text-align: center;">OCR processing not available for this record.</p>
+            {% endif %}
+        </div>
+
+        <div
+            style="background: white; border-radius: 1.5rem; padding: 2.5rem; border: 1px solid var(--border-color); box-shadow: var(--shadow-md);">
+            <h3 style="margin-bottom: 2rem;"><i class="fas fa-shield-alt" style="color: #10b981;"></i> Final Decision
+            </h3>
+
+            <p style="color: #64748b; margin-bottom: 2rem;">Review the extracted data and document images above before
+                making a decision.</p>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <form
+                    action="/admin/{{ 'caterers' if target_user.role == 'caterer' else 'customers' }}/{{ caterer_profile.id if target_user.role == 'caterer' else target_user.id }}/verify"
+                    method="POST">
+                    <input type="hidden" name="action" value="approve">
+                    <button type="submit"
+                        style="width: 100%; background: #10b981; color: white; border: none; padding: 1rem; border-radius: 1rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+                        <i class="fas fa-check-circle"></i> Approve
+                    </button>
+                </form>
+                <form
+                    action="/admin/{{ 'caterers' if target_user.role == 'caterer' else 'customers' }}/{{ caterer_profile.id if target_user.role == 'caterer' else target_user.id }}/verify"
+                    method="POST">
+                    <input type="hidden" name="action" value="reject">
+                    <button type="submit"
+                        style="width: 100%; background: #fef2f2; color: #ef4444; border: 1px solid #fee2e2; padding: 1rem; border-radius: 1rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+                        <i class="fas fa-times-circle"></i> Reject
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

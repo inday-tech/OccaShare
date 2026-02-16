@@ -1,0 +1,193 @@
+{% extends "admin/layout.html" %}
+
+{% block title %}Overview - Admin Dashboard{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Platform Overview</h1>
+    <p>Monitor platform growth, revenue, and pending administrative tasks.</p>
+</div>
+
+<!-- Stats Grid -->
+<div
+    style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; margin-bottom: 3.5rem;">
+    <div
+        style="background: var(--white); padding: 2.25rem; border-radius: 1.25rem; border: 1px solid var(--border-color); box-shadow: 0 1px 2px rgba(0,0,0,0.05); position: relative; overflow: hidden;">
+        <i class="fas fa-users"
+            style="position: absolute; top: 1.5rem; right: 1.5rem; font-size: 2.5rem; opacity: 0.1; color: var(--primary-color);"></i>
+        <div
+            style="color: #64748b; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; margin-bottom: 0.75rem; letter-spacing: 0.05em;">
+            Total Customers</div>
+        <div style="font-size: 2.5rem; font-weight: 800; color: #0f172a; letter-spacing: -0.025em;">{{
+            metrics.customer_count }}
+        </div>
+    </div>
+
+    <div
+        style="background: var(--white); padding: 2.25rem; border-radius: 1.25rem; border: 1px solid var(--border-color); box-shadow: 0 1px 2px rgba(0,0,0,0.05); position: relative; overflow: hidden;">
+        <i class="fas fa-store"
+            style="position: absolute; top: 1.5rem; right: 1.5rem; font-size: 2.5rem; opacity: 0.1; color: var(--primary-color);"></i>
+        <div
+            style="color: #64748b; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; margin-bottom: 0.75rem; letter-spacing: 0.05em;">
+            Active Caterers</div>
+        <div style="font-size: 2.5rem; font-weight: 800; color: #0f172a; letter-spacing: -0.025em;">{{
+            metrics.caterer_count }}
+        </div>
+    </div>
+
+    <div
+        style="background: var(--white); padding: 2.25rem; border-radius: 1.25rem; border: 1px solid var(--border-color); box-shadow: 0 1px 2px rgba(0,0,0,0.05); position: relative; overflow: hidden;">
+        <i class="fas fa-calendar-check"
+            style="position: absolute; top: 1.5rem; right: 1.5rem; font-size: 2.5rem; opacity: 0.1; color: var(--primary-color);"></i>
+        <div
+            style="color: #64748b; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; margin-bottom: 0.75rem; letter-spacing: 0.05em;">
+            Total Bookings</div>
+        <div style="font-size: 2.5rem; font-weight: 800; color: #0f172a; letter-spacing: -0.025em;">{{
+            metrics.booking_count }}
+        </div>
+    </div>
+
+    <div
+        style="background: var(--white); padding: 2.25rem; border-radius: 1.25rem; border: 1px solid var(--border-color); box-shadow: 0 1px 2px rgba(0,0,0,0.05); position: relative; overflow: hidden;">
+        <i class="fas fa-user-shield"
+            style="position: absolute; top: 1.5rem; right: 1.5rem; font-size: 2.5rem; opacity: 0.1; color: #f59e0b;"></i>
+        <div
+            style="color: #64748b; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; margin-bottom: 0.75rem; letter-spacing: 0.05em;">
+            Pending Verifications</div>
+        <div style="font-size: 2.5rem; font-weight: 800; color: #0f172a; letter-spacing: -0.025em;">{{
+            metrics.pending_verifications }}
+        </div>
+    </div>
+
+    <div
+        style="background: linear-gradient(135deg, var(--secondary-color), #3b5a37); color: white; padding: 2.25rem; border-radius: 1.25rem; box-shadow: 0 10px 15px -3px rgba(37,66,34,0.1); position: relative; overflow: hidden; grid-column: span 2;">
+        <i class="fas fa-coins"
+            style="position: absolute; bottom: -1rem; right: -1rem; font-size: 5rem; opacity: 0.05;"></i>
+        <div
+            style="font-size: 0.8rem; font-weight: 700; text-transform: uppercase; margin-bottom: 0.75rem; opacity: 0.7; letter-spacing: 0.05em;">
+            Total Sales & Earnings</div>
+        <div style="font-size: 2.5rem; font-weight: 800; letter-spacing: -0.025em;">₱{{
+            "{:,.2f}".format(metrics.total_sales) }}</div>
+        <div style="font-size: 0.8rem; margin-top: 0.75rem; color: #94a3b8; font-weight: 500;">
+            Platform Revenue: <span style="color: var(--primary-color); font-weight: 700;">₱{{
+                "{:,.2f}".format(metrics.platform_earnings) }}</span> (10% Commission)
+        </div>
+    </div>
+</div>
+
+<div style="display: grid; grid-template-columns: 2fr 1fr; gap: 2rem;">
+    <!-- Pending Verifications -->
+    <div
+        style="background: var(--white); border-radius: 1.5rem; padding: 2.5rem; border: 1px solid var(--border-color); box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2.25rem;">
+            <h3 style="font-size: 1.25rem; font-weight: 800; color: #0f172a;"><i class="fas fa-id-card-alt"
+                    style="color: var(--primary-color); margin-right: 0.5rem;"></i> Pending Verifications</h3>
+            <a href="/admin/caterers" class="btn-text"
+                style="font-weight: 700; font-size: 0.85rem; color: var(--primary-color); text-transform: uppercase; letter-spacing: 0.02em;">Manage
+                All <i class="fas fa-arrow-right" style="margin-left: 0.25rem;"></i></a>
+        </div>
+
+        {% if pending_caterers %}
+        <div style="overflow-x: auto;">
+            <table style="width: 100%; border-collapse: separate; border-spacing: 0 0.5rem;">
+                <thead>
+                    <tr
+                        style="text-align: left; color: #94a3b8; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; font-weight: 800;">
+                        <th style="padding: 0 1.25rem;">Business Name</th>
+                        <th style="padding: 0 1.25rem;">City</th>
+                        <th style="padding: 0 1.25rem; text-align: right;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for c in pending_caterers %}
+                    <tr style="background: var(--background-soft); transition: all 0.2s ease;">
+                        <td style="padding: 1rem 1.25rem; border-radius: 1rem 0 0 1rem;">
+                            <div style="font-weight: 700; color: #1e293b; font-size: 0.95rem;">{{ c.business_name }}
+                            </div>
+                        </td>
+                        <td style="padding: 1rem 1.25rem; color: #64748b; font-size: 0.9rem;">{{ c.city }}</td>
+                        <td style="padding: 1rem 1.25rem; border-radius: 0 1rem 1rem 0; text-align: right;">
+                            <div style="display: flex; gap: 0.75rem; justify-content: flex-end;">
+                                <form action="/admin/caterers/{{ c.id }}/verify" method="POST">
+                                    <input type="hidden" name="action" value="approve">
+                                    <button type="submit" class="btn-primary"
+                                        style="padding: 0.5rem 1rem; font-size: 0.75rem; font-weight: 700; background: #10b981; border: none; border-radius: 0.6rem; box-shadow: 0 2px 4px rgba(16,185,129,0.2);">Approve</button>
+                                </form>
+                                <form action="/admin/caterers/{{ c.id }}/verify" method="POST">
+                                    <input type="hidden" name="action" value="reject">
+                                    <button type="submit"
+                                        style="padding: 0.5rem 1rem; font-size: 0.75rem; font-weight: 700; color: #ef4444; background: #fef2f2; border: 1px solid #fee2e2; border-radius: 0.6rem; cursor: pointer; transition: all 0.2s ease;">Reject</button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div style="text-align: center; padding: 4rem 2rem;">
+            <div
+                style="width: 80px; height: 80px; background: var(--background-soft); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem;">
+                <i class="fas fa-check" style="font-size: 2rem; color: var(--primary-color);"></i>
+            </div>
+            <p style="color: var(--text-light); font-weight: 600; font-size: 0.95rem;">No pending verifications</p>
+            <p style="color: #94a3b8; font-size: 0.85rem; margin-top: 0.25rem;">You've processed all caterer
+                applications.</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Platform Stats / Quick Info -->
+    <div style="display: flex; flex-direction: column; gap: 2rem;">
+        <div
+            style="background: var(--white); border-radius: 1.5rem; padding: 2.25rem; border: 1px solid var(--border-color); box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+            <h3
+                style="font-size: 1.1rem; font-weight: 800; margin-bottom: 2rem; color: #0f172a; text-transform: uppercase; letter-spacing: 0.05em;">
+                Quick Stats</h3>
+            <div style="display: flex; flex-direction: column; gap: 1.25rem;">
+                <div
+                    style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 1rem; border-bottom: 1px dashed var(--border-color);">
+                    <div style="color: #64748b; font-size: 0.9rem; font-weight: 500;">Commission Rate</div>
+                    <div style="font-weight: 800; color: #0f172a;">10%</div>
+                </div>
+                <div
+                    style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 1rem; border-bottom: 1px dashed var(--border-color);">
+                    <div style="color: #64748b; font-size: 0.9rem; font-weight: 500;">Total Platform Users</div>
+                    <div style="font-weight: 800; color: #0f172a;">{{ user_count }}</div>
+                </div>
+                <div
+                    style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 1rem; border-bottom: 1px dashed var(--border-color);">
+                    <div style="color: #64748b; font-size: 0.9rem; font-weight: 500;">Verified Partners</div>
+                    <div style="font-weight: 800; color: #0f172a;">{{ caterer_count }}</div>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div style="color: #64748b; font-size: 0.9rem; font-weight: 500;">Bookings To Date</div>
+                    <div style="font-weight: 800; color: #0f172a;">{{ booking_count }}</div>
+                </div>
+            </div>
+        </div>
+
+        <div
+            style="background: var(--secondary-color); color: white; border-radius: 1.5rem; padding: 2.25rem; box-shadow: 0 10px 15px -3px rgba(37,66,34,0.1); position: relative; overflow: hidden;">
+            <div
+                style="position: absolute; top: -2rem; right: -2rem; width: 120px; height: 120px; background: rgba(255,255,255,0.03); border-radius: 50%;">
+            </div>
+            <h3
+                style="font-size: 1rem; font-weight: 700; margin-bottom: 1.25rem; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em;">
+                System Status</h3>
+            <div
+                style="display: flex; align-items: center; gap: 0.75rem; color: #10b981; font-weight: 700; font-size: 0.9rem;">
+                <span
+                    style="width: 10px; height: 10px; background: #10b981; border-radius: 50%; box-shadow: 0 0 12px #10b981;"></span>
+                PostgreSQL Online
+            </div>
+            <div
+                style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: space-between; align-items: center;">
+                <span style="font-size: 0.75rem; color: #64748b; font-weight: 600;">Engine v1.2.4-stable</span>
+                <i class="fas fa-shield-check" style="color: rgba(255,255,255,0.2);"></i>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

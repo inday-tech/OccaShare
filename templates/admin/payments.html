@@ -1,0 +1,83 @@
+{% extends "admin/layout.html" %}
+
+{% block title %}Payments - Admin Dashboard{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Platform Payments</h1>
+    <p>Monitor all financial transactions and track platform earnings.</p>
+</div>
+
+<div
+    style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; margin-bottom: 3.5rem;">
+    <div
+        style="background: linear-gradient(135deg, #1e40af, #3b82f6); color: white; padding: 2.5rem 2rem; border-radius: 1.5rem; box-shadow: var(--shadow-md);">
+        <div style="font-size: 0.9rem; font-weight: 500; opacity: 0.9; margin-bottom: 0.5rem;">Total Platform Sales
+        </div>
+        <div style="font-size: 2.5rem; font-weight: 700;">
+            ₱{% set total = 0 %}{% for b in bookings %}{% set total = total + (b.total_amount or 0) %}{% endfor %}{{
+            "{:,.2f}".format(total) }}
+        </div>
+    </div>
+
+    <div
+        style="background: #ffffff; padding: 2.5rem 2rem; border-radius: 1.5rem; border: 1px solid var(--border-color); box-shadow: var(--shadow-sm);">
+        <div
+            style="color: var(--text-light); font-size: 0.9rem; font-weight: 600; margin-bottom: 0.5rem; text-transform: uppercase;">
+            Expected Commission</div>
+        <div style="font-size: 2.5rem; font-weight: 700; color: #10b981;">
+            ₱{{ "{:,.2f}".format(total * 0.10) }}
+        </div>
+    </div>
+</div>
+
+<div
+    style="background: var(--white); border-radius: 2rem; padding: 2.5rem; border: 1px solid var(--border-color); box-shadow: var(--shadow-md);">
+    <h3 style="font-size: 1.5rem; margin-bottom: 2rem;"><i class="fas fa-file-invoice-dollar"></i> Global Transaction
+        History</h3>
+
+    {% if bookings %}
+    <div style="overflow-x: auto;">
+        <table style="width: 100%; border-collapse: separate; border-spacing: 0 1rem;">
+            <thead>
+                <tr style="text-align: left; color: var(--text-light); font-size: 0.9rem; text-transform: uppercase;">
+                    <th style="padding: 0 1.5rem;">Transaction Ref</th>
+                    <th style="padding: 0 1.5rem;">Parties</th>
+                    <th style="padding: 0 1.5rem;">Amount</th>
+                    <th style="padding: 0 1.5rem;">Platform Fee</th>
+                    <th style="padding: 0 1.5rem;">Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for booking in bookings %}
+                <tr style="background: #f8fafc; border-radius: 1rem;">
+                    <td style="padding: 1.5rem; border-radius: 1rem 0 0 1rem;">
+                        <div style="font-weight: 700;">#TXN-{{ booking.id }}</div>
+                        <div style="font-size: 0.8rem; color: var(--text-light);">{{ booking.created_at.strftime('%b %d,
+                            %Y') if booking.created_at else 'N/A' }}</div>
+                    </td>
+                    <td style="padding: 1.5rem;">
+                        <div style="font-size: 0.9rem;"><strong>From:</strong> {{ booking.user.first_name }}</div>
+                        <div style="font-size: 0.9rem;"><strong>To:</strong> {{ booking.caterer_profile.business_name if
+                            booking.caterer_profile else 'Unknown' }}</div>
+                    </td>
+                    <td style="padding: 1.5rem; font-weight: 700;">₱{{ "{:,.2f}".format(booking.total_amount) if
+                        booking.total_amount else '0.00' }}</td>
+                    <td style="padding: 1.5rem; color: #10b981; font-weight: 700;">₱{{
+                        "{:,.2f}".format((booking.total_amount or 0) * 0.10) }}</td>
+                    <td style="padding: 1.5rem; border-radius: 0 1rem 1rem 0;">
+                        <span
+                            style="padding: 0.4rem 0.8rem; border-radius: 2rem; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; background: #dcfce7; color: #166534;">
+                            {{ booking.payment_status or 'pending' }}
+                        </span>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <p style="text-align: center; color: var(--text-light); padding: 3rem;">No payment transactions found.</p>
+    {% endif %}
+</div>
+{% endblock %}

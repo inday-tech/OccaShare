@@ -1,0 +1,77 @@
+{% extends "admin/layout.html" %}
+
+{% block title %}Manage Categories - OccaServe Admin{% endblock %}
+
+{% block content %}
+<div class="page-header" style="display: flex; justify-content: space-between; align-items: center;">
+    <div>
+        <h1>Manage Categories</h1>
+        <p>Define and organize catering categories for the platform.</p>
+    </div>
+    <button class="btn-primary" onclick="document.getElementById('addCategoryModal').style.display='flex'">
+        <i class="fas fa-plus"></i> Add New Category
+    </button>
+</div>
+
+<div class="stats-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem;">
+    {% for category in categories %}
+    <div
+        style="background: var(--white); border-radius: 1.5rem; padding: 2rem; border: 1px solid var(--border-color); box-shadow: var(--shadow-sm); position: relative;">
+        <div style="display: flex; align-items: center; gap: 1.5rem; margin-bottom: 1.5rem;">
+            <div
+                style="width: 60px; height: 60px; background: #f5f3ff; color: var(--primary-color); border-radius: 1rem; display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">
+                <i class="{{ category.icon_class }}"></i>
+            </div>
+            <div>
+                <h3 style="margin: 0;">{{ category.name }}</h3>
+                <span style="font-size: 0.8rem; color: var(--text-light);">{{ category.packages|length }} Packages
+                    linked</span>
+            </div>
+        </div>
+        <p style="color: var(--text-light); font-size: 0.9rem; line-height: 1.6; margin-bottom: 2rem;">{{
+            category.description }}</p>
+
+        <div style="display: flex; gap: 0.5rem;">
+            <button class="btn-text" style="font-size: 0.85rem; padding: 0.5rem 1rem;">Edit</button>
+            <form action="/admin/categories/{{ category.id }}/toggle" method="POST" style="display: inline;">
+                <button type="submit" class="btn-text"
+                    style="font-size: 0.85rem; padding: 0.5rem 1rem; color: {{ 'red' if category.is_active else 'green' }};">
+                    {{ 'Deactivate' if category.is_active else 'Activate' }}
+                </button>
+            </form>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Add Category Modal -->
+<div id="addCategoryModal"
+    style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;">
+    <div
+        style="background: var(--white); padding: 3rem; border-radius: 2rem; width: 100%; max-width: 500px; position: relative;">
+        <button onclick="this.parentElement.parentElement.style.display='none'"
+            style="position: absolute; top: 1.5rem; right: 1.5rem; background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--text-light);">&times;</button>
+        <h2 style="margin-bottom: 0.5rem;">Add Category</h2>
+        <p style="color: var(--text-light); margin-bottom: 2rem;">Create a new catering category for the platform.</p>
+
+        <form action="/admin/categories/add" method="POST">
+            <div style="margin-bottom: 1.5rem;">
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Category Name</label>
+                <input type="text" name="name" required placeholder="e.g., Weddings"
+                    style="width: 100%; padding: 0.75rem 1rem; border: 1px solid var(--border-color); border-radius: 0.75rem;">
+            </div>
+            <div style="margin-bottom: 1.5rem;">
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Icon Class (FontAwesome)</label>
+                <input type="text" name="icon_class" required value="fas fa-utensils"
+                    style="width: 100%; padding: 0.75rem 1rem; border: 1px solid var(--border-color); border-radius: 0.75rem;">
+            </div>
+            <div style="margin-bottom: 2rem;">
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Description</label>
+                <textarea name="description" rows="3"
+                    style="width: 100%; padding: 0.75rem 1rem; border: 1px solid var(--border-color); border-radius: 0.75rem;"></textarea>
+            </div>
+            <button type="submit" class="btn-primary" style="width: 100%;">Create Category</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

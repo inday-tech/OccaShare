@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Caterer Registration - OccaServe</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='/css/styles.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #99cc66;
+            --primary-hover: #88bb55;
+            --slate-50: #fdfdfb;
+            --slate-100: #cae4c5;
+            --slate-200: #e2e8e0;
+            --slate-600: #5a7a56;
+            --slate-700: #3b5a37;
+            --slate-800: #254222;
+            --slate-900: #1a2e18;
+        }
+
+        body.auth-page {
+            background-color: var(--slate-50);
+            background-image: radial-gradient(at 0% 0%, hsla(120, 30%, 15%, 1) 0, transparent 50%),
+                radial-gradient(at 50% 0%, hsla(90, 40%, 40%, 1) 0, transparent 50%),
+                radial-gradient(at 100% 0%, hsla(45, 30%, 80%, 1) 0, transparent 50%);
+            background-attachment: fixed;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 4rem 1rem;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .auth-container {
+            width: 100%;
+            max-width: 850px;
+            animation: slideIn 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .professional-card {
+            background: #ffffff;
+            border-radius: 1.5rem;
+            padding: 4rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            border: 1px solid var(--slate-200);
+        }
+
+        .form-header {
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+
+        .form-header h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.75rem;
+            color: var(--slate-900);
+            margin-bottom: 1rem;
+            letter-spacing: -0.02em;
+        }
+
+        .form-header p {
+            color: var(--slate-600);
+            font-size: 1.1rem;
+            max-width: 500px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+
+        @media (max-width: 768px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .professional-card {
+                padding: 2.5rem;
+            }
+        }
+
+        .form-section-title {
+            grid-column: 1 / -1;
+            font-weight: 800;
+            font-size: 0.8rem;
+            color: var(--primary);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin: 2rem 0 1rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .form-section-title::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--slate-200);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: var(--slate-700);
+            margin-bottom: 0.6rem;
+        }
+
+        .minimal-input {
+            width: 100%;
+            padding: 1rem 1.25rem;
+            border: 2px solid var(--slate-200);
+            border-radius: 0.75rem;
+            font-size: 1rem;
+            transition: all 0.2s ease;
+            background: var(--slate-50);
+            color: var(--slate-900);
+            box-sizing: border-box;
+        }
+
+        .minimal-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: #fff;
+            box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
+        }
+
+        .checkbox-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 1rem;
+            background: var(--slate-50);
+            padding: 2rem;
+            border-radius: 1rem;
+            border: 2px solid var(--slate-200);
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 0.95rem;
+            color: var(--slate-700);
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .checkbox-item:hover {
+            color: var(--primary);
+        }
+
+        .checkbox-item input {
+            width: 1.2rem;
+            height: 1.2rem;
+            accent-color: var(--primary);
+            cursor: pointer;
+        }
+
+        .file-upload-box {
+            height: 120px;
+            border: 2px dashed var(--slate-200);
+            border-radius: 1rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: var(--slate-50);
+            transition: all 0.2s;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .file-upload-box:hover {
+            border-color: var(--primary);
+            background: #fff;
+        }
+
+        .file-upload-box i {
+            font-size: 1.75rem;
+            color: var(--slate-600);
+            margin-bottom: 0.5rem;
+        }
+
+        .file-upload-box input {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        .btn-create-account {
+            background: var(--slate-900);
+            color: white;
+            padding: 1.25rem;
+            border-radius: 1rem;
+            font-size: 1.1rem;
+            font-weight: 700;
+            width: 100%;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            margin-top: 2.5rem;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-create-account:hover {
+            background: var(--primary);
+            transform: translateY(-2px);
+            box-shadow: 0 20px 25px -5px rgba(79, 70, 229, 0.4);
+        }
+
+        .auth-footer {
+            margin-top: 3rem;
+            text-align: center;
+            color: var(--slate-600);
+            font-size: 0.95rem;
+        }
+
+        .auth-footer a {
+            color: var(--primary);
+            font-weight: 700;
+            text-decoration: none;
+        }
+
+        .auth-footer a:hover {
+            text-decoration: underline;
+        }
+
+        .logo-preview {
+            width: 80px;
+            height: 80px;
+            border-radius: 1rem;
+            object-fit: cover;
+            border: 2px solid var(--slate-200);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+
+<body class="auth-page">
+    <div class="auth-container">
+        <div class="professional-card">
+            <div class="form-header">
+                <h2>Caterer Registration</h2>
+                <p>Register your business today and start reaching elite customers across the Philippines.</p>
+            </div>
+
+            {% if error %}
+            <div
+                style="background: #fee2e2; color: #b91c1c; padding: 1rem; border-radius: 0.75rem; margin-bottom: 2rem; font-size: 0.9rem; display: flex; align-items: center; gap: 0.5rem;">
+                <i class="fas fa-exclamation-circle"></i> {{ error }}
+            </div>
+            {% endif %}
+
+            <form action="/auth/register" method="post" enctype="multipart/form-data" id="catererForm">
+                <input type="hidden" name="role" value="caterer">
+
+                <div class="form-grid">
+                    <!-- Section: Business Details -->
+                    <div class="form-section-title"><i class="fas fa-store"></i> Business Information</div>
+
+                    <div class="form-group full-width">
+                        <label for="business_name">Business Name</label>
+                        <input type="text" id="business_name" name="business_name" class="minimal-input" required
+                            placeholder="Gourmet Catering Services">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="logo">Upload Logo</label>
+                        <div class="file-upload-box" id="logoUploadBox">
+                            <img id="logoPreview" class="logo-preview">
+                            <i class="fas fa-cloud-upload-alt" id="uploadIcon"></i>
+                            <p id="uploadText" style="font-size: 0.8rem; margin: 0;">Click to upload logo</p>
+                            <input type="file" id="logo" name="logo" accept="image/*" onchange="previewLogo(this)">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="coverage_area">Service Areas</label>
+                        <input type="text" id="coverage_area" name="coverage_area" class="minimal-input" required
+                            placeholder="Metro Manila, Laguna, Cavite">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="business_type">Business Type</label>
+                        <select id="business_type" name="business_type" class="minimal-input" required>
+                            <option value="">Select Type</option>
+                            <option value="Sole Proprietorship">Sole Proprietorship</option>
+                            <option value="Partnership">Partnership</option>
+                            <option value="Corporation">Corporation</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="years_of_operation">Years in Business</label>
+                        <input type="number" id="years_of_operation" name="years_of_operation" class="minimal-input"
+                            required placeholder="e.g. 5" min="0">
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label for="business_description">Short Description</label>
+                        <textarea id="business_description" name="business_description" class="minimal-input" rows="3"
+                            placeholder="Tell customers about your specialties and experience..."></textarea>
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label>Event Types Supported</label>
+                        <div class="checkbox-group">
+                            <label class="checkbox-item"><input type="checkbox" name="event_type_choice"
+                                    value="Wedding"> Wedding Events</label>
+                            <label class="checkbox-item"><input type="checkbox" name="event_type_choice"
+                                    value="Birthday"> Birthday Parties</label>
+                            <label class="checkbox-item"><input type="checkbox" name="event_type_choice"
+                                    value="Corporate"> Corporate Functions</label>
+                            <label class="checkbox-item"><input type="checkbox" name="event_type_choice"
+                                    value="Private Party"> Private Occasions</label>
+                            <label class="checkbox-item"><input type="checkbox" name="event_type_choice"
+                                    value="Anniversary"> Anniversaries</label>
+                            <label class="checkbox-item"><input type="checkbox" name="event_type_choice"
+                                    value="Christening"> Baptisms & Christenings</label>
+                        </div>
+                        <input type="hidden" name="event_types" id="eventTypesInput">
+                    </div>
+
+                    <!-- Section: Legal Verification -->
+                    <div class="form-section-title"><i class="fas fa-file-contract"></i> Legal Verification (Required)
+                    </div>
+
+                    <div class="form-group">
+                        <label for="permit">Business Permit (Upload)</label>
+                        <div class="file-upload-box" onclick="document.getElementById('permit').click()">
+                            <i class="fas fa-file-invoice"></i>
+                            <p id="permitName" style="font-size: 0.8rem; margin: 0;">BusinessPermit.pdf / jpg</p>
+                            <input type="file" id="permit" name="permit" accept=".pdf,image/*" required
+                                onchange="updateFileName(this, 'permitName')">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="gov_id">Valid ID (Upload)</label>
+                        <div class="file-upload-box" onclick="document.getElementById('gov_id').click()">
+                            <i class="fas fa-id-card"></i>
+                            <p id="govIdName" style="font-size: 0.8rem; margin: 0;">GovID.pdf / jpg</p>
+                            <input type="file" id="gov_id" name="gov_id" accept=".pdf,image/*" required
+                                onchange="updateFileName(this, 'govIdName')">
+                        </div>
+                    </div>
+
+                    <!-- Section: Owner & Contact -->
+                    <div class="form-section-title"><i class="fas fa-user-tie"></i> Owner & Contact</div>
+
+                    <div class="form-group">
+                        <label for="full_name">Owner Name</label>
+                        <input type="text" id="full_name" name="full_name" class="minimal-input" required
+                            placeholder="Juan Dela Cruz">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email">Email Address</label>
+                        <input type="email" id="email" name="email" class="minimal-input" required
+                            placeholder="juan@example.com">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="mobile_number">Contact Number</label>
+                        <input type="tel" id="mobile_number" name="mobile_number" class="minimal-input" required
+                            placeholder="0917 123 4567">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="address">Address</label>
+                        <input type="text" id="address" name="address" class="minimal-input" required
+                            placeholder="123 Serene St, Quezon City">
+                    </div>
+
+                    <!-- Section: Security -->
+                    <div class="form-section-title"><i class="fas fa-lock"></i> Security</div>
+
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input type="password" id="password" name="password" class="minimal-input" required
+                            placeholder="••••••••">
+                        <div id="passwordHint" class="error-hint">Min. 8 characters needed</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="confirm_password">Confirm Password</label>
+                        <input type="password" id="confirm_password" name="confirm_password" class="minimal-input"
+                            required placeholder="••••••••">
+                        <div id="confirmHint" class="error-hint">Passwords do not match</div>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-create-account">Create Business Account</button>
+            </form>
+
+            <div class="auth-footer">
+                <p>By creating an account, you agree to our <a href="#">Terms</a> & <a href="#">Privacy</a></p>
+                <div style="margin-top: 1rem;">
+                    <a href="/auth/login"><i class="fas fa-long-arrow-left"></i> Back to Login</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function previewLogo(input) {
+            const preview = document.getElementById('logoPreview');
+            const icon = document.getElementById('uploadIcon');
+            const text = document.getElementById('uploadText');
+
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    preview.src = e.target.result;
+                    preview.style.display = 'inline-block';
+                    icon.style.display = 'none';
+                    text.innerText = 'Logo Selected';
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        function updateFileName(input, targetId) {
+            const fileName = input.files[0] ? input.files[0].name : "Click to upload";
+            document.getElementById(targetId).textContent = fileName;
+            document.getElementById(targetId).parentElement.style.borderColor = 'var(--primary)';
+        }
+
+        const form = document.getElementById('catererForm');
+        const passInput = document.getElementById('password');
+        const confirmInput = document.getElementById('confirm_password');
+        const passHint = document.getElementById('passwordHint');
+        const confirmHint = document.getElementById('confirmHint');
+
+        function validatePassword() {
+            let valid = true;
+            if (passInput.value.length < 8) {
+                passInput.classList.add('input-invalid');
+                passHint.style.display = 'block';
+                valid = false;
+            } else {
+                passInput.classList.remove('input-invalid');
+                passHint.style.display = 'none';
+            }
+
+            if (passInput.value !== confirmInput.value) {
+                confirmInput.classList.add('input-invalid');
+                confirmHint.style.display = 'block';
+                valid = false;
+            } else {
+                confirmInput.classList.remove('input-invalid');
+                confirmHint.style.display = 'none';
+            }
+            return valid;
+        }
+
+        form.onsubmit = function (e) {
+            // Collect event types
+            const checkboxes = document.querySelectorAll('input[name="event_type_choice"]:checked');
+            const eventTypes = Array.from(checkboxes).map(cb => cb.value).join(',');
+            document.getElementById('eventTypesInput').value = eventTypes;
+
+            if (!validatePassword()) {
+                e.preventDefault();
+                alert('Please check your password configuration.');
+                return false;
+            }
+            return true;
+        }
+
+        passInput.oninput = validatePassword;
+        confirmInput.oninput = validatePassword;
+    </script>
+</body>
+
+</html>

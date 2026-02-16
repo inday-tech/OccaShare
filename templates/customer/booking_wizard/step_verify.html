@@ -1,0 +1,118 @@
+{% extends "customer/booking_wizard/wizard_base.html" %}
+
+{% block title %}Verify Identity - OccaServe{% endblock %}
+
+{% block content %}
+<div class="wizard-header-content">
+    <h2 class="wizard-title font-playfair">Identity Verification</h2>
+    <p class="wizard-subtitle">Verification is mandatory to ensure the safety of our catering community. Your data is
+        encrypted and secure.</p>
+</div>
+
+<div class="verification-container" style="max-width: 500px; margin: 0 auto;">
+    <form action="/bookings/step/verify" method="POST" enctype="multipart/form-data" id="verifyForm">
+        <div class="form-group" style="margin-bottom: 2rem;">
+            <div class="scanner-box" id="idScanner"
+                style="position: relative; overflow: hidden; border-radius: 1.5rem; border: 2px solid #e2e8f0; background: #fff; padding: 2rem; text-align: center; cursor: pointer; transition: all 0.3s ease;">
+                <div class="scanning-line" id="idLine"
+                    style="display: none; position: absolute; left: 0; width: 100%; height: 2px; background: #4f46e5; box-shadow: 0 0 15px #4f46e5; z-index: 10; animation: scan 2s infinite linear;">
+                </div>
+                <input type="file" name="id_document" accept="image/*" required
+                    style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer;"
+                    onchange="handleIDUpload(this)">
+                <div id="idStatus">
+                    <i class="fas fa-id-card" style="font-size: 3rem; color: #4f46e5; margin-bottom: 1rem;"></i>
+                    <h4 style="margin-bottom: 0.5rem;">Scan Government ID</h4>
+                    <p style="font-size: 0.85rem; color: #64748b;">Place ID inside the frame</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 3rem;">
+            <div class="scanner-box" id="faceScanner"
+                style="position: relative; overflow: hidden; border-radius: 50%; width: 220px; height: 220px; margin: 0 auto; border: 2px solid #e2e8f0; background: #fff; display: flex; align-items: center; justify-content: center; text-align: center; cursor: pointer; transition: all 0.3s ease;">
+                <div class="scanning-line" id="faceLine"
+                    style="display: none; position: absolute; left: 0; width: 100%; height: 2px; background: #10b981; box-shadow: 0 0 15px #10b981; z-index: 10; animation: scan 2s infinite linear;">
+                </div>
+                <input type="file" name="selfie" accept="image/*" capture="user" required
+                    style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer;"
+                    onchange="handleFaceUpload(this)">
+                <div id="faceStatus">
+                    <i class="fas fa-user-circle" style="font-size: 3rem; color: #10b981; margin-bottom: 1rem;"></i>
+                    <h4 style="font-size: 0.9rem;">Liveness Check</h4>
+                </div>
+            </div>
+        </div>
+
+        <button type="submit" class="btn-primary" id="verifyBtn"
+            style="width: 100%; padding: 1.25rem; border-radius: 1rem; font-weight: 700; font-size: 1.1rem; box-shadow: 0 10px 15px -3px rgba(79, 70, 229, 0.3);">
+            <span id="btnText">Verify & Continue</span>
+            <i class="fas fa-shield-alt" style="margin-left: 0.5rem;"></i>
+        </button>
+    </form>
+</div>
+
+<style>
+    @keyframes scan {
+        0% {
+            top: 0;
+        }
+
+        100% {
+            top: 100%;
+        }
+    }
+
+    .scanner-box.active {
+        border-color: #4f46e5;
+        background: #f8fafc;
+    }
+
+    .scanner-box.completed {
+        border-color: #10b981;
+        background: #f0fdf4;
+    }
+</style>
+
+<script>
+    function handleIDUpload(input) {
+        if (input.files && input.files[0]) {
+            document.getElementById('idLine').style.display = 'block';
+            document.getElementById('idScanner').classList.add('active');
+            document.getElementById('idStatus').innerHTML = '<i class="fas fa-check-circle" style="font-size: 3rem; color: #10b981; margin-bottom: 1rem;"></i><h4 style="color: #166534">ID Uploaded</h4>';
+            setTimeout(() => {
+                document.getElementById('idLine').style.display = 'none';
+                document.getElementById('idScanner').classList.add('completed');
+            }, 2000);
+        }
+    }
+
+    function handleFaceUpload(input) {
+        if (input.files && input.files[0]) {
+            document.getElementById('faceLine').style.display = 'block';
+            document.getElementById('faceScanner').classList.add('active');
+            document.getElementById('faceStatus').innerHTML = '<i class="fas fa-check-circle" style="font-size: 3rem; color: #10b981; margin-bottom: 1rem;"></i><h4 style="font-size: 0.9rem; color: #166534">Face Captured</h4>';
+            setTimeout(() => {
+                document.getElementById('faceLine').style.display = 'none';
+                document.getElementById('faceScanner').classList.add('completed');
+            }, 2000);
+        }
+    }
+
+    document.getElementById('verifyForm').onsubmit = function () {
+        document.getElementById('btnText').innerText = 'Processing Data...';
+        document.getElementById('verifyBtn').disabled = true;
+        document.getElementById('verifyBtn').style.opacity = '0.7';
+        return true;
+    };
+</script>
+
+<div
+    style="margin-top: 4rem; padding: 1.5rem; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 1rem; display: flex; align-items: flex-start; gap: 1rem;">
+    <i class="fas fa-user-shield" style="color: #16a34a; font-size: 1.25rem; margin-top: 0.25rem;"></i>
+    <p style="margin: 0; font-size: 0.9rem; color: #166534; line-height: 1.5;">
+        <strong>Your privacy matters.</strong> Document images are encrypted and stored securely. They are only used for
+        identity verification purposes and are not shared with third parties.
+    </p>
+</div>
+{% endblock %}
