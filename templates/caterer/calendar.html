@@ -1,0 +1,380 @@
+{% extends "caterer/layout.html" %}
+
+{% block title %}Calendar - Caterer Dashboard{% endblock %}
+
+{% block extra_css %}
+<!-- FullCalendar CSS -->
+<link href='https://cdn.jsdelivr.net/npm/fullcalendar@5.10.1/main.min.css' rel='stylesheet' />
+<style>
+    :root {
+        --fc-border-color: var(--border-color);
+        --fc-button-bg-color: var(--primary-color);
+        --fc-button-border-color: var(--primary-color);
+        --fc-button-hover-bg-color: var(--secondary-color);
+        --fc-button-active-bg-color: var(--secondary-color);
+        --fc-today-bg-color: rgba(79, 70, 229, 0.05);
+    }
+
+    .fc-toolbar-title {
+        font-size: 1.5rem !important;
+        font-weight: 700 !important;
+        color: var(--secondary-color);
+    }
+
+    .fc-button {
+        border-radius: 0.75rem !important;
+        font-weight: 600 !important;
+        text-transform: capitalize !important;
+        padding: 0.6rem 1.2rem !important;
+        border: none !important;
+    }
+
+    .fc-event {
+        cursor: pointer;
+        border-radius: 0.5rem !important;
+        padding: 0.2rem 0.5rem !important;
+        border: none !important;
+        font-weight: 500 !important;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+
+    .fc-daygrid-event-dot {
+        border-color: currentColor !important;
+    }
+
+    /* Modal Styles */
+    .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(15, 23, 42, 0.4);
+        backdrop-filter: blur(8px);
+        z-index: 2000;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .modal-content {
+        background: white;
+        padding: 2.5rem;
+        border-radius: 2rem;
+        max-width: 500px;
+        width: 90%;
+        box-shadow: var(--shadow-lg);
+        animation: slideUp 0.3s ease-out;
+    }
+
+    @keyframes slideUp {
+        from {
+            transform: translateY(20px);
+            opacity: 0;
+        }
+
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+
+    .detail-item {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1.25rem;
+        padding-bottom: 1.25rem;
+        border-bottom: 1px solid #f1f5f9;
+    }
+
+    .detail-item:last-child {
+        border-bottom: none;
+        margin-bottom: 0;
+    }
+
+    .detail-item i {
+        width: 32px;
+        height: 32px;
+        background: #f1f5f9;
+        color: var(--primary-color);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 0.75rem;
+        font-size: 0.9rem;
+    }
+
+    .detail-label {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--text-light);
+        font-weight: 600;
+        margin-bottom: 0.15rem;
+    }
+
+    .detail-value {
+        font-weight: 600;
+        color: var(--secondary-color);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Service Calendar</h1>
+    <p>Manage your availability and view upcoming event dates.</p>
+</div>
+
+<div style="display: grid; grid-template-columns: 3fr 1fr; gap: 2rem; align-items: start;">
+    <!-- Main Calendar -->
+    <div
+        style="background: var(--white); border-radius: 2rem; padding: 2.5rem; border: 1px solid var(--border-color); box-shadow: var(--shadow-md);">
+        <div id='calendar'></div>
+    </div>
+
+    <!-- Info Column -->
+    <div style="display: flex; flex-direction: column; gap: 2rem;">
+        <!-- Availability Management -->
+        <div
+            style="background: var(--white); border-radius: 2rem; padding: 2rem; border: 1px solid var(--border-color); box-shadow: var(--shadow-md);">
+            <h4 style="margin-bottom: 1.5rem; font-size: 1.1rem;">Manage Availability</h4>
+            <form id="availabilityForm" style="display: grid; gap: 1rem;">
+                <div>
+                    <label
+                        style="font-size: 0.8rem; font-weight: 600; color: var(--text-light); display: block; margin-bottom: 0.5rem;">Select
+                        Date</label>
+                    <input type="date" id="blockDate" required
+                        style="width: 100%; padding: 0.75rem; border: 1px solid var(--border-color); border-radius: 0.75rem; font-family: inherit;">
+                </div>
+                <div>
+                    <label
+                        style="font-size: 0.8rem; font-weight: 600; color: var(--text-light); display: block; margin-bottom: 0.5rem;">Reason
+                        (Optional)</label>
+                    <input type="text" id="blockReason" placeholder="Holiday, Repair, etc."
+                        style="width: 100%; padding: 0.75rem; border: 1px solid var(--border-color); border-radius: 0.75rem; font-family: inherit;">
+                </div>
+                <button type="button" onclick="toggleDateAvailability(false)" class="btn-primary"
+                    style="padding: 0.75rem; background: #ef4444; font-size: 0.9rem;">Block Date</button>
+                <button type="button" onclick="toggleDateAvailability(true)" class="btn-outline"
+                    style="padding: 0.75rem; font-size: 0.9rem;">Unblock Date</button>
+            </form>
+        </div>
+
+        <!-- Calendar Legend -->
+        <div
+            style="background: var(--white); border-radius: 2rem; padding: 2rem; border: 1px solid var(--border-color); box-shadow: var(--shadow-md);">
+            <h4 style="margin-bottom: 1.5rem; font-size: 1.1rem;">Calendar Legend</h4>
+            <div style="display: grid; gap: 1rem;">
+                <div style="display: flex; align-items: center; gap: 0.75rem;">
+                    <span style="width: 12px; height: 12px; border-radius: 50%; background: #ec4899;"></span>
+                    <span style="font-size: 0.9rem; font-weight: 500;">Weddings</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 0.75rem;">
+                    <span style="width: 12px; height: 12px; border-radius: 50%; background: #3b82f6;"></span>
+                    <span style="font-size: 0.9rem; font-weight: 500;">Birthdays</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 0.75rem;">
+                    <span style="width: 12px; height: 12px; border-radius: 50%; background: #10b981;"></span>
+                    <span style="font-size: 0.9rem; font-weight: 500;">Corporate</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 0.75rem;">
+                    <span style="width: 12px; height: 12px; border-radius: 50%; background: #f59e0b;"></span>
+                    <span style="font-size: 0.9rem; font-weight: 500;">Private Parties</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 0.75rem; margin-top: 0.5rem;">
+                    <span
+                        style="width: 12px; height: 12px; border-radius: 3px; background: #fee2e2; border: 1px solid #fecaca;"></span>
+                    <span style="font-size: 0.9rem; font-weight: 500; color: #ef4444;">Blocked Date</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Upcoming List (Summary) -->
+        <div
+            style="background: var(--white); border-radius: 2rem; padding: 2rem; border: 1px solid var(--border-color); box-shadow: var(--shadow-md);">
+            <h4 style="margin-bottom: 1.5rem; font-size: 1.1rem;">This Week</h4>
+            {% if bookings %}
+            <div style="display: grid; gap: 1rem;">
+                {% for booking in bookings[:3] %}
+                <div
+                    style="padding: 1rem; background: #f8fafc; border-radius: 1rem; border-left: 4px solid var(--primary-color);">
+                    <div
+                        style="font-size: 0.8rem; font-weight: 600; color: var(--primary-color); margin-bottom: 0.25rem;">
+                        {{ booking.event_date.strftime('%b %d') }}
+                    </div>
+                    <div style="font-weight: 700; font-size: 0.9rem; color: var(--secondary-color);">{{
+                        booking.event_name or booking.user.first_name }}</div>
+                    <div style="font-size: 0.75rem; color: var(--text-light);">{{ booking.guest_count }} guests</div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p style="font-size: 0.85rem; color: var(--text-light); text-align: center;">No events this week.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Event Details Modal -->
+<div id="eventModal" class="modal">
+    <div class="modal-content">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+            <h3 id="modalTitle" style="font-size: 1.5rem; margin: 0;">Event Details</h3>
+            <button onclick="closeModal()"
+                style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--text-light);">&times;</button>
+        </div>
+
+        <div id="modalBody">
+            <div class="detail-item">
+                <i class="fas fa-user"></i>
+                <div>
+                    <div class="detail-label">Customer</div>
+                    <div id="detCustomer" class="detail-value">---</div>
+                </div>
+            </div>
+            <div class="detail-item">
+                <i class="fas fa-tag"></i>
+                <div>
+                    <div class="detail-label">Event Type</div>
+                    <div id="detType" class="detail-value">---</div>
+                </div>
+            </div>
+            <div class="detail-item">
+                <i class="fas fa-clock"></i>
+                <div>
+                    <div class="detail-label">Date & Time</div>
+                    <div id="detDateTime" class="detail-value">---</div>
+                </div>
+            </div>
+            <div class="detail-item">
+                <i class="fas fa-map-marker-alt"></i>
+                <div>
+                    <div class="detail-label">Venue / Address</div>
+                    <div id="detVenue" class="detail-value">---</div>
+                </div>
+            </div>
+            <div class="detail-item">
+                <i class="fas fa-users"></i>
+                <div>
+                    <div class="detail-label">Guests & Package</div>
+                    <div id="detPackage" class="detail-value">---</div>
+                </div>
+            </div>
+        </div>
+
+        <div style="margin-top: 2rem; display: flex; gap: 1rem;">
+            <input type="hidden" id="currentBookingId">
+            <button onclick="setReminder()" class="btn-primary" style="flex: 1; padding: 1rem;">Set Reminder</button>
+            <button onclick="closeModal()" class="btn-outline" style="flex: 1; padding: 1rem;">Close</button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- FullCalendar JS -->
+<script src='https://cdn.jsdelivr.net/npm/fullcalendar@5.10.1/main.min.js'></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var calendarEl = document.getElementById('calendar');
+        var calendar = new FullCalendar.Calendar(calendarEl, {
+            initialView: 'dayGridMonth',
+            headerToolbar: {
+                left: 'prev,next today',
+                center: 'title',
+                right: 'dayGridMonth,timeGridWeek'
+            },
+            events: '/caterer/api/events',
+            eventClick: function (info) {
+                showEventDetails(info.event);
+            },
+            height: 'auto',
+            dayMaxEvents: true
+        });
+        calendar.render();
+    });
+
+    function showEventDetails(event) {
+        const props = event.extendedProps;
+        document.getElementById('currentBookingId').value = event.id;
+        document.getElementById('detCustomer').textContent = props.customer;
+        document.getElementById('detType').textContent = props.type;
+        document.getElementById('detDateTime').textContent = event.start.toLocaleDateString('en-US', {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        }) + ' at ' + (props.time || 'TBD');
+        document.getElementById('detVenue').textContent = props.venue;
+        document.getElementById('detPackage').textContent = props.guests + ' Guests - ' + props.package;
+
+        document.getElementById('eventModal').style.display = 'flex';
+    }
+
+    async function setReminder() {
+        const bookingId = document.getElementById('currentBookingId').value;
+        const btn = document.querySelector('.btn-primary');
+        const originalText = btn.textContent;
+
+        btn.disabled = true;
+        btn.textContent = 'Setting...';
+
+        try {
+            const response = await fetch(`/caterer/api/bookings/${bookingId}/reminders`, {
+                method: 'POST'
+            });
+            const data = await response.json();
+
+            if (data.status === 'success') {
+                alert('Reminder set! You will see it in your notifications.');
+                closeModal();
+                location.reload(); // To update notification count
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Failed to set reminder.');
+        } finally {
+            btn.disabled = false;
+            btn.textContent = originalText;
+        }
+    }
+
+    function closeModal() {
+        document.getElementById('eventModal').style.display = 'none';
+    }
+
+    async function toggleDateAvailability(isAvailable) {
+        const date = document.getElementById('blockDate').value;
+        const reason = document.getElementById('blockReason').value;
+
+        if (!date) {
+            alert('Please select a date first.');
+            return;
+        }
+
+        try {
+            const response = await fetch('/caterer/api/availability/toggle', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ date, is_available: isAvailable, reason })
+            });
+
+            if (response.ok) {
+                location.reload();
+            } else {
+                alert('Failed to update availability.');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('An error occurred.');
+        }
+    }
+
+    // Close on escape
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') closeModal();
+    });
+</script>
+{% endblock %}

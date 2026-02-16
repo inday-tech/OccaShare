@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Admin Dashboard - OccaServe{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='/css/styles.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --sidebar-width: 280px;
+            --dashboard-bg: #fdfdfb;
+        }
+
+        body {
+            background-color: var(--dashboard-bg);
+            color: var(--secondary-color);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .navbar {
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+            height: 80px;
+            background: var(--white);
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+        }
+
+        .dashboard-wrapper {
+            display: flex;
+            flex: 1;
+        }
+
+        .sidebar {
+            width: var(--sidebar-width);
+            background: var(--secondary-color);
+            color: #f8fafc;
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            padding: 2rem 1.25rem;
+            z-index: 100;
+            overflow-y: auto;
+            border-right: 1px solid #3b5a37;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .sidebar-menu li {
+            margin-bottom: 0.25rem;
+        }
+
+        .sidebar-menu a {
+            display: flex;
+            align-items: center;
+            padding: 0.85rem 1.25rem;
+            color: #94a3b8;
+            text-decoration: none;
+            border-radius: 0.75rem;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            font-weight: 500;
+            gap: 0.85rem;
+            font-size: 0.95rem;
+        }
+
+        .sidebar-menu a i {
+            font-size: 1.1rem;
+            width: 24px;
+            text-align: center;
+            opacity: 0.7;
+        }
+
+        .sidebar-menu a:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: #f8fafc;
+        }
+
+        .sidebar-menu a.active {
+            background: var(--primary-color);
+            color: var(--white);
+            box-shadow: 0 4px 12px rgba(153, 204, 102, 0.25);
+        }
+
+        .sidebar-menu a.active i {
+            opacity: 1;
+        }
+
+        .menu-divider {
+            height: 1px;
+            background: #3b5a37;
+            margin: 1.5rem 1.25rem;
+        }
+
+        .main-content {
+            flex: 1;
+            margin-left: var(--sidebar-width);
+            padding: 2.5rem 3rem;
+            max-width: 1600px;
+        }
+
+        .page-header {
+            margin-bottom: 2.5rem;
+        }
+
+        .page-header h1 {
+            font-size: 2rem;
+            font-weight: 800;
+            color: #0f172a;
+            letter-spacing: -0.025em;
+        }
+
+        .page-header p {
+            color: #64748b;
+            font-size: 1rem;
+            margin-top: 0.25rem;
+        }
+
+        @media (max-width: 1024px) {
+            .sidebar {
+                width: 80px;
+                padding: 2rem 1rem;
+                text-align: center;
+            }
+
+            .sidebar-menu a span {
+                display: none;
+            }
+
+            .main-content {
+                margin-left: 80px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-wrapper {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                position: relative;
+                top: 0;
+                width: 100%;
+                height: auto;
+                border-right: none;
+                border-bottom: 1px solid var(--border-color);
+                padding: 1rem;
+            }
+
+            .sidebar-menu {
+                display: flex;
+                overflow-x: auto;
+                gap: 0.5rem;
+                padding-bottom: 0.5rem;
+            }
+
+            .sidebar-menu li {
+                margin-bottom: 0;
+                flex-shrink: 0;
+            }
+
+            .main-content {
+                margin-left: 0;
+                padding: 1.5rem;
+            }
+        }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+
+<body>
+
+    <div class="dashboard-wrapper">
+        <aside class="sidebar">
+            <div style="margin-bottom: 2.5rem; padding: 0 0.5rem;">
+                <a href="/" class="logo" style="display: block; margin-bottom: 2rem; color: var(--white);">OccaServe</a>
+                <div
+                    style="display: flex; align-items: center; gap: 1rem; padding: 1rem; background: rgba(255,255,255,0.05); border-radius: 1rem; border: 1px solid rgba(255,255,255,0.1);">
+                    <div
+                        style="width: 44px; height: 44px; border-radius: 0.75rem; background: var(--primary-color); color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; flex-shrink: 0;">
+                        {{ user.first_name[0] }}{{ user.last_name[0] }}
+                    </div>
+                    <div style="overflow: hidden;">
+                        <div
+                            style="font-weight: 700; font-size: 0.9rem; color: #f8fafc; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                            {{ user.first_name }} {{ user.last_name }}</div>
+                        <div
+                            style="font-size: 0.65rem; color: #ef4444; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em;">
+                            Administrator</div>
+                    </div>
+                </div>
+            </div>
+            <ul class="sidebar-menu">
+                <li>
+                    <a href="/admin/dashboard" class="{{ 'active' if active_page == 'overview' }}">
+                        <i class="fas fa-chart-line"></i> <span>Overview</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="/admin/caterers" class="{{ 'active' if active_page == 'caterers' }}">
+                        <i class="fas fa-store"></i> <span>Manage Caterers</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="/admin/customers" class="{{ 'active' if active_page == 'customers' }}">
+                        <i class="fas fa-user-friends"></i> <span>Manage Customers</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="/admin/bookings" class="{{ 'active' if active_page == 'bookings' }}">
+                        <i class="fas fa-clipboard-list"></i> <span>All Bookings</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="/admin/payments" class="{{ 'active' if active_page == 'payments' }}">
+                        <i class="fas fa-file-invoice-dollar"></i> <span>Payments</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="/admin/reviews" class="{{ 'active' if active_page == 'reviews' }}">
+                        <i class="fas fa-star"></i> <span>Reviews</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="/admin/reports" class="{{ 'active' if active_page == 'reports' }}">
+                        <i class="fas fa-analytics"></i> <span>Reports</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="/admin/settings" class="{{ 'active' if active_page == 'settings' }}">
+                        <i class="fas fa-cog"></i> <span>Website Settings</span>
+                    </a>
+                </li>
+                <li class="menu-divider"></li>
+                <li>
+                    <a href="/auth/logout" class="logout-link">
+                        <i class="fas fa-sign-out-alt"></i> <span>Logout</span>
+                    </a>
+                </li>
+            </ul>
+        </aside>
+
+        <main class="main-content">
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+
+    <script src="{{ url_for('static', path='/js/main.js') }}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+
+</html>

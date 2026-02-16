@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - OccaServe</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='/css/styles.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #99cc66;
+            --primary-hover: #88bb55;
+            --slate-50: #fdfdfb;
+            --slate-100: #cae4c5;
+            --slate-200: #e2e8e0;
+            --slate-600: #5a7a56;
+            --slate-700: #3b5a37;
+            --slate-800: #254222;
+            --slate-900: #1a2e18;
+        }
+
+        body.auth-page {
+            background-color: var(--slate-50);
+            background-image: radial-gradient(at 0% 0%, hsla(120, 30%, 15%, 1) 0, transparent 50%),
+                radial-gradient(at 50% 0%, hsla(90, 40%, 40%, 1) 0, transparent 50%),
+                radial-gradient(at 100% 0%, hsla(45, 30%, 80%, 1) 0, transparent 50%);
+            background-attachment: fixed;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 4rem 1rem;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .auth-container {
+            width: 100%;
+            max-width: 450px;
+            animation: slideIn 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .professional-card {
+            background: #ffffff;
+            border-radius: 1.5rem;
+            padding: 4rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            border: 1px solid var(--slate-200);
+        }
+
+        .professional-card h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5rem;
+            color: var(--slate-900);
+            margin-bottom: 0.75rem;
+            text-align: center;
+            letter-spacing: -0.02em;
+        }
+
+        .auth-subtitle {
+            text-align: center;
+            color: var(--slate-600);
+            margin-bottom: 3rem;
+            font-size: 1rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: var(--slate-700);
+            margin-bottom: 0.6rem;
+        }
+
+        .minimal-input {
+            width: 100%;
+            padding: 1rem 1.25rem;
+            border: 2px solid var(--slate-200);
+            border-radius: 0.75rem;
+            font-size: 1rem;
+            transition: all 0.2s ease;
+            background: var(--slate-50);
+            color: var(--slate-900);
+            box-sizing: border-box;
+        }
+
+        .minimal-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: #fff;
+            box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
+        }
+
+        .btn-primary-action {
+            background: var(--slate-900);
+            color: white;
+            padding: 1.1rem;
+            border-radius: 1rem;
+            font-size: 1.1rem;
+            font-weight: 700;
+            width: 100%;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-primary-action:hover {
+            background: var(--primary);
+            transform: translateY(-2px);
+            box-shadow: 0 20px 25px -5px rgba(79, 70, 229, 0.4);
+        }
+
+        /* Realtime Overlay Styles */
+        .realtime-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.85);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.4s ease;
+            backdrop-filter: blur(12px);
+        }
+
+        .realtime-overlay.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .verification-inner-card {
+            background: #ffffff;
+            padding: 3.5rem;
+            border-radius: 2rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            text-align: center;
+            max-width: 450px;
+            width: 90%;
+            transform: scale(0.9) translateY(20px);
+            transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .realtime-overlay.active .verification-inner-card {
+            transform: scale(1) translateY(0);
+        }
+
+        .loader-ring {
+            position: relative;
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 2.5rem;
+        }
+
+        .loader-ring div {
+            box-sizing: border-box;
+            display: block;
+            position: absolute;
+            width: 80px;
+            height: 80px;
+            border: 6px solid var(--primary);
+            border-radius: 50%;
+            animation: ring-pulse 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+            border-color: var(--primary) transparent transparent transparent;
+        }
+
+        @keyframes ring-pulse {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.5rem 1rem;
+            background: var(--slate-100);
+            border-radius: 2rem;
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: var(--slate-600);
+            margin-bottom: 1.5rem;
+        }
+
+        .status-badge.success {
+            background: #ecfdf5;
+            color: #10b981;
+        }
+
+        .verification-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.75rem;
+            color: var(--slate-900);
+            margin-bottom: 0.75rem;
+        }
+
+        .verification-desc {
+            color: var(--slate-600);
+            font-size: 1rem;
+            line-height: 1.6;
+        }
+
+        .success-icon {
+            font-size: 5rem;
+            color: #10b981;
+            display: none;
+            margin-bottom: 1.5rem;
+            animation: scaleCheck 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes scaleCheck {
+            from {
+                transform: scale(0.5);
+                opacity: 0;
+            }
+
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .social-auth {
+            margin-bottom: 2rem;
+        }
+
+        .btn-facebook {
+            background: #1877f2;
+            color: white;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            font-weight: 700;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .btn-facebook:hover {
+            background: #166fe5;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(24, 119, 242, 0.3);
+        }
+
+        .auth-divider {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin: 2rem 0;
+            color: var(--slate-600);
+            font-size: 0.9rem;
+        }
+
+        .auth-divider::before,
+        .auth-divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--slate-200);
+        }
+
+        .auth-footer {
+            margin-top: 2.5rem;
+            text-align: center;
+            border-top: 1px solid var(--slate-100);
+            padding-top: 1.5rem;
+            color: var(--slate-600);
+            font-size: 0.95rem;
+        }
+
+        .auth-footer a {
+            color: var(--primary);
+            font-weight: 700;
+            text-decoration: none;
+        }
+
+        .alert-error {
+            background: #fef2f2;
+            border: 1px solid #fee2e2;
+            color: #991b1b;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            margin-bottom: 2rem;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+    </style>
+</head>
+
+<body class="auth-page">
+    <div class="auth-container">
+        <div class="professional-card">
+            <h2>Welcome Back</h2>
+            <p class="auth-subtitle">Sign in to manage your bookings</p>
+
+            {% if error %}
+            <div class="alert-error">
+                <i class="fas fa-exclamation-circle"></i> {{ error }}
+            </div>
+            {% endif %}
+
+
+            <div class="social-auth">
+                <a href="javascript:void(0)" onclick="handleFacebookLogin()" class="btn-social btn-facebook">
+                    <i class="fab fa-facebook-f"></i> Continue with Facebook
+                </a>
+            </div>
+
+            <div class="auth-divider">
+                <span>or continue with email</span>
+            </div>
+
+            <form action="/auth/login" method="post" class="auth-form">
+                {% if next_url %}
+                <input type="hidden" name="next_url" value="{{ next_url }}">
+                {% endif %}
+                <div class="form-group">
+                    <label for="email">Email Address or Username</label>
+                    <input type="text" id="email" name="email" class="minimal-input" required
+                        placeholder="you@example.com">
+                </div>
+                <div class="form-group">
+                    <div
+                        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                        <label for="password" style="margin-bottom: 0;">Password</label>
+                        <a href="/auth/forgot-password"
+                            style="font-size: 0.85rem; color: var(--primary); font-weight: 500;">Forgot
+                            password?</a>
+                    </div>
+                    <input type="password" id="password" name="password" class="minimal-input" required
+                        placeholder="••••••••">
+                </div>
+                <button type="submit" class="btn-primary-action">Sign In</button>
+            </form>
+
+            <p class="auth-footer">
+                Don't have an account? <a href="/auth/register{% if next_url %}?next={{ next_url }}{% endif %}">Create
+                    one</a>
+            </p>
+            <p class="auth-footer">
+                <a href="/"><i class="fas fa-arrow-left"></i> Back to Home</a>
+            </p>
+        </div>
+    </div>
+    <!-- Realtime Verification Overlay -->
+    <div class="realtime-overlay" id="realtimeOverlay">
+        <div class="verification-inner-card">
+            <div id="loaderTarget">
+                <div class="loader-ring">
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                </div>
+            </div>
+            <div id="successTarget" class="success-icon">
+                <i class="fas fa-check-circle"></i>
+            </div>
+
+            <div class="status-badge" id="statusBadge">
+                <i class="fas fa-shield-alt"></i> Secure Connection
+            </div>
+
+            <h3 class="verification-title" id="verifTitle">Authenticating</h3>
+            <p class="verification-desc" id="verifDesc">Connecting to Facebook secure servers. Please wait a moment.</p>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+
+        if (urlParams.get('verified') === 'true') {
+            Swal.fire({
+                icon: 'success',
+                title: 'Email successfully verified!',
+                text: 'You can now log in to your account.',
+                confirmButtonColor: '#4f46e5'
+            });
+        }
+
+        if (urlParams.get('success') === 'password_reset') {
+            Swal.fire({
+                icon: 'success',
+                title: 'Password Updated!',
+                text: 'Your password has been reset successfully. Please log in with your new password.',
+                confirmButtonColor: '#4f46e5'
+            });
+        }
+
+        function handleFacebookLogin() {
+            const overlay = document.getElementById('realtimeOverlay');
+            const statusBadge = document.getElementById('statusBadge');
+            const verifTitle = document.getElementById('verifTitle');
+            const verifDesc = document.getElementById('verifDesc');
+            const loaderTarget = document.getElementById('loaderTarget');
+            const successTarget = document.getElementById('successTarget');
+
+            overlay.classList.add('active');
+
+            // Sequence of "Realtime" events
+            setTimeout(() => {
+                verifTitle.innerText = "Verifying Identity";
+                verifDesc.innerText = "Checking Facebook credentials and establishing secure session...";
+            }, 1500);
+
+            setTimeout(() => {
+                verifTitle.innerText = "Finalizing Login";
+                verifDesc.innerText = "Synchronizing your OccaServe profile with Facebook data.";
+            }, 3000);
+
+            setTimeout(() => {
+                // Success State
+                loaderTarget.style.display = 'none';
+                successTarget.style.display = 'block';
+                statusBadge.classList.add('success');
+                statusBadge.innerHTML = '<i class="fas fa-check"></i> Verified Successfully';
+                verifTitle.innerText = "Welcome Back!";
+                verifDesc.innerText = "Identity confirmed. Redirecting to your dashboard...";
+
+                setTimeout(() => {
+                    window.location.href = "/auth/facebook/login";
+                }, 1200);
+            }, 4500);
+        }
+    </script>
+</body>
+
+</html>

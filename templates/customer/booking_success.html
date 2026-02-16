@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Booking Confirmed - OccaServe</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='/css/styles.css') }}">
+    <style>
+        .success-container {
+            text-align: center;
+            padding: 4rem;
+            max-width: 600px;
+            margin: 4rem auto;
+        }
+
+        .success-icon {
+            font-size: 4rem;
+            color: #10b981;
+            margin-bottom: 1.5rem;
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="container nav-container">
+            <a href="/" class="logo">OccaServe</a>
+        </div>
+    </nav>
+    <div class="success-container">
+        <i class="fas fa-check-circle success-icon"></i>
+        <h1>Booking Request Sent!</h1>
+        <p>Your request has been sent to the caterer. We have created an account for you.</p>
+
+        <div
+            style="background: #f3f4f6; padding: 2rem; border-radius: 0.5rem; margin: 2rem 0; text-align: left; border: 1px solid #e5e7eb;">
+            <div style="margin-bottom: 1rem; border-bottom: 1px solid #e5e7eb; padding-bottom: 1rem;">
+                <h4 style="margin-bottom: 0.5rem;">Verification Status</h4>
+                <p style="color: #059669; font-weight: 600;"><i class="fas fa-shield-alt"></i> Identity Verified</p>
+            </div>
+
+            {% if is_new_user %}
+            <div
+                style="background: #eff6ff; padding: 1rem; border-radius: 0.5rem; border: 1px dashed #3b82f6; margin-bottom: 1rem;">
+                <h4 style="color: #1e40af; margin-bottom: 0.5rem;">Account Created Successfully</h4>
+                <p style="font-size: 0.9rem; margin-bottom: 0.5rem;">We've generated a temporary password for you:</p>
+                <code
+                    style="background: #fff; padding: 0.5rem; border-radius: 0.25rem; font-weight: bold; font-size: 1.1rem; border: 1px solid #bfdbfe; display: block; text-align: center;">{{ password_generated }}</code>
+                <p style="font-size: 0.85rem; margin-top: 0.5rem; color: #6b7280;">Please save this password. We sent a
+                    copy to {{ user.email }}.</p>
+            </div>
+            {% endif %}
+
+            <div style="display: flex; justify-content: space-between; font-size: 0.9rem;">
+                <span><strong>Booking ID:</strong> #{{ booking.id }}</span>
+                <span><strong>Email:</strong> {{ user.email }}</span>
+            </div>
+        </div>
+
+        <a href="/bookings/my" class="btn-primary">View My Bookings</a>
+    </div>
+</body>
+
+</html>

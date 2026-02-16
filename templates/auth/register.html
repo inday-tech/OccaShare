@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Join OccaServe - Philippines' Premier Catering Marketplace</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='/css/styles.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #99cc66;
+            --primary-hover: #88bb55;
+            --slate-50: #fdfdfb;
+            --slate-100: #cae4c5;
+            --slate-200: #e2e8e0;
+            --slate-600: #5a7a56;
+            --slate-700: #3b5a37;
+            --slate-800: #254222;
+            --slate-900: #1a2e18;
+        }
+
+        body.auth-page {
+            background-color: var(--slate-50);
+            background-image: radial-gradient(at 0% 0%, hsla(120, 30%, 15%, 1) 0, transparent 50%),
+                radial-gradient(at 50% 0%, hsla(90, 40%, 40%, 1) 0, transparent 50%),
+                radial-gradient(at 100% 0%, hsla(45, 30%, 80%, 1) 0, transparent 50%);
+            background-attachment: fixed;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 4rem 1rem;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .auth-container {
+            width: 100%;
+            max-width: 500px;
+            animation: slideIn 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .professional-card {
+            background: #ffffff;
+            border-radius: 1.5rem;
+            padding: 4rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            border: 1px solid var(--slate-200);
+        }
+
+        .brand-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .brand-header h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5rem;
+            color: var(--slate-900);
+            margin-bottom: 0.75rem;
+            letter-spacing: -0.02em;
+        }
+
+        .brand-header p {
+            font-size: 1rem;
+            color: var(--slate-600);
+            line-height: 1.6;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            font-size: 0.85rem;
+            color: var(--slate-700);
+            margin-bottom: 0.6rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .minimal-input {
+            width: 100%;
+            padding: 1rem 1.25rem;
+            border: 2px solid var(--slate-200);
+            border-radius: 0.75rem;
+            font-size: 1rem;
+            transition: all 0.2s ease;
+            background: var(--slate-50);
+            color: var(--slate-900);
+            box-sizing: border-box;
+        }
+
+        .minimal-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: #fff;
+            box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
+        }
+
+        .btn-luxury-submit {
+            background: var(--slate-900);
+            color: white;
+            padding: 1.25rem;
+            border-radius: 1rem;
+            font-size: 1.1rem;
+            font-weight: 700;
+            width: 100%;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            margin-top: 1.5rem;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-luxury-submit:hover {
+            background: var(--primary);
+            transform: translateY(-2px);
+            box-shadow: 0 20px 25px -5px rgba(79, 70, 229, 0.4);
+        }
+
+        .auth-footer {
+            margin-top: 3rem;
+            text-align: center;
+            border-top: 1px solid var(--slate-100);
+            padding-top: 2rem;
+            color: var(--slate-600);
+        }
+
+        .auth-footer p {
+            font-size: 0.95rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .auth-footer a {
+            color: var(--primary);
+            font-weight: 700;
+            text-decoration: none;
+        }
+
+        .auth-footer a:hover {
+            text-decoration: underline;
+        }
+
+        .role-hint {
+            font-size: 0.85rem;
+            color: var(--slate-600);
+            margin-top: 1.25rem;
+        }
+
+        .alert-error {
+            background: #fef2f2;
+            border: 1px solid #fee2e2;
+            color: #991b1b;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            margin-bottom: 2rem;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .input-error {
+            border-color: #ef4444 !important;
+        }
+
+        .error-message {
+            color: #ef4444;
+            font-size: 0.75rem;
+            margin-top: 0.4rem;
+            display: none;
+        }
+    </style>
+</head>
+
+<body class="auth-page">
+    <div class="auth-container">
+        <div class="professional-card">
+            <div class="brand-header">
+                <h2>OccaServe</h2>
+                <p id="welcomeText">Start your extraordinary event journey today</p>
+            </div>
+
+            {% if error %}
+            <div class="alert-error">
+                <i class="fas fa-exclamation-circle"></i> {{ error }}
+            </div>
+            {% endif %}
+
+            <form action="/auth/register" method="post" id="regForm">
+                {% if next_url %}
+                <input type="hidden" name="next_url" value="{{ next_url }}">
+                {% endif %}
+                <input type="hidden" name="role" id="roleInput" value="customer">
+                <input type="hidden" name="full_name" value="Member">
+                <input type="hidden" name="address" value="TBD">
+
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input type="email" id="email" name="email" class="minimal-input" required
+                        placeholder="name@example.com">
+                </div>
+
+                <div class="form-group">
+                    <label for="mobile_number">Mobile Number</label>
+                    <input type="tel" id="mobile_number" name="mobile_number" class="minimal-input" required
+                        placeholder="0917 000 0000">
+                    <div id="mobileError" class="error-message">Please enter a valid PH mobile number (e.g., 0917 000
+                        0000)</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" class="minimal-input" required
+                        placeholder="••••••••">
+                    <div id="passwordError" class="error-message">Password must be at least 8 characters long</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="confirm_password">Confirm Password</label>
+                    <input type="password" id="confirm_password" name="confirm_password" class="minimal-input" required
+                        placeholder="••••••••">
+                    <div id="confirmError" class="error-message">Passwords do not match</div>
+                </div>
+
+
+                <button type="submit" class="btn-luxury-submit">Sign Up</button>
+            </form>
+
+            <div class="auth-footer">
+                <p>Already a member? <a href="/auth/login">Sign In</a></p>
+
+                <p id="roleToggleContainer" class="role-hint">
+                    <span id="roleLabel">Business owner?</span>
+                    <a href="javascript:void(0)" onclick="switchRole()" id="roleToggleLink"
+                        style="font-weight: 600;">Switch to Caterer</a>
+                </p>
+
+                <div style="margin-top: 2rem;">
+                    <a href="/" style="color: var(--slate-600); font-size: 0.85rem;"><i
+                            class="fas fa-long-arrow-left"></i> Exit to Home</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function updateUI(role) {
+            const welcomeText = document.getElementById('welcomeText');
+            const roleLabel = document.getElementById('roleLabel');
+            const roleToggleLink = document.getElementById('roleToggleLink');
+            const roleInput = document.getElementById('roleInput');
+
+            if (role === 'caterer') {
+                welcomeText.innerText = 'Partner with OccaServe and grow your catering business';
+                roleLabel.innerText = 'Regular customer?';
+                roleToggleLink.innerText = 'Switch to Customer';
+                roleInput.value = 'caterer';
+            } else {
+                welcomeText.innerText = 'Start your extraordinary event journey today';
+                roleLabel.innerText = 'Business owner?';
+                roleToggleLink.innerText = 'Switch to Caterer';
+                roleInput.value = 'customer';
+            }
+        }
+
+        function switchRole() {
+            const currentRole = document.getElementById('roleInput').value;
+            if (currentRole === 'customer') {
+                window.location.href = "/auth/register/caterer";
+            } else {
+                updateUI('customer');
+            }
+        }
+
+        window.onload = function () {
+            const urlParams = new URLSearchParams(window.location.search);
+            const role = urlParams.get('role');
+            if (role) updateUI(role);
+        };
+
+        document.getElementById('mobile_number').oninput = function () {
+            const mobileRegex = /^(09|\+639)\d{9}$/;
+            const val = this.value.replace(/\s/g, '');
+            const error = document.getElementById('mobileError');
+            if (val && !mobileRegex.test(val)) {
+                this.classList.add('input-error');
+                error.style.display = 'block';
+            } else {
+                this.classList.remove('input-error');
+                error.style.display = 'none';
+            }
+        };
+
+        const validatePasswords = () => {
+            const pass = document.getElementById('password');
+            const confirm = document.getElementById('confirm_password');
+            const passError = document.getElementById('passwordError');
+            const confirmError = document.getElementById('confirmError');
+
+            if (pass.value && pass.value.length < 8) {
+                pass.classList.add('input-error');
+                passError.style.display = 'block';
+            } else {
+                pass.classList.remove('input-error');
+                passError.style.display = 'none';
+            }
+
+            if (confirm.value && pass.value !== confirm.value) {
+                confirm.classList.add('input-error');
+                confirmError.style.display = 'block';
+            } else {
+                confirm.classList.remove('input-error');
+                confirmError.style.display = 'none';
+            }
+        };
+
+        document.getElementById('password').oninput = validatePasswords;
+        document.getElementById('confirm_password').oninput = validatePasswords;
+
+        document.getElementById('regForm').onsubmit = function (e) {
+            const pass = document.getElementById('password').value;
+            const confirm = document.getElementById('confirm_password').value;
+            const mobile = document.getElementById('mobile_number').value.replace(/\s/g, '');
+            const mobileRegex = /^(09|\+639)\d{9}$/;
+
+            let hasError = false;
+
+            if (pass.length < 8) {
+                alert("Password must be at least 8 characters long.");
+                hasError = true;
+            } else if (pass !== confirm) {
+                alert("Credentials do not match. Please verify your security sequence.");
+                hasError = true;
+            } else if (!mobileRegex.test(mobile)) {
+                alert("Please enter a valid Philippine mobile number.");
+                hasError = true;
+            }
+
+            if (hasError) {
+                e.preventDefault();
+                return false;
+            }
+            return true;
+        };
+    </script>
+</body>
+
+</html>

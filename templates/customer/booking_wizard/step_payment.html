@@ -1,0 +1,137 @@
+{% extends "customer/booking_wizard/wizard_base.html" %}
+
+{% block title %}Secure Payment - OccaServe{% endblock %}
+
+{% block content %}
+<div class="wizard-header-content">
+    <h2 class="wizard-title font-playfair">Secure Payment Selection</h2>
+    <p class="wizard-subtitle">Choose your preferred payment method. You won't be charged until the caterer accepts your
+        booking.</p>
+</div>
+
+<form action="/bookings/step/payment" method="POST" style="max-width: 500px; margin: 0 auto;">
+    <div class="payment-options" style="display: grid; gap: 1.5rem; margin-bottom: 3rem;">
+        <!-- GCash -->
+        <label class="payment-card" style="position: relative; cursor: pointer; display: block;">
+            <input type="radio" name="payment_method" value="GCash" required style="position: absolute; opacity: 0;">
+            <div class="payment-card-content"
+                style="padding: 1.5rem; border: 2px solid var(--border-color); border-radius: 1.25rem; display: flex; align-items: center; gap: 1.25rem; transition: all 0.3s ease;">
+                <div
+                    style="width: 50px; height: 50px; background: #007dfe; border-radius: 0.75rem; display: flex; align-items: center; justify-content: center; color: white; font-weight: 800; font-style: italic; font-size: 1.1rem;">
+                    G</div>
+                <div style="flex: 1;">
+                    <h4 style="margin: 0; font-size: 1.1rem;">GCash</h4>
+                    <span style="font-size: 0.85rem; color: var(--text-light);">Fast & Secure Mobile Payment</span>
+                </div>
+                <div class="check-mark"
+                    style="width: 24px; height: 24px; border: 2px solid var(--border-color); border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: all 0.3s ease;">
+                    <i class="fas fa-check" style="font-size: 0.7rem; color: white; display: none;"></i>
+                </div>
+            </div>
+        </label>
+
+        <!-- Credit Card -->
+        <label class="payment-card" style="position: relative; cursor: pointer; display: block;">
+            <input type="radio" name="payment_method" value="Credit Card" required
+                style="position: absolute; opacity: 0;">
+            <div class="payment-card-content"
+                style="padding: 1.5rem; border: 2px solid var(--border-color); border-radius: 1.25rem; display: flex; align-items: center; gap: 1.25rem; transition: all 0.3s ease;">
+                <div
+                    style="width: 50px; height: 50px; background: #1a1a1a; border-radius: 0.75rem; display: flex; align-items: center; justify-content: center; color: white;">
+                    <i class="fas fa-credit-card" style="font-size: 1.25rem;"></i>
+                </div>
+                <div style="flex: 1;">
+                    <h4 style="margin: 0; font-size: 1.1rem;">Credit / Debit Card</h4>
+                    <span style="font-size: 0.85rem; color: var(--text-light);">Visa, Mastercard, & more</span>
+                </div>
+                <div class="check-mark"
+                    style="width: 24px; height: 24px; border: 2px solid var(--border-color); border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: all 0.3s ease;">
+                    <i class="fas fa-check" style="font-size: 0.7rem; color: white; display: none;"></i>
+                </div>
+            </div>
+        </label>
+
+        <!-- Bank Transfer -->
+        <label class="payment-card" style="position: relative; cursor: pointer; display: block;">
+            <input type="radio" name="payment_method" value="Bank Transfer" required
+                style="position: absolute; opacity: 0;">
+            <div class="payment-card-content"
+                style="padding: 1.5rem; border: 2px solid var(--border-color); border-radius: 1.25rem; display: flex; align-items: center; gap: 1.25rem; transition: all 0.3s ease;">
+                <div
+                    style="width: 50px; height: 50px; background: #f59e0b; border-radius: 0.75rem; display: flex; align-items: center; justify-content: center; color: white;">
+                    <i class="fas fa-university" style="font-size: 1.25rem;"></i>
+                </div>
+                <div style="flex: 1;">
+                    <h4 style="margin: 0; font-size: 1.1rem;">Bank Transfer</h4>
+                    <span style="font-size: 0.85rem; color: var(--text-light);">BDO, BPI, & others</span>
+                </div>
+                <div class="check-mark"
+                    style="width: 24px; height: 24px; border: 2px solid var(--border-color); border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: all 0.3s ease;">
+                    <i class="fas fa-check" style="font-size: 0.7rem; color: white; display: none;"></i>
+                </div>
+            </div>
+        </label>
+    </div>
+
+    <div id="payment-processing" style="display: none; text-align: center; margin: 2rem 0;">
+        <div class="loader" style="margin: 0 auto 1.5rem;"></div>
+        <h4 style="color: var(--primary-color);">Processing Secure Payment...</h4>
+        <p style="font-size: 0.85rem; color: var(--text-light);">Connecting to payment gateway. Please do not close this
+            window.</p>
+    </div>
+
+    <div class="wizard-actions" id="wizard-actions">
+        <a href="/bookings/step/verify" class="btn-prev">
+            <i class="fas fa-arrow-left"></i> Back to Verification
+        </a>
+        <button type="submit" class="btn-primary"
+            style="padding: 1.25rem 2.5rem; border-radius: 1rem; font-weight: 700;">
+            Complete Booking <i class="fas fa-lock" style="margin-left: 0.5rem; font-size: 0.8rem;"></i>
+        </button>
+    </div>
+</form>
+
+<style>
+    /* Reuse loader from verification if needed, or define here */
+    .loader {
+        border: 4px solid #f3f3f3;
+        border-top: 4px solid var(--primary-color);
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+        0% {
+            transform: rotate(0deg);
+        }
+
+        100% {
+            transform: rotate(360deg);
+        }
+    }
+
+    .payment-card input:checked+.payment-card-content {
+        border-color: var(--primary-color);
+        background: #f5f3ff;
+    }
+
+    .payment-card input:checked+.payment-card-content .check-mark {
+        background: var(--primary-color);
+        border-color: var(--primary-color);
+    }
+
+    .payment-card input:checked+.payment-card-content .check-mark i {
+        display: block;
+    }
+</style>
+
+<script>
+    document.querySelector('form').onsubmit = function () {
+        document.getElementById('wizard-actions').style.display = 'none';
+        document.getElementById('payment-processing').style.display = 'block';
+        return true;
+    };
+</script>
+{% endblock %}

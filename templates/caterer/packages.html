@@ -1,0 +1,257 @@
+{% extends "caterer/layout.html" %}
+
+{% block title %}My Packages - Caterer Dashboard{% endblock %}
+
+{% block extra_css %}
+<style>
+    .package-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        gap: 2rem;
+        margin-top: 2rem;
+    }
+
+    .package-card {
+        background: var(--white);
+        padding: 2rem;
+        border-radius: 1.5rem;
+        box-shadow: var(--shadow-sm);
+        border: 1px solid var(--border-color);
+        transition: all 0.3s ease;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .package-card:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--shadow-md);
+        border-color: var(--primary-color);
+    }
+
+    .package-card h4 {
+        font-size: 1.25rem;
+        margin-bottom: 0.5rem;
+        color: var(--secondary-color);
+    }
+
+    .package-card .price {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--primary-color);
+        margin-bottom: 1rem;
+    }
+
+    .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(15, 23, 42, 0.6);
+        backdrop-filter: blur(4px);
+        z-index: 2000;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+    }
+
+    .modal-content {
+        background: var(--white);
+        padding: 3rem;
+        border-radius: 2rem;
+        max-width: 600px;
+        width: 100%;
+        box-shadow: var(--shadow-lg);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header" style="display: flex; justify-content: space-between; align-items: flex-end;">
+    <div>
+        <h1>My Catering Packages</h1>
+        <p>Manage the menus and pricing you offer to customers.</p>
+    </div>
+    <button class="btn-primary" onclick="showModal()" style="padding: 1rem 2rem;">
+        <i class="fas fa-plus" style="margin-right: 0.5rem;"></i> Add New Package
+    </button>
+</div>
+
+<div class="package-grid">
+    {% for pkg in packages %}
+    <div class="package-card">
+        <div style="flex: 1;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                <h4>{{ pkg.name }}</h4>
+                <span
+                    style="font-size: 0.7rem; background: var(--slate-100); color: var(--slate-700); padding: 0.2rem 0.6rem; border-radius: 1rem; font-weight: 600;">{{
+                    pkg.service_type }}</span>
+            </div>
+            <div class="price">₱{{ "{:,.2f}".format(pkg.price) }} <span
+                    style="font-size: 0.9rem; font-weight: 400; color: var(--text-light);">/ package</span></div>
+            <p style="font-size: 0.95rem; color: var(--text-light); margin-bottom: 1.5rem; line-height: 1.6;">{{
+                pkg.description[:120] }}...</p>
+
+            <div style="font-size: 0.85rem; color: var(--text-color); margin-bottom: 1rem;">
+                <i class="fas fa-users" style="margin-right: 0.5rem; color: var(--primary-color);"></i> Min guests: {{
+                pkg.min_guests }}
+            </div>
+        </div>
+
+        <div
+            style="display: flex; gap: 0.75rem; margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid var(--border-color);">
+            <button class="btn-outline" style="flex: 1; padding: 0.6rem; font-size: 0.85rem;"
+                onclick="showMenuModal({{ pkg.id }})">Manage Menu</button>
+            <button class="btn-outline" style="padding: 0.6rem; color: #ef4444; border-color: #fee2e2;"
+                onclick="deletePackage({{ pkg.id }})"><i class="fas fa-trash"></i></button>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Add Package Modal -->
+<div id="addModal" class="modal">
+    <div class="modal-content">
+        <h3 style="font-size: 1.75rem; margin-bottom: 2rem;">Create New Package</h3>
+        <form action="/caterer/packages/add" method="POST">
+            <div style="margin-bottom: 1.5rem;">
+                <label style="display: block; font-weight: 600; margin-bottom: 0.5rem;">Package Name</label>
+                <input type="text" name="name"
+                    style="width: 100%; padding: 0.9rem 1.25rem; border: 1px solid var(--border-color); border-radius: 0.75rem; font-family: inherit;"
+                    placeholder="e.g. Wedding Platinum Buffet" required>
+            </div>
+
+            <div style="margin-bottom: 1.5rem;">
+                <label style="display: block; font-weight: 600; margin-bottom: 0.5rem;">Description</label>
+                <textarea name="description" rows="4"
+                    style="width: 100%; padding: 0.9rem 1.25rem; border: 1px solid var(--border-color); border-radius: 0.75rem; font-family: inherit;"
+                    placeholder="Describe what's included in this package..." required></textarea>
+            </div>
+
+            <div style="margin-bottom: 1.5rem;">
+                <label style="display: block; font-weight: 600; margin-bottom: 0.5rem;">Service Type</label>
+                <select name="service_type"
+                    style="width: 100%; padding: 0.9rem 1.25rem; border: 1px solid var(--border-color); border-radius: 0.75rem; font-family: inherit; background: white;">
+                    <option value="Wedding">Wedding</option>
+                    <option value="Birthday">Birthday</option>
+                    <option value="Corporate">Corporate</option>
+                    <option value="Private Party">Private Party</option>
+                    <option value="General">General</option>
+                </select>
+            </div>
+
+            <div style="margin-bottom: 1.5rem;">
+                <label style="display: block; font-weight: 600; margin-bottom: 0.5rem;">Service Type</label>
+                <select name="service_type"
+                    style="width: 100%; padding: 0.9rem 1.25rem; border: 1px solid var(--border-color); border-radius: 0.75rem; font-family: inherit; background: white;">
+                    <option value="Wedding">Wedding</option>
+                    <option value="Birthday">Birthday</option>
+                    <option value="Corporate">Corporate</option>
+                    <option value="Private Party">Private Party</option>
+                    <option value="General">General</option>
+                </select>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2.5rem;">
+                <div>
+                    <label style="display: block; font-weight: 600; margin-bottom: 0.5rem;">Price (₱)</label>
+                    <input type="number" name="price" step="0.01"
+                        style="width: 100%; padding: 0.9rem 1.25rem; border: 1px solid var(--border-color); border-radius: 0.75rem; font-family: inherit;"
+                        required>
+                </div>
+                <div>
+                    <label style="display: block; font-weight: 600; margin-bottom: 0.5rem;">Min Guests</label>
+                    <input type="number" name="min_guests"
+                        style="width: 100%; padding: 0.9rem 1.25rem; border: 1px solid var(--border-color); border-radius: 0.75rem; font-family: inherit;"
+                        required>
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 1rem;">
+                <button type="submit" class="btn-primary" style="flex: 2; padding: 1rem;">Create Package</button>
+                <button type="button" class="btn-outline" onclick="hideModal()"
+                    style="flex: 1; padding: 1rem;">Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Add Menu Item Modal -->
+<div id="menuModal" class="modal">
+    <div class="modal-content">
+        <h3 style="font-size: 1.75rem; margin-bottom: 2rem;">Add Menu Item</h3>
+        <form id="menuForm" method="POST">
+            <div style="margin-bottom: 1.5rem;">
+                <label style="display: block; font-weight: 600; margin-bottom: 0.5rem;">Item Name</label>
+                <input type="text" name="name"
+                    style="width: 100%; padding: 0.9rem 1.25rem; border: 1px solid var(--border-color); border-radius: 0.75rem; font-family: inherit;"
+                    required>
+            </div>
+
+            <div style="margin-bottom: 1.5rem;">
+                <label style="display: block; font-weight: 600; margin-bottom: 0.5rem;">Category</label>
+                <select name="category"
+                    style="width: 100%; padding: 0.9rem 1.25rem; border: 1px solid var(--border-color); border-radius: 0.75rem; font-family: inherit; background: white;">
+                    <option>Starter</option>
+                    <option>Main Course</option>
+                    <option>Dessert</option>
+                    <option>Beverage</option>
+                    <option>Add-on</option>
+                </select>
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 2.5rem;">
+                <input type="checkbox" name="is_addon" id="is_addon"
+                    style="width: 18px; height: 18px; cursor: pointer;">
+                <label for="is_addon" style="cursor: pointer;">Is this an optional Add-on?</label>
+            </div>
+
+            <div style="display: flex; gap: 1rem;">
+                <button type="submit" class="btn-primary" style="flex: 2; padding: 1rem;">Add Item</button>
+                <button type="button" class="btn-outline" onclick="hideMenuModal()"
+                    style="flex: 1; padding: 1rem;">Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function showModal() { document.getElementById('addModal').style.display = 'flex'; }
+    function hideModal() { document.getElementById('addModal').style.display = 'none'; }
+
+    function showMenuModal(pkgId) {
+        document.getElementById('menuForm').action = '/caterer/packages/' + pkgId + '/menu/add';
+        document.getElementById('menuModal').style.display = 'flex';
+    }
+    function hideMenuModal() { document.getElementById('menuModal').style.display = 'none'; }
+
+    async function deletePackage(pkgId) {
+        if (!confirm('Are you sure you want to delete this package? This will also remove associated menu items.')) return;
+
+        try {
+            const response = await fetch(`/caterer/packages/${pkgId}/delete`, {
+                method: 'POST'
+            });
+            if (response.ok) {
+                location.reload();
+            } else {
+                alert('Failed to delete package.');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('An error occurred.');
+        }
+    }
+
+    // Close modal on outside click
+    window.onclick = function (event) {
+        if (event.target.className === 'modal') {
+            hideModal();
+            hideMenuModal();
+        }
+    }
+</script>
+{% endblock %}

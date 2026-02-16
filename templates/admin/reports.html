@@ -1,0 +1,46 @@
+{% extends "admin/layout.html" %}
+
+{% block title %}Reports - Admin Dashboard{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Analytics & Reports</h1>
+    <p>Deep dive into platform performance, growth, and accuracy metrics.</p>
+</div>
+
+<div
+    style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 2.5rem; margin-bottom: 3.5rem;">
+    <!-- Growth Card -->
+    <div
+        style="background: var(--white); padding: 2.5rem; border-radius: 2rem; border: 1px solid var(--border-color); box-shadow: var(--shadow-sm);">
+        <h3 style="color: var(--text-light); font-size: 0.9rem; text-transform: uppercase; margin-bottom: 1rem;"><i
+                class="fas fa-chart-line" style="margin-right: 0.5rem;"></i> Monthly Growth</h3>
+        <div style="font-size: 2.75rem; font-weight: 700;">+24%</div>
+        <p style="font-size: 0.9rem; color: #10b981; margin-top: 0.75rem;">New caterers and customers this month.</p>
+    </div>
+
+    <!-- Satisfaction Card -->
+    <div
+        style="background: var(--white); padding: 2.5rem; border-radius: 2rem; border: 1px solid var(--border-color); box-shadow: var(--shadow-sm);">
+        <h3 style="color: var(--text-light); font-size: 0.9rem; text-transform: uppercase; margin-bottom: 1rem;"><i
+                class="fas fa-smile" style="margin-right: 0.5rem;"></i> User Satisfaction</h3>
+        <div style="font-size: 2.75rem; font-weight: 700;">4.8/5</div>
+        <p style="font-size: 0.9rem; color: #10b981; margin-top: 0.75rem;">Based on 150+ platform-wide ratings.</p>
+    </div>
+</div>
+
+<div
+    style="background: var(--white); border-radius: 2rem; padding: 3rem; border: 1px solid var(--border-color); box-shadow: var(--shadow-md);">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 3rem;">
+        <h3 style="font-size: 1.75rem;"><i class="fas fa-analytics"></i> Regional Performance</h3>
+        <button class="btn-outline" style="padding: 0.75rem 1.5rem;">Export CSV</button>
+    </div>
+
+    <div
+        style="height: 400px; background: #f8fafc; border-radius: 2rem; border: 2px dashed var(--border-color); display: flex; align-items: center; justify-content: center; flex-direction: column; color: var(--text-light); text-align: center; padding: 2rem;">
+        <i class="fas fa-map-marked-alt" style="font-size: 4rem; margin-bottom: 1.5rem; opacity: 0.15;"></i>
+        <h4 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.5rem;">Performance Heatmap</h4>
+        <p>Interactive data visualizations are being initialized based on current traffic.</p>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,55 @@
+{% extends "caterer/layout.html" %}
+
+{% block title %}Customers - Caterer Dashboard{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>My Customers</h1>
+    <p>View and manage your client list.</p>
+</div>
+
+<div
+    style="background: var(--white); border-radius: 2rem; padding: 2.5rem; border: 1px solid var(--border-color); box-shadow: var(--shadow-md);">
+    <h3 style="font-size: 1.5rem; margin-bottom: 2rem;"><i class="fas fa-users"></i> Client Directory</h3>
+
+    {% if customers %}
+    <div style="overflow-x: auto;">
+        <table style="width: 100%; border-collapse: separate; border-spacing: 0 1rem;">
+            <thead>
+                <tr style="text-align: left; color: var(--text-light); font-size: 0.9rem; text-transform: uppercase;">
+                    <th style="padding: 0 1.5rem;">Customer Name</th>
+                    <th style="padding: 0 1.5rem;">Email Address</th>
+                    <th style="padding: 0 1.5rem;">Bookings</th>
+                    <th style="padding: 0 1.5rem;">Avg Rating</th>
+                    <th style="padding: 0 1.5rem; text-align: right;">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for customer in customers %}
+                <tr style="background: #f8fafc; border-radius: 1rem;">
+                    <td style="padding: 1.5rem; border-radius: 1rem 0 0 1rem;">
+                        <div style="font-weight: 600;">{{ customer.first_name }} {{ customer.last_name }}</div>
+                    </td>
+                    <td style="padding: 1.5rem;">
+                        {{ customer.email }}
+                    </td>
+                    <td style="padding: 1.5rem; font-weight: 600;">
+                        {{ customer.total_bookings }}
+                    </td>
+                    <td style="padding: 1.5rem;">
+                        <span style="color: #f59e0b;"><i class="fas fa-star"></i> {{ customer.avg_rating }}</span>
+                    </td>
+                    <td style="padding: 1.5rem; border-radius: 0 1rem 1rem 0; text-align: right;">
+                        <a href="mailto:{{ customer.email }}" class="btn-outline"
+                            style="padding: 0.5rem 1rem; font-size: 0.85rem;">Email Client</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <p style="text-align: center; color: var(--text-light); padding: 3rem;">You don't have any customers yet.</p>
+    {% endif %}
+</div>
+{% endblock %}

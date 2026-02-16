@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Booking - OccaServe{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='/css/styles.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            background-color: #f8fafc;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .wizard-header {
+            background: var(--white);
+            padding: 1.5rem 0;
+            box-shadow: var(--shadow-sm);
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 3rem;
+        }
+
+        .wizard-container {
+            flex: 1;
+            width: 100%;
+            max-width: 900px;
+            margin: 0 auto 5rem;
+            padding: 0 1.5rem;
+        }
+
+        /* Progress Bar */
+        .progress-stepper {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 4rem;
+            position: relative;
+            padding: 0 1rem;
+        }
+
+        .progress-stepper::before {
+            content: '';
+            position: absolute;
+            top: 25px;
+            left: 10%;
+            right: 10%;
+            height: 2px;
+            background: #e2e8f0;
+            z-index: 1;
+        }
+
+        .step-item {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+            flex: 1;
+        }
+
+        .step-number {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: var(--white);
+            border: 2px solid #e2e8f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 0.75rem;
+            font-weight: 700;
+            color: var(--text-light);
+            transition: all 0.3s ease;
+        }
+
+        .step-label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-light);
+            transition: all 0.3s ease;
+        }
+
+        .step-item.active .step-number {
+            border-color: var(--primary-color);
+            background: var(--primary-color);
+            color: var(--white);
+            box-shadow: 0 0 0 5px rgba(79, 70, 229, 0.1);
+        }
+
+        .step-item.active .step-label {
+            color: var(--primary-color);
+        }
+
+        .step-item.completed .step-number {
+            background: #dcfce7;
+            border-color: #22c55e;
+            color: #166534;
+        }
+
+        /* Wizard Card */
+        .wizard-card {
+            background: var(--white);
+            border-radius: 2rem;
+            padding: 3.5rem;
+            box-shadow: var(--shadow-lg);
+            border: 1px solid var(--border-color);
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .wizard-title {
+            font-size: 2.25rem;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .wizard-subtitle {
+            color: var(--text-light);
+            text-align: center;
+            margin-bottom: 3rem;
+            font-size: 1.1rem;
+        }
+
+        /* Buttons Fix */
+        .wizard-actions {
+            margin-top: 4rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .btn-prev {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-light);
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.2s;
+        }
+
+        .btn-prev:hover {
+            color: var(--secondary-color);
+        }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+
+<body>
+    <header class="wizard-header">
+        <div class="container" style="display: flex; justify-content: center;">
+            <a href="/" class="logo" style="font-size: 1.75rem;">OccaServe</a>
+        </div>
+    </header>
+
+    <main class="wizard-container">
+        <!-- Progress Bar -->
+        <div class="progress-stepper">
+            <div
+                class="step-item {% if current_step >= 1 %}active{% if current_step > 1 %} completed{% endif %}{% endif %}">
+                <div class="step-number">{% if current_step > 1 %}<i class="fas fa-check"></i>{% else %}1{% endif %}
+                </div>
+                <div class="step-label">Caterer</div>
+            </div>
+            <div
+                class="step-item {% if current_step >= 2 %}active{% if current_step > 2 %} completed{% endif %}{% endif %}">
+                <div class="step-number">{% if current_step > 2 %}<i class="fas fa-check"></i>{% else %}2{% endif %}
+                </div>
+                <div class="step-label">Menu</div>
+            </div>
+            <div
+                class="step-item {% if current_step >= 3 %}active{% if current_step > 3 %} completed{% endif %}{% endif %}">
+                <div class="step-number">{% if current_step > 3 %}<i class="fas fa-check"></i>{% else %}3{% endif %}
+                </div>
+                <div class="step-label">Schedule</div>
+            </div>
+            <div
+                class="step-item {% if current_step >= 4 %}active{% if current_step > 4 %} completed{% endif %}{% endif %}">
+                <div class="step-number">{% if current_step > 4 %}<i class="fas fa-check"></i>{% else %}4{% endif %}
+                </div>
+                <div class="step-label">Details</div>
+            </div>
+            <div
+                class="step-item {% if current_step >= 5 %}active{% if current_step > 5 %} completed{% endif %}{% endif %}">
+                <div class="step-number">{% if current_step > 5 %}<i class="fas fa-check"></i>{% else %}5{% endif %}
+                </div>
+                <div class="step-label">Review</div>
+            </div>
+            <div
+                class="step-item {% if current_step >= 6 %}active{% if current_step > 6 %} completed{% endif %}{% endif %}">
+                <div class="step-number">{% if current_step > 6 %}<i class="fas fa-check"></i>{% else %}6{% endif %}
+                </div>
+                <div class="step-label">Verify</div>
+            </div>
+            <div
+                class="step-item {% if current_step >= 7 %}active{% if current_step > 7 %} completed{% endif %}{% endif %}">
+                <div class="step-number">7</div>
+                <div class="step-label">Payment</div>
+            </div>
+        </div>
+
+        <div class="wizard-card">
+            {% block content %}{% endblock %}
+        </div>
+    </main>
+
+    <footer style="padding: 2rem; text-align: center; color: #94a3b8; font-size: 0.9rem; margin-top: auto;">
+        &copy; 2026 OccaServe. Philippines' Premier Event Marketplace.
+    </footer>
+
+    {% block extra_js %}{% endblock %}
+</body>
+
+</html>

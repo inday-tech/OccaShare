@@ -1,0 +1,74 @@
+{% extends "customer/booking_wizard/wizard_base.html" %}
+
+{% block title %}Booking Details - OccaServe{% endblock %}
+
+{% block content %}
+<div class="wizard-header-content">
+    <h2 class="wizard-title font-playfair">Nearly there! Tell us more about the event.</h2>
+    <p class="wizard-subtitle">These details help the caterer understand your vision and prepare accordingly.</p>
+</div>
+
+<form action="/bookings/step/details" method="POST" style="max-width: 600px; margin: 0 auto;">
+    <div class="form-group" style="margin-bottom: 2rem;">
+        <label style="display: block; font-weight: 600; margin-bottom: 0.75rem; color: var(--secondary-color);">Event
+            Name</label>
+        <div style="position: relative;">
+            <i class="fas fa-magic"
+                style="position: absolute; left: 1.25rem; top: 50%; transform: translateY(-50%); color: var(--primary-color);"></i>
+            <input type="text" name="event_name" required class="form-input" placeholder="e.g., Garcia Family Reunion"
+                style="width: 100%; padding: 1rem 1rem 1rem 3rem; border-radius: 1rem; border: 1px solid var(--border-color); font-family: inherit;">
+        </div>
+    </div>
+
+    <div class="form-group" style="margin-bottom: 2rem;">
+        <label style="display: block; font-weight: 600; margin-bottom: 0.75rem; color: var(--secondary-color);">Event
+            Type</label>
+        <div style="position: relative;">
+            <i class="fas fa-tag"
+                style="position: absolute; left: 1.25rem; top: 50%; transform: translateY(-50%); color: var(--primary-color);"></i>
+            <select name="event_type" required class="form-input"
+                style="width: 100%; padding: 1rem 1rem 1rem 3rem; border-radius: 1rem; border: 1px solid var(--border-color); font-family: inherit; appearance: none; background: white;">
+                <option value="" disabled selected>Select event type</option>
+                <option value="Wedding">Wedding</option>
+                <option value="Birthday">Birthday</option>
+                <option value="Corporate">Corporate</option>
+                <option value="Private Party">Private Party</option>
+                <option value="Other">Other</option>
+            </select>
+            <i class="fas fa-chevron-down"
+                style="position: absolute; right: 1.25rem; top: 50%; transform: translateY(-50%); color: var(--text-light); pointer-events: none;"></i>
+        </div>
+    </div>
+
+    <div class="form-group" style="margin-bottom: 2rem;">
+        <label style="display: block; font-weight: 600; margin-bottom: 0.75rem; color: var(--secondary-color);">Venue /
+            Address</label>
+        <div style="position: relative;">
+            <i class="fas fa-map-marker-alt"
+                style="position: absolute; left: 1.25rem; top: 1.25rem; color: var(--primary-color);"></i>
+            <textarea name="venue_address" required class="form-input" rows="3"
+                placeholder="Full address or name of the venue..."
+                style="width: 100%; padding: 1rem 1rem 1rem 3rem; border-radius: 1rem; border: 1px solid var(--border-color); font-family: inherit; resize: none;"></textarea>
+        </div>
+    </div>
+
+    <div class="form-group" style="margin-bottom: 3.5rem;">
+        <label
+            style="display: block; font-weight: 600; margin-bottom: 0.75rem; color: var(--secondary-color);">Additional
+            Notes / Special Requests</label>
+        <textarea name="special_requests" class="form-input" rows="4"
+            placeholder="Dietary restrictions, specific menu preferences, or any other notes for the caterer..."
+            style="width: 100%; padding: 1.25rem; border-radius: 1rem; border: 1px solid var(--border-color); font-family: inherit; resize: none;">{{ booking_data.special_requests or '' }}</textarea>
+    </div>
+
+    <div class="wizard-actions">
+        <a href="/bookings/step/date" class="btn-prev">
+            <i class="fas fa-arrow-left"></i> Back to Date
+        </a>
+        <button type="submit" class="btn-primary"
+            style="padding: 1.25rem 2.5rem; border-radius: 1rem; font-weight: 700;">
+            Next: Review Summary <i class="fas fa-chevron-right" style="margin-left: 0.5rem; font-size: 0.8rem;"></i>
+        </button>
+    </div>
+</form>
+{% endblock %}

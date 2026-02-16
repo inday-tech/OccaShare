@@ -1,0 +1,77 @@
+{% extends "admin/layout.html" %}
+
+{% block title %}Website Settings - Admin Dashboard{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Website Settings</h1>
+    <p>Configure platform-wide preferences, security, and global parameters.</p>
+</div>
+
+<div
+    style="background: var(--white); border-radius: 2.5rem; border: 1px solid var(--border-color); box-shadow: var(--shadow-md); overflow: hidden;">
+    <div style="padding: 3rem;">
+        <h3 style="font-size: 1.5rem; margin-bottom: 2.5rem;"><i class="fas fa-sliders-h"></i> General Configuration
+        </h3>
+
+        <form style="display: grid; gap: 2.5rem;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2.5rem;">
+                <div>
+                    <label
+                        style="display: block; font-weight: 700; margin-bottom: 0.75rem; color: var(--secondary-color);">Platform
+                        Name</label>
+                    <input type="text" value="OccaServe"
+                        style="width: 100%; padding: 1rem 1.25rem; border: 1px solid var(--border-color); border-radius: 0.75rem; background: #f8fafc;">
+                </div>
+                <div>
+                    <label
+                        style="display: block; font-weight: 700; margin-bottom: 0.75rem; color: var(--secondary-color);">Platform
+                        Commission (%)</label>
+                    <input type="number" value="10"
+                        style="width: 100%; padding: 1rem 1.25rem; border: 1px solid var(--border-color); border-radius: 0.75rem; background: #f8fafc;">
+                </div>
+            </div>
+
+            <div
+                style="display: flex; justify-content: space-between; align-items: center; padding: 2rem; background: #f8fafc; border-radius: 1.5rem;">
+                <div>
+                    <div style="font-weight: 700; color: var(--secondary-color); font-size: 1.1rem;">Maintenance Mode
+                    </div>
+                    <div style="font-size: 0.9rem; color: var(--text-light);">Temporarily disable public access to the
+                        platform for updates.</div>
+                </div>
+                <div
+                    style="width: 60px; height: 32px; background: #cbd5e1; border-radius: 20px; position: relative; cursor: pointer;">
+                    <div
+                        style="width: 24px; height: 24px; background: white; border-radius: 50%; position: absolute; top: 4px; left: 4px; transition: 0.3s;">
+                    </div>
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2.5rem;">
+                <div>
+                    <label
+                        style="display: block; font-weight: 700; margin-bottom: 0.75rem; color: var(--secondary-color);">Support
+                        Email</label>
+                    <input type="email" value="support@occaserve.com"
+                        style="width: 100%; padding: 1rem 1.25rem; border: 1px solid var(--border-color); border-radius: 0.75rem; background: #f8fafc;">
+                </div>
+                <div>
+                    <label
+                        style="display: block; font-weight: 700; margin-bottom: 0.75rem; color: var(--secondary-color);">Max
+                        Upload Size (MB)</label>
+                    <input type="number" value="5"
+                        style="width: 100%; padding: 1rem 1.25rem; border: 1px solid var(--border-color); border-radius: 0.75rem; background: #f8fafc;">
+                </div>
+            </div>
+
+            <div
+                style="display: flex; gap: 1.5rem; margin-top: 2rem; pt: 2.5rem; border-top: 1px solid var(--border-color);">
+                <button type="submit" class="btn-primary" style="padding: 1.25rem 3rem; font-weight: 700;">Save System
+                    Changes</button>
+                <button type="button" class="btn-outline" style="padding: 1.25rem 2rem;">Reset to Defaults</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

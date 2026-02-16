@@ -1,0 +1,96 @@
+{% extends "customer/layout.html" %}
+
+{% block title %}My Bookings - OccaServe Dashboard{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div style="display: flex; justify-content: space-between; align-items: flex-end;">
+        <div>
+            <h1>My Bookings</h1>
+            <p>Track and manage all your catering reservations.</p>
+        </div>
+        <a href="/customer/marketplace" class="btn-primary">
+            <i class="fas fa-plus" style="margin-right: 0.5rem;"></i> New Booking
+        </a>
+    </div>
+</div>
+
+<div
+    style="background: var(--white); border-radius: 2rem; padding: 2.5rem; box-shadow: var(--shadow-md); border: 1px solid var(--border-color);">
+    {% if bookings %}
+    <div style="overflow-x: auto;">
+        <table style="width: 100%; border-collapse: separate; border-spacing: 0 1.25rem;">
+            <thead>
+                <tr
+                    style="text-align: left; color: var(--text-light); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.05em;">
+                    <th style="padding: 0 1.5rem;">Event Info</th>
+                    <th style="padding: 0 1.5rem;">Caterer</th>
+                    <th style="padding: 0 1.5rem;">Guests</th>
+                    <th style="padding: 0 1.5rem;">Amount</th>
+                    <th style="padding: 0 1.5rem;">Status</th>
+                    <th style="padding: 0 1.5rem; text-align: right;">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for booking in bookings %}
+                <tr style="background: #f8fafc; border-radius: 1rem; transition: all 0.3s ease;"
+                    onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='#f8fafc'">
+                    <td style="padding: 1.5rem; border-radius: 1rem 0 0 1rem;">
+                        <div style="font-weight: 700; color: var(--secondary-color); margin-bottom: 0.25rem;">
+                            {{ booking.event_date.strftime('%b %d, %Y') }}
+                        </div>
+                        <div style="font-size: 0.85rem; color: var(--text-light);">
+                            <i class="far fa-clock" style="margin-right: 0.25rem;"></i>
+                            {{ booking.event_time.strftime('%H:%M') if booking.event_time else 'TBD' }}
+                        </div>
+                    </td>
+                    <td style="padding: 1.5rem;">
+                        <div style="font-weight: 600; color: var(--secondary-color);">{{ booking.caterer.business_name
+                            }}</div>
+                        <div style="font-size: 0.85rem; color: var(--text-light);">{{ booking.package.name if
+                            booking.package else 'Custom Menu' }}</div>
+                    </td>
+                    <td style="padding: 1.5rem; color: var(--text-color);">
+                        <i class="fas fa-users" style="margin-right: 0.5rem; opacity: 0.5;"></i>
+                        {{ booking.guest_count }} guests
+                    </td>
+                    <td style="padding: 1.5rem; font-weight: 700; color: var(--secondary-color);">
+                        ₱{{ "{:,.2f}".format(booking.total_amount) if booking.total_amount else 'TBD' }}
+                    </td>
+                    <td style="padding: 1.5rem;">
+                        {% set status_colors = {
+                        'pending': '#92400e; background: #fef3c7;',
+                        'confirmed': '#166534; background: #dcfce7;',
+                        'completed': '#1e40af; background: #dbeafe;',
+                        'cancelled': '#991b1b; background: #fee2e2;'
+                        } %}
+                        {% set style = status_colors.get(booking.status, '#374151; background: #f1f5f9;') %}
+                        <span
+                            style="padding: 0.5rem 1rem; border-radius: 2rem; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; {{ style }}">
+                            {{ booking.status }}
+                        </span>
+                    </td>
+                    <td style="padding: 1.5rem; border-radius: 0 1rem 1rem 0; text-align: right;">
+                        <div style="display: flex; gap: 0.5rem; justify-content: flex-end;">
+                            <button class="btn-outline" style="padding: 0.5rem 1rem; font-size: 0.85rem;">View
+                                Details</button>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div style="text-align: center; padding: 5rem 2rem;">
+        <img src="https://illustrations.popsy.co/gray/paper-plane.svg" alt="Empty"
+            style="width: 200px; margin-bottom: 2rem; opacity: 0.5;">
+        <h3 style="color: var(--secondary-color); font-size: 1.5rem; margin-bottom: 1rem;">No bookings yet</h3>
+        <p
+            style="color: var(--text-light); margin-bottom: 2.5rem; max-width: 400px; margin-left: auto; margin-right: auto;">
+            Start planning your next event! Browse through our curated list of top-rated caterers.</p>
+        <a href="/caterers" class="btn-primary" style="padding: 1rem 2.5rem;">Browse Caterers</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

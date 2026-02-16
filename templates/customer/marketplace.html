@@ -1,0 +1,344 @@
+{% extends "customer/layout.html" %}
+
+{% block title %}Catering Marketplace - OccaServe{% endblock %}
+
+{% block extra_css %}
+<style>
+    .marketplace-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        gap: 2rem;
+    }
+
+    .caterer-card {
+        background: var(--white);
+        border-radius: 1.5rem;
+        overflow: hidden;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        border: 1px solid var(--border-color);
+        transition: all 0.3s ease;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .caterer-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    }
+
+    .caterer-banner {
+        height: 140px;
+        background: var(--premium-gradient);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+    }
+
+    .caterer-logo-container {
+        width: 90px;
+        height: 90px;
+        background: white;
+        border-radius: 50%;
+        padding: 4px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        position: absolute;
+        bottom: -45px;
+        left: 2rem;
+    }
+
+    .caterer-logo-container img {
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        object-fit: cover;
+    }
+
+    .caterer-content {
+        padding: 3.5rem 2rem 2rem;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .caterer-verified {
+        color: var(--primary-color);
+        font-size: 0.9rem;
+    }
+
+    .rating-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+        background: #fef3c7;
+        color: #92400e;
+        padding: 0.25rem 0.75rem;
+        border-radius: 9999px;
+        font-weight: 600;
+        font-size: 0.85rem;
+        margin-top: 0.5rem;
+    }
+
+    .caterer-meta {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-top: 1rem;
+        font-size: 0.85rem;
+        color: var(--text-light);
+    }
+
+    .caterer-description {
+        margin-top: 1rem;
+        color: var(--text-light);
+        font-size: 0.95rem;
+        line-height: 1.6;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        min-height: 3.2em;
+    }
+
+    .caterer-footer {
+        margin-top: 2rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid var(--border-color);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<style>
+    /* Progress Bar Styles (copied from wizard_base) */
+    .progress-stepper {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 4rem;
+        position: relative;
+        padding: 0 1rem;
+    }
+
+    .progress-stepper::before {
+        content: '';
+        position: absolute;
+        top: 25px;
+        left: 5%;
+        right: 5%;
+        height: 2px;
+        background: #e2e8f0;
+        z-index: 1;
+    }
+
+    .step-item {
+        position: relative;
+        z-index: 2;
+        text-align: center;
+        flex: 1;
+    }
+
+    .step-number {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background: var(--white);
+        border: 2px solid #e2e8f0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 0.75rem;
+        font-weight: 700;
+        color: var(--text-light);
+        transition: all 0.3s ease;
+    }
+
+    .step-label {
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: var(--text-light);
+        transition: all 0.3s ease;
+    }
+
+    .step-item.active .step-number {
+        border-color: var(--primary-color);
+        background: var(--primary-color);
+        color: var(--white);
+        box-shadow: 0 0 0 5px rgba(79, 70, 229, 0.1);
+    }
+
+    .step-item.active .step-label {
+        color: var(--primary-color);
+    }
+
+    .step-item.completed .step-number {
+        background: #dcfce7;
+        border-color: #22c55e;
+        color: #166534;
+    }
+</style>
+
+<!-- Wizard Progress Bar -->
+<div class="progress-stepper" style="margin-top: 2rem;">
+    <div class="step-item active">
+        <div class="step-number">1</div>
+        <div class="step-label">Caterer</div>
+    </div>
+    <div class="step-item">
+        <div class="step-number">2</div>
+        <div class="step-label">Menu</div>
+    </div>
+    <div class="step-item">
+        <div class="step-number">3</div>
+        <div class="step-label">Schedule</div>
+    </div>
+    <div class="step-item">
+        <div class="step-number">4</div>
+        <div class="step-label">Details</div>
+    </div>
+    <div class="step-item">
+        <div class="step-number">5</div>
+        <div class="step-label">Review</div>
+    </div>
+    <div class="step-item">
+        <div class="step-number">6</div>
+        <div class="step-label">Verify</div>
+    </div>
+    <div class="step-item">
+        <div class="step-number">7</div>
+        <div class="step-label">Payment</div>
+    </div>
+</div>
+
+<div class="page-header" style="text-align: center; margin-bottom: 2rem;">
+    <h1>Catering Marketplace</h1>
+    <p>Step 1: Discover and book top-tier culinary professionals for your special events.</p>
+</div>
+
+<!-- Search & Filter Section -->
+<div class="search-filter-container"
+    style="background: white; padding: 2rem; border-radius: 1.5rem; box-shadow: var(--shadow-sm); margin-bottom: 3rem; border: 1px solid var(--border-color);">
+    <form action="/customer/marketplace" method="GET" id="filterForm">
+        <div style="display: grid; grid-template-columns: 1fr auto; gap: 1rem; margin-bottom: 1.5rem;">
+            <div style="position: relative;">
+                <i class="fas fa-search"
+                    style="position: absolute; left: 1.25rem; top: 50%; transform: translateY(-50%); color: var(--text-light);"></i>
+                <input type="text" name="q" value="{{ filters.q or '' }}"
+                    placeholder="Search caterers (e.g., 'Filipino wedding buffet')..."
+                    style="width: 100%; padding: 1rem 1rem 1rem 3rem; border-radius: 1rem; border: 1px solid var(--border-color); font-size: 1rem;">
+            </div>
+            <button type="submit" class="btn-primary" style="padding: 0 2rem; border-radius: 1rem;">Search</button>
+        </div>
+
+        <div style="display: flex; flex-wrap: wrap; gap: 1rem; align-items: center;">
+            <div class="filter-group">
+                <select name="event_type" onchange="this.form.submit()"
+                    style="padding: 0.75rem 1rem; border-radius: 0.75rem; border: 1px solid var(--border-color); background: white;">
+                    <option value="">All Event Types</option>
+                    {% for type in types %}
+                    <option value="{{ type }}" {{ 'selected' if filters.event_type==type }}>{{ type }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <select name="city" onchange="this.form.submit()"
+                    style="padding: 0.75rem 1rem; border-radius: 0.75rem; border: 1px solid var(--border-color); background: white;">
+                    <option value="">All Locations</option>
+                    {% for city in cities %}
+                    <option value="{{ city }}" {{ 'selected' if filters.city==city }}>{{ city }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <select name="rating" onchange="this.form.submit()"
+                    style="padding: 0.75rem 1rem; border-radius: 0.75rem; border: 1px solid var(--border-color); background: white;">
+                    <option value="">Any Rating</option>
+                    <option value="4.0" {{ 'selected' if filters.rating==4.0 }}>4.0+ Stars</option>
+                    <option value="4.5" {{ 'selected' if filters.rating==4.5 }}>4.5+ Stars</option>
+                    <option value="5.0" {{ 'selected' if filters.rating==5.0 }}>5.0 Stars</option>
+                </select>
+            </div>
+
+            <div class="filter-group" style="margin-left: auto;">
+                <label style="font-size: 0.85rem; color: var(--text-light); margin-right: 0.5rem;">Sort by:</label>
+                <select name="sort" onchange="this.form.submit()"
+                    style="padding: 0.75rem 1rem; border-radius: 0.75rem; border: 1px solid var(--border-color); background: white;">
+                    <option value="newest" {{ 'selected' if filters.sort=='newest' }}>Newest First</option>
+                    <option value="rating" {{ 'selected' if filters.sort=='rating' }}>Highest Rated</option>
+                    <option value="price_low" {{ 'selected' if filters.sort=='price_low' }}>Price: Low to High</option>
+                </select>
+            </div>
+        </div>
+    </form>
+</div>
+
+<div class="marketplace-grid">
+    {% for caterer in caterers %}
+    {% set min_price = caterer.packages|map(attribute='price')|list|min if caterer.packages else 0 %}
+    <div class="caterer-card">
+        <div class="caterer-banner">
+            <div class="caterer-logo-container">
+                <img src="{{ caterer.logo_url if caterer.logo_url else 'https://ui-avatars.com/api/?name=' ~ (caterer.business_name or 'Caterer') ~ '&background=random' }}"
+                    alt="{{ caterer.business_name }}">
+            </div>
+            {% if min_price > 0 %}
+            <div
+                style="position: absolute; top: 1rem; right: 1rem; background: rgba(255,255,255,0.9); padding: 0.4rem 0.8rem; border-radius: 2rem; font-weight: 700; font-size: 0.8rem; color: var(--primary-color);">
+                ₱{{ "{:,.0f}".format(min_price) }}+
+            </div>
+            {% endif %}
+        </div>
+        <div class="caterer-content">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem;">
+                <h3 style="margin: 0; font-size: 1.3rem; font-family: 'Playfair Display', serif;">{{
+                    caterer.business_name }}</h3>
+                {% if caterer.verification_status == 'Verified' %}
+                <i class="fas fa-certificate" style="color: #0ea5e9;" title="Verified Professional"></i>
+                {% endif %}
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem;">
+                <div class="rating-badge" style="margin-top: 0;">
+                    <i class="fas fa-star" style="color: #f59e0b;"></i> {{ "%.1f"|format(caterer.rating or 0) }}
+                </div>
+                <span style="font-size: 0.8rem; color: var(--text-light);">{{ caterer.review_count or 0 }}
+                    Reviews</span>
+            </div>
+
+            <p class="caterer-description" style="margin-bottom: 1.5rem;">{{ caterer.description or 'Exquisite catering
+                services for your special moments.' }}</p>
+
+            <div class="caterer-meta" style="margin-bottom: 2rem;">
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                    <i class="fas fa-utensils"></i>
+                    <span>{{ caterer.business_type or 'Events' }}</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                    <i class="fas fa-location-dot"></i>
+                    <span>{{ caterer.city or 'Mainland' }}</span>
+                </div>
+            </div>
+
+            <div class="caterer-footer" style="padding-top: 0; border: none;">
+                <a href="/caterers/{{ caterer.user_id }}" class="btn-primary"
+                    style="display: flex; align-items: center; justify-content: center; width: 100%; padding: 1rem; border-radius: 1rem; gap: 0.5rem;">
+                    View Packages <i class="fas fa-arrow-right" style="font-size: 0.8rem;"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div
+        style="grid-column: 1/-1; text-align: center; padding: 6rem 2rem; background: white; border-radius: 2rem; border: 1px dashed var(--border-color);">
+        <i class="fas fa-search" style="font-size: 4rem; color: #e2e8f0; margin-bottom: 2rem;"></i>
+        <h2 style="color: var(--secondary-color);">No Caterers Found</h2>
+        <p style="color: var(--text-light); max-width: 400px; margin: 1rem auto;">We couldn't find any caterers matching
+            your criteria. Try adjusting your filters.</p>
+        <a href="/customer/marketplace" class="btn-outline" style="margin-top: 1rem; display: inline-block;">Clear All
+            Filters</a>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}
