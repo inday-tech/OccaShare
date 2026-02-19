@@ -45,12 +45,17 @@ async def register(
     business_description: str = Form(None),
     coverage_area: str = Form(None),
     payout_method: str = Form(None),
+    payout_account_name: Optional[str] = Form(None),
     account_number: Optional[str] = Form(None),
-    event_types: Optional[str] = Form(None), # Comma separated or single
+    event_types: Optional[str] = Form(None),
+    min_pax: int = Form(0),
+    starting_price: float = Form(0.0),
+    city: str = Form(None),
     # Verification Files & Logo
     logo: UploadFile = File(None),
     gov_id: UploadFile = File(None),
     permit: UploadFile = File(None),
+    sample_menu: UploadFile = File(None),
     next_url: Optional[str] = Form(None),
     db: Session = Depends(database.get_db)
 ):
@@ -76,8 +81,7 @@ async def register(
     if role == "caterer":
         if not business_name or not business_name.strip():
             errors.append("Business name is required for caterers")
-        if not coverage_area or not coverage_area.strip():
-            errors.append("Coverage area is required for caterers")
+        # Removed coverage_area requirement per user request
 
     if errors:
         context = {"request": request, "error": "; ".join(errors), "next_url": next_url, "role": role}
@@ -122,7 +126,8 @@ async def register(
     if role == "caterer":
         gov_id_url = ""
         permit_url = ""
-        logo_url = "/static/images/default_caterer.png" # Default
+        sample_menu_url = ""
+        logo_url = "/static/images/default_caterer.png"
         
         # Ensure upload directory for profiles
         PROFILE_DIR = "app/static/uploads/profiles"
@@ -148,6 +153,12 @@ async def register(
                 buffer.write(await permit.read())
             permit_url = f"/static/uploads/verification/{new_user.id}_permit_{permit.filename}"
 
+        if sample_menu and sample_menu.filename:
+            file_path = os.path.join(UPLOAD_DIR, f"{new_user.id}_menu_{sample_menu.filename}")
+            with open(file_path, "wb") as buffer:
+                buffer.write(await sample_menu.read())
+            sample_menu_url = f"/static/uploads/verification/{new_user.id}_menu_{sample_menu.filename}"
+
         # Handle event_types
         event_list = []
         if event_types:
@@ -161,11 +172,18 @@ async def register(
             description=business_description,
             coverage_area=coverage_area,
             payout_method=payout_method,
+            payout_account_name=payout_account_name,
             payout_account_number=account_number,
             contact_address=address,
             contact_phone=mobile_number,
             logo_url=logo_url,
             event_types=event_list,
+            min_pax=min_pax,
+            starting_price=starting_price,
+            city=city,
+            sample_menu_url=sample_menu_url,
+            permit_url=permit_url,
+            gov_id_url=gov_id_url,
             verification_status="Pending"
         )
         db.add(new_profile)

@@ -167,7 +167,9 @@
 
 {% block content %}
 <div class="profile-header-premium">
-    <div class="profile-cover-img" style="background-image: url('{{ caterer.cover_image_url }}');"></div>
+    <div class="profile-cover-img"
+        style="background-image: url('{{ caterer.cover_image_url if caterer.cover_image_url else 'https://images.unsplash.com/photo-1495191746130-1117fad1776b?q=80&w=2070&auto=format&fit=crop' }}');">
+    </div>
     <div class="profile-info-overlay">
         <div class="profile-avatar-premium">
             {% if caterer.logo_url %}
@@ -181,10 +183,11 @@
             <h1>
                 {{ caterer.business_name }}
                 {% if caterer.is_verified %}
-                <i class="fas fa-check-circle verified-badge-large" title="Verified Caterer"></i>
+                <i class="fas fa-check-circle verified-badge-large" title="Verified Caterer"
+                    style="color: var(--primary-color);"></i>
                 {% endif %}
             </h1>
-            <p style="color: var(--text-light); font-size: 1.1rem; max-width: 800px;">{{ caterer.description }}</p>
+
             <div class="info-pills">
                 <div class="info-pill">
                     <i class="fas fa-star" style="color: #f59e0b;"></i>
@@ -195,8 +198,16 @@
                     {{ caterer.city }}
                 </div>
                 <div class="info-pill">
-                    <i class="fas fa-utensils"></i>
-                    {{ caterer.business_type or 'Professional Caterer' }}
+                    <i class="fas fa-history"></i>
+                    {{ caterer.years_of_operation }} Years Exp.
+                </div>
+                <div class="info-pill">
+                    <i class="fas fa-users"></i>
+                    Min {{ caterer.min_pax }} pax
+                </div>
+                <div class="info-pill" style="background: var(--primary-soft); color: var(--primary-color);">
+                    <i class="fas fa-tag"></i>
+                    From ₱{{ "{:,.0f}".format(caterer.starting_price) }} / guest
                 </div>
             </div>
         </div>
@@ -205,6 +216,73 @@
 
 <div class="profile-grid-dashboard">
     <div class="content-side">
+        <!-- About Section -->
+        <section class="profile-section-card">
+            <h3 class="section-title-premium"><i class="fas fa-info-circle"></i> About {{ caterer.business_name }}</h3>
+            <p style="color: var(--text-color); font-size: 1.05rem; line-height: 1.8; margin-bottom: 2rem;">{{
+                caterer.description }}</p>
+
+            <div
+                style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-top: 2rem; padding-top: 2rem; border-top: 1px solid #f1f5f9;">
+                <div>
+                    <h4
+                        style="font-size: 0.9rem; font-weight: 700; color: #64748b; text-transform: uppercase; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                        <i class="fas fa-utensils" style="color: var(--primary-color);"></i> Cuisine Specialties
+                    </h4>
+                    <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
+                        {% if caterer.cuisine_types %}
+                        {% for cuisine in caterer.cuisine_types %}
+                        <span
+                            style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 0.4rem 0.8rem; border-radius: 0.5rem; font-size: 0.85rem; font-weight: 600;">{{
+                            cuisine }}</span>
+                        {% endfor %}
+                        {% else %}
+                        <span style="color: var(--text-light); font-size: 0.85rem; font-style: italic;">Inquire for
+                            specialties</span>
+                        {% endif %}
+                    </div>
+                </div>
+                <div>
+                    <h4
+                        style="font-size: 0.9rem; font-weight: 700; color: #64748b; text-transform: uppercase; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                        <i class="fas fa-calendar-check" style="color: var(--secondary-color);"></i> Event Expertise
+                    </h4>
+                    <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
+                        {% if caterer.event_types %}
+                        {% for event in caterer.event_types %}
+                        <span
+                            style="background: #fdf2f8; border: 1px solid #fce7f3; padding: 0.4rem 0.8rem; border-radius: 0.5rem; font-size: 0.85rem; font-weight: 600; color: #be185d;">{{
+                            event }}</span>
+                        {% endfor %}
+                        {% else %}
+                        <span style="color: var(--text-light); font-size: 0.85rem; font-style: italic;">All types of
+                            events</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Resources Section -->
+        {% if caterer.sample_menu_url %}
+        <section class="profile-section-card"
+            style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); color: white; border: none;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <h3
+                        style="color: white; font-family: 'Playfair Display', serif; font-size: 1.5rem; margin-bottom: 0.5rem;">
+                        Digital Menu & Packages</h3>
+                    <p style="color: #94a3b8; font-size: 0.9rem;">Download our comprehensive menu and service
+                        inclusions.</p>
+                </div>
+                <a href="{{ caterer.sample_menu_url }}" target="_blank" class="btn-primary"
+                    style="background: white; color: #0f172a; border: none; padding: 1rem 1.5rem; border-radius: 1rem; display: flex; align-items: center; gap: 0.75rem; text-decoration: none; font-weight: 700;">
+                    <i class="fas fa-file-pdf"></i> View Sample Menu
+                </a>
+            </div>
+        </section>
+        {% endif %}
+
         <!-- Packages Section -->
         <section class="profile-section-card">
             <h3 class="section-title-premium"><i class="fas fa-concierge-bell"></i> Available Packages</h3>
@@ -262,6 +340,39 @@
         <section class="profile-section-card">
             <h3 class="section-title-premium"><i class="far fa-calendar-alt"></i> Availability</h3>
             <div id="availabilityCalendar"></div>
+        </section>
+
+        <!-- Policies Section -->
+        <section class="profile-section-card">
+            <h3 class="section-title-premium"><i class="fas fa-shield-alt"></i> Policies & Terms</h3>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2.5rem;">
+                <div>
+                    <h4
+                        style="font-size: 1rem; color: var(--secondary-color); margin-bottom: 1rem; border-bottom: 2px solid #fee2e2; padding-bottom: 0.5rem; width: fit-content;">
+                        Cancellation Policy</h4>
+                    <p style="font-size: 0.95rem; line-height: 1.6; color: var(--text-color);">
+                        {% if packages[0] and packages[0].policies and packages[0].policies.cancellation %}
+                        {{ packages[0].policies.cancellation }}
+                        {% else %}
+                        Cancellations made 30 days before the event are eligible for a partial refund. Please inquire
+                        for specific terms regarding last-minute changes.
+                        {% endif %}
+                    </p>
+                </div>
+                <div>
+                    <h4
+                        style="font-size: 1rem; color: var(--secondary-color); margin-bottom: 1rem; border-bottom: 2px solid #dcfce7; padding-bottom: 0.5rem; width: fit-content;">
+                        Payment Terms</h4>
+                    <p style="font-size: 0.95rem; line-height: 1.6; color: var(--text-color);">
+                        {% if packages[0] and packages[0].policies and packages[0].policies.payment %}
+                        {{ packages[0].policies.payment }}
+                        {% else %}
+                        A 50% reservation fee is required to block your date. The remaining balance must be settled at
+                        least 7 days before the event date via the OccaShare platform.
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
         </section>
 
         <!-- Reviews Section -->
