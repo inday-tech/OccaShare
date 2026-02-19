@@ -70,6 +70,14 @@ class CatererProfile(Base):
     payout_account_number = Column(String, nullable=True)
     verification_status = Column(String, default='Pending') # Pending, Verified, Rejected
     is_verified = Column(Boolean, default=False)
+    
+    # NEW: Refined Registration Fields
+    min_pax = Column(Integer, default=0)
+    starting_price = Column(Float, default=0.0)
+    sample_menu_url = Column(String, nullable=True)
+    permit_url = Column(String, nullable=True)
+    gov_id_url = Column(String, nullable=True)
+    
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     user = relationship("User", back_populates="caterer_profile")

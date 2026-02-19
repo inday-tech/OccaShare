@@ -23,7 +23,12 @@ async def admin_dashboard(
     # Platform Metrics
     user_count = db.query(models.User).count()
     customer_count = db.query(models.User).filter(models.User.role == 'customer').count()
-    caterer_count = db.query(models.CatererProfile).count()
+    
+    # Caterer Metrics
+    total_caterers = db.query(models.CatererProfile).count()
+    pending_caterers = db.query(models.CatererProfile).filter(models.CatererProfile.verification_status == "Pending").all()
+    approved_caterers_count = db.query(models.CatererProfile).filter(models.CatererProfile.verification_status == "Verified").count()
+    rejected_caterers_count = db.query(models.CatererProfile).filter(models.CatererProfile.verification_status == "Rejected").count()
     
     all_bookings = db.query(models.Booking).all()
     booking_count = len(all_bookings)
@@ -32,7 +37,6 @@ async def admin_dashboard(
     total_revenue = sum(b.total_amount for b in all_bookings if b.payment_status == 'paid')
     platform_earnings = total_revenue * 0.10 # 10% commission
 
-    pending_caterers = db.query(models.CatererProfile).filter(models.CatererProfile.verification_status == "Pending").all()
     pending_customers = db.query(models.User).filter(
         models.User.role == "customer",
         models.User.is_verified == False
@@ -44,7 +48,10 @@ async def admin_dashboard(
         "metrics": {
             "user_count": user_count,
             "customer_count": customer_count,
-            "caterer_count": caterer_count,
+            "caterer_count": total_caterers,
+            "pending_caterers_count": len(pending_caterers),
+            "approved_caterers_count": approved_caterers_count,
+            "rejected_caterers_count": rejected_caterers_count,
             "booking_count": booking_count,
             "total_sales": total_sales,
             "total_revenue": total_revenue,
@@ -63,10 +70,20 @@ async def manage_caterers(
 ):
     
     caterers = db.query(models.CatererProfile).all()
+    
+    # Caterer Metrics for Summary
+    metrics = {
+        "total_caterers": db.query(models.CatererProfile).count(),
+        "pending_caterers_count": db.query(models.CatererProfile).filter(models.CatererProfile.verification_status == "Pending").count(),
+        "approved_caterers_count": db.query(models.CatererProfile).filter(models.CatererProfile.verification_status == "Verified").count(),
+        "rejected_caterers_count": db.query(models.CatererProfile).filter(models.CatererProfile.verification_status == "Rejected").count(),
+    }
+
     return templates.TemplateResponse("admin/caterers.html", {
         "request": request,
         "user": user,
         "caterers": caterers,
+        "metrics": metrics,
         "active_page": "caterers"
     })
 
@@ -157,7 +174,13 @@ async def website_settings(
     })
 
 @router.post("/caterers/{caterer_id}/verify")
-def verify_caterer(caterer_id: int, action: str = Form(...), db: Session = Depends(database.get_db), user: models.User = Depends(admin_only)):
+def verify_caterer(
+    caterer_id: int, 
+    action: str = Form(...), 
+    reason: Optional[str] = Form(None),
+    db: Session = Depends(database.get_db), 
+    user: models.User = Depends(admin_only)
+):
     caterer = db.query(models.CatererProfile).get(caterer_id)
     if not caterer:
         raise HTTPException(status_code=404, detail="Caterer not found")
@@ -172,8 +195,13 @@ def verify_caterer(caterer_id: int, action: str = Form(...), db: Session = Depen
                 caterer_user.status = "active"
                 caterer_user.is_email_verified = True
                 caterer_user.is_verified = True
-    else:
+    elif action == "reject":
         caterer.verification_status = "Rejected"
+        caterer.is_verified = False
+        # Optional: Store rejection reason if we added a field for it, 
+        # or send a notification/email to the caterer.
+    elif action == "revision":
+        caterer.verification_status = "Revision Requested"
         caterer.is_verified = False
     
     db.commit()

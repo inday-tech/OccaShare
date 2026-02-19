@@ -14,89 +14,229 @@
     </div>
 </div>
 
-<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
-    <!-- Document Display -->
-    <div
-        style="background: white; border-radius: 1.5rem; padding: 2.5rem; border: 1px solid var(--border-color); box-shadow: var(--shadow-md);">
-        <h3 style="margin-bottom: 2rem;"><i class="fas fa-file-alt" style="color: var(--primary-color);"></i> Submitted
-            Documents</h3>
+<div style="display: grid; grid-template-columns: 1fr 1.5fr; gap: 2rem;">
+    <!-- Left Column: Account & Business Info -->
+    <div style="display: flex; flex-direction: column; gap: 2rem;">
+        <!-- Account Info -->
+        <div
+            style="background: white; border-radius: 1.5rem; padding: 2rem; border: 1px solid var(--border-color); box-shadow: var(--shadow-sm);">
+            <h3 style="font-size: 1.1rem; margin-bottom: 1.5rem;"><i class="fas fa-user-circle"
+                    style="color: var(--primary-color);"></i> Account Info</h3>
+            <div style="display: grid; gap: 1rem;">
+                <div>
+                    <div style="font-size: 0.75rem; color: #64748b; font-weight: 700; text-transform: uppercase;">Full
+                        Name</div>
+                    <div style="font-weight: 600;">{{ target_user.first_name }} {{ target_user.last_name }}</div>
+                </div>
+                <div>
+                    <div style="font-size: 0.75rem; color: #64748b; font-weight: 700; text-transform: uppercase;">Email
+                    </div>
+                    <div style="font-weight: 600;">{{ target_user.email }}</div>
+                </div>
+                <div>
+                    <div style="font-size: 0.75rem; color: #64748b; font-weight: 700; text-transform: uppercase;">
+                        Contact Number</div>
+                    <div style="font-weight: 600;">{{ target_user.phone_number or caterer_profile.contact_phone or 'N/A'
+                        }}</div>
+                </div>
+            </div>
+        </div>
 
-        {% if caterer_profile and caterer_profile.logo_url %}
-        <div style="margin-bottom: 2rem;">
-            <p style="font-weight: 700; margin-bottom: 1rem;">Business Permit / Logo</p>
-            <img src="{{ caterer_profile.logo_url }}"
-                style="width: 100%; border-radius: 1rem; border: 1px solid #e2e8f0; max-height: 400px; object-fit: contain;"
-                alt="Business Document">
+        <!-- Business Info -->
+        <div
+            style="background: white; border-radius: 1.5rem; padding: 2rem; border: 1px solid var(--border-color); box-shadow: var(--shadow-sm);">
+            <h3 style="font-size: 1.1rem; margin-bottom: 1.5rem;"><i class="fas fa-briefcase"
+                    style="color: var(--secondary-color);"></i> Business Info</h3>
+            <div style="display: grid; gap: 1rem;">
+                <div>
+                    <div style="font-size: 0.75rem; color: #64748b; font-weight: 700; text-transform: uppercase;">
+                        Business Name</div>
+                    <div style="font-weight: 600;">{{ caterer_profile.business_name }}</div>
+                </div>
+                <div>
+                    <div style="font-size: 0.75rem; color: #64748b; font-weight: 700; text-transform: uppercase;">
+                        Address</div>
+                    <div style="font-weight: 600;">{{ caterer_profile.contact_address }}, {{ caterer_profile.city }}
+                    </div>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div>
+                        <div style="font-size: 0.75rem; color: #64748b; font-weight: 700; text-transform: uppercase;">
+                            Experience</div>
+                        <div style="font-weight: 600;">{{ caterer_profile.years_of_operation }} Years</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 0.75rem; color: #64748b; font-weight: 700; text-transform: uppercase;">
+                            Min Pax</div>
+                        <div style="font-weight: 600;">{{ caterer_profile.min_pax }} pax</div>
+                    </div>
+                </div>
+                <div>
+                    <div style="font-size: 0.75rem; color: #64748b; font-weight: 700; text-transform: uppercase;">
+                        Starting Price</div>
+                    <div style="font-weight: 600; color: var(--primary-color);">₱{{
+                        "{:,.2f}".format(caterer_profile.starting_price) }}</div>
+                </div>
+                <div>
+                    <div style="font-size: 0.75rem; color: #64748b; font-weight: 700; text-transform: uppercase;">
+                        Description</div>
+                    <div style="font-size: 0.85rem; color: #4b5563; line-height: 1.5;">{{ caterer_profile.description }}
+                    </div>
+                </div>
+            </div>
         </div>
-        {% elif verification %}
-        <div style="margin-bottom: 2rem;">
-            <p style="font-weight: 700; margin-bottom: 1rem;">Government ID</p>
-            <img src="{{ verification.document_url }}"
-                style="width: 100%; border-radius: 1rem; border: 1px solid #e2e8f0; max-height: 400px; object-fit: contain;"
-                alt="ID Document">
-        </div>
-        <div style="margin-bottom: 2rem;">
-            <p style="font-weight: 700; margin-bottom: 1rem;">Liveness Selfie</p>
-            <img src="{{ verification.selfie_url }}"
-                style="width: 100%; border-radius: 1rem; border: 1px solid #e2e8f0; max-height: 400px; object-fit: contain;"
-                alt="Liveness Selfie">
-        </div>
-        {% else %}
-        <p style="padding: 3rem; text-align: center; color: #94a3b8;">No documents uploaded yet.</p>
-        {% endif %}
     </div>
 
-    <!-- Data & Actions -->
-    <div>
+    <!-- Right Column: Documents & Verification -->
+    <div style="display: flex; flex-direction: column; gap: 2rem;">
+        <!-- Uploaded Documents -->
         <div
-            style="background: white; border-radius: 1.5rem; padding: 2.5rem; border: 1px solid var(--border-color); box-shadow: var(--shadow-md); margin-bottom: 2rem;">
-            <h3 style="margin-bottom: 2rem;"><i class="fas fa-microchip" style="color: #6366f1;"></i> OCR Data
-                Extraction</h3>
+            style="background: white; border-radius: 1.5rem; padding: 2rem; border: 1px solid var(--border-color); box-shadow: var(--shadow-sm);">
+            <h3 style="font-size: 1.1rem; margin-bottom: 1.5rem;"><i class="fas fa-file-upload"
+                    style="color: #6366f1;"></i> Uploaded Documents</h3>
 
-            {% if (verification and verification.ocr_data) %}
-            <div style="display: grid; gap: 1rem;">
-                {% for key, val in verification.ocr_data.items() %}
-                <div
-                    style="display: flex; justify-content: space-between; padding: 0.75rem; background: #f8fafc; border-radius: 0.5rem;">
-                    <span style="color: #64748b; font-size: 0.8rem; font-weight: 600; text-transform: uppercase;">{{
-                        key.replace('_', ' ') }}</span>
-                    <span style="font-weight: 700;">{{ val }}</span>
+            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem;">
+                <!-- Business Permit -->
+                <div>
+                    <div style="font-size: 0.8rem; font-weight: 700; margin-bottom: 0.75rem;">Business Permit</div>
+                    {% if caterer_profile.permit_url %}
+                    <div style="border: 1px solid #e2e8f0; border-radius: 0.75rem; overflow: hidden;">
+                        <img src="{{ caterer_profile.permit_url }}"
+                            style="width: 100%; height: 150px; object-fit: cover;" alt="Permit">
+                        <div
+                            style="padding: 0.75rem; background: #f8fafc; border-top: 1px solid #e2e8f0; display: flex; justify-content: center;">
+                            <a href="{{ caterer_profile.permit_url }}" target="_blank"
+                                style="font-size: 0.75rem; color: var(--primary-color); font-weight: 700; text-decoration: none;">View
+                                Full Size</a>
+                        </div>
+                    </div>
+                    {% else %}
+                    <div
+                        style="height: 150px; background: #f1f5f9; border-radius: 0.75rem; display: flex; align-items: center; justify-content: center; color: #94a3b8; font-size: 0.8rem; border: 2px dashed #e2e8f0;">
+                        Not Provided</div>
+                    {% endif %}
                 </div>
-                {% endfor %}
+
+                <!-- Valid ID -->
+                <div>
+                    <div style="font-size: 0.8rem; font-weight: 700; margin-bottom: 0.75rem;">Valid ID</div>
+                    {% if caterer_profile.gov_id_url %}
+                    <div style="border: 1px solid #e2e8f0; border-radius: 0.75rem; overflow: hidden;">
+                        <img src="{{ caterer_profile.gov_id_url }}"
+                            style="width: 100%; height: 150px; object-fit: cover;" alt="ID">
+                        <div
+                            style="padding: 0.75rem; background: #f8fafc; border-top: 1px solid #e2e8f0; display: flex; justify-content: center;">
+                            <a href="{{ caterer_profile.gov_id_url }}" target="_blank"
+                                style="font-size: 0.75rem; color: var(--primary-color); font-weight: 700; text-decoration: none;">View
+                                Full Size</a>
+                        </div>
+                    </div>
+                    {% else %}
+                    <div
+                        style="height: 150px; background: #f1f5f9; border-radius: 0.75rem; display: flex; align-items: center; justify-content: center; color: #94a3b8; font-size: 0.8rem; border: 2px dashed #e2e8f0;">
+                        Not Provided</div>
+                    {% endif %}
+                </div>
+
+                <!-- Sample Menu -->
+                <div>
+                    <div style="font-size: 0.8rem; font-weight: 700; margin-bottom: 0.75rem;">Sample Menu</div>
+                    {% if caterer_profile.sample_menu_url %}
+                    <div style="border: 1px solid #e2e8f0; border-radius: 0.75rem; overflow: hidden;">
+                        <img src="{{ caterer_profile.sample_menu_url }}"
+                            style="width: 100%; height: 150px; object-fit: cover;" alt="Menu">
+                        <div
+                            style="padding: 0.75rem; background: #f8fafc; border-top: 1px solid #e2e8f0; display: flex; justify-content: center;">
+                            <a href="{{ caterer_profile.sample_menu_url }}" target="_blank"
+                                style="font-size: 0.75rem; color: var(--primary-color); font-weight: 700; text-decoration: none;">View
+                                Full Size</a>
+                        </div>
+                    </div>
+                    {% else %}
+                    <div
+                        style="height: 150px; background: #f1f5f9; border-radius: 0.75rem; display: flex; align-items: center; justify-content: center; color: #94a3b8; font-size: 0.8rem; border: 2px dashed #e2e8f0;">
+                        Not Provided</div>
+                    {% endif %}
+                </div>
+
+                <!-- Logo -->
+                <div>
+                    <div style="font-size: 0.8rem; font-weight: 700; margin-bottom: 0.75rem;">Logo / Profile Picture
+                    </div>
+                    {% if caterer_profile.logo_url %}
+                    <div style="border: 1px solid #e2e8f0; border-radius: 0.75rem; overflow: hidden;">
+                        <img src="{{ caterer_profile.logo_url }}" style="width: 100%; height: 150px; object-fit: cover;"
+                            alt="Logo">
+                        <div
+                            style="padding: 0.75rem; background: #f8fafc; border-top: 1px solid #e2e8f0; display: flex; justify-content: center;">
+                            <a href="{{ caterer_profile.logo_url }}" target="_blank"
+                                style="font-size: 0.75rem; color: var(--primary-color); font-weight: 700; text-decoration: none;">View
+                                Full Size</a>
+                        </div>
+                    </div>
+                    {% else %}
+                    <div
+                        style="height: 150px; background: #f1f5f9; border-radius: 0.75rem; display: flex; align-items: center; justify-content: center; color: #94a3b8; font-size: 0.8rem; border: 2px dashed #e2e8f0;">
+                        Not Provided</div>
+                    {% endif %}
+                </div>
             </div>
-            {% else %}
-            <p style="color: #94a3b8; text-align: center;">OCR processing not available for this record.</p>
-            {% endif %}
         </div>
 
+        <!-- Verification Checklist -->
+        <div style="background: #f8fafc; border-radius: 1.5rem; padding: 2rem; border: 1px solid var(--border-color);">
+            <h3 style="font-size: 1.1rem; margin-bottom: 1.5rem;"><i class="fas fa-check-double"
+                    style="color: #10b981;"></i> Verification Steps</h3>
+            <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                <label style="display: flex; align-items: center; gap: 0.75rem; cursor: pointer;">
+                    <input type="checkbox" style="width: 18px; height: 18px; accent-color: var(--primary-color);">
+                    <span style="font-size: 0.9rem;">Business Name matches permit</span>
+                </label>
+                <label style="display: flex; align-items: center; gap: 0.75rem; cursor: pointer;">
+                    <input type="checkbox" style="width: 18px; height: 18px; accent-color: var(--primary-color);">
+                    <span style="font-size: 0.9rem;">Permit is valid and updated for current year</span>
+                </label>
+                <label style="display: flex; align-items: center; gap: 0.75rem; cursor: pointer;">
+                    <input type="checkbox" style="width: 18px; height: 18px; accent-color: var(--primary-color);">
+                    <span style="font-size: 0.9rem;">Owner name matches Government ID</span>
+                </label>
+                <label style="display: flex; align-items: center; gap: 0.75rem; cursor: pointer;">
+                    <input type="checkbox" style="width: 18px; height: 18px; accent-color: var(--primary-color);">
+                    <span style="font-size: 0.9rem;">Documents appear authentic (seals, signatures)</span>
+                </label>
+            </div>
+        </div>
+
+        <!-- Verification Actions -->
         <div
-            style="background: white; border-radius: 1.5rem; padding: 2.5rem; border: 1px solid var(--border-color); box-shadow: var(--shadow-md);">
-            <h3 style="margin-bottom: 2rem;"><i class="fas fa-shield-alt" style="color: #10b981;"></i> Final Decision
-            </h3>
+            style="background: white; border-radius: 1.5rem; padding: 2rem; border: 1px solid var(--border-color); box-shadow: var(--shadow-lg);">
+            <h3 style="font-size: 1.1rem; margin-bottom: 1.5rem;"><i class="fas fa-shield-alt"
+                    style="color: var(--primary-color);"></i> Admin Action</h3>
 
-            <p style="color: #64748b; margin-bottom: 2rem;">Review the extracted data and document images above before
-                making a decision.</p>
+            <form action="/admin/caterers/{{ caterer_profile.id }}/verify" method="POST">
+                <div style="margin-bottom: 1.5rem;">
+                    <label
+                        style="font-size: 0.8rem; font-weight: 700; color: #64748b; text-transform: uppercase;">Optional
+                        Reason / Feedback</label>
+                    <textarea name="reason" placeholder="Explain rejection or request specific revisions..."
+                        style="width: 100%; min-height: 80px; padding: 1rem; border: 1px solid #e2e8f0; border-radius: 0.75rem; margin-top: 0.5rem; font-family: inherit;"></textarea>
+                </div>
 
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-                <form
-                    action="/admin/{{ 'caterers' if target_user.role == 'caterer' else 'customers' }}/{{ caterer_profile.id if target_user.role == 'caterer' else target_user.id }}/verify"
-                    method="POST">
-                    <input type="hidden" name="action" value="approve">
-                    <button type="submit"
-                        style="width: 100%; background: #10b981; color: white; border: none; padding: 1rem; border-radius: 1rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem;">
+                    <button type="submit" name="action" value="approve"
+                        style="background: #10b981; color: white; border: none; padding: 1rem; border-radius: 0.75rem; font-weight: 800; cursor: pointer; transition: all 0.2s ease;">
                         <i class="fas fa-check-circle"></i> Approve
                     </button>
-                </form>
-                <form
-                    action="/admin/{{ 'caterers' if target_user.role == 'caterer' else 'customers' }}/{{ caterer_profile.id if target_user.role == 'caterer' else target_user.id }}/verify"
-                    method="POST">
-                    <input type="hidden" name="action" value="reject">
-                    <button type="submit"
-                        style="width: 100%; background: #fef2f2; color: #ef4444; border: 1px solid #fee2e2; padding: 1rem; border-radius: 1rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+                    <button type="submit" name="action" value="revision"
+                        style="background: #fff7ed; color: #ea580c; border: 1px solid #fdba74; padding: 1rem; border-radius: 0.75rem; font-weight: 800; cursor: pointer; transition: all 0.2s ease;">
+                        <i class="fas fa-edit"></i> Revision
+                    </button>
+                    <button type="submit" name="action" value="reject"
+                        style="background: #fef2f2; color: #ef4444; border: 1px solid #fee2e2; padding: 1rem; border-radius: 0.75rem; font-weight: 800; cursor: pointer; transition: all 0.2s ease;">
                         <i class="fas fa-times-circle"></i> Reject
                     </button>
-                </form>
-            </div>
+                </div>
+            </form>
         </div>
     </div>
 </div>
