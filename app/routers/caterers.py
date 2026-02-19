@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.orm import Session
 from fastapi.templating import Jinja2Templates
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, RedirectResponse
 from ..db import database, models, crud
 from ..core import security as auth
 
@@ -42,6 +42,19 @@ def get_caterer_profile(request: Request, caterer_id: int, db: Session = Depends
     if not caterer:
         raise HTTPException(status_code=404, detail="Caterer not found")
     
+    # If the user is a logged-in customer, show the dashboard-integrated view
+    if user and user.role == "customer":
+        return templates.TemplateResponse("customer/caterer_profile_view.html", {
+            "request": request, 
+            "caterer": caterer,
+            "packages": caterer.packages,
+            "gallery_items": caterer.gallery_items,
+            "reviews": caterer.reviews,
+            "user": user,
+            "active_page": "marketplace"
+        })
+    
+    # Otherwise, show the standalone profile (e.g., for guests or other roles)
     return templates.TemplateResponse("caterer/profile.html", {
         "request": request, 
         "caterer": caterer,

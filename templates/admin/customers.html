@@ -40,28 +40,39 @@
                         if customer.created_at else 'N/A' }}</td>
                     <td style="padding: 1.5rem;">
                         {% if customer.status == 'active' %}
-                        <span style="color: #166534; font-weight: 700; font-size: 0.85rem;"><i class="fas fa-circle"
-                                style="font-size: 0.5rem; margin-right: 0.5rem; vertical-align: middle;"></i>
-                            Active</span>
+                        <span
+                            style="padding: 0.25rem 0.75rem; border-radius: 2rem; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; background: #eff6ff; color: #1e40af; border: 1px solid #dbeafe;">
+                            <i class="fas fa-check-circle"></i> Active
+                        </span>
                         {% else %}
-                        <span style="color: #dc2626; font-weight: 700; font-size: 0.85rem;"><i class="fas fa-circle"
-                                style="font-size: 0.5rem; margin-right: 0.5rem; vertical-align: middle;"></i>
-                            Suspended</span>
+                        <span
+                            style="padding: 0.25rem 0.75rem; border-radius: 2rem; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; background: #fef2f2; color: #ef4444; border: 1px solid #fee2e2;">
+                            <i class="fas fa-times-circle"></i> {{ customer.status|title }}
+                        </span>
                         {% endif %}
                     </td>
                     <td style="padding: 1.5rem; border-radius: 0 1rem 1rem 0; text-align: right;">
-                        <div style="display: flex; gap: 0.5rem; justify-content: flex-end;">
+                        <div style="display: flex; gap: 0.75rem; justify-content: flex-end; align-items: center;">
                             <a href="/admin/verify/{{ customer.id }}" class="btn-outline"
-                                style="padding: 0.5rem 1rem; font-size: 0.85rem; text-decoration: none;">Review ID</a>
+                                style="padding: 0.6rem 1.2rem; font-size: 0.85rem; text-decoration: none; border-radius: 0.75rem; display: flex; align-items: center; gap: 0.5rem;">
+                                <i class="fas fa-eye"></i> Review ID
+                            </a>
 
                             <form action="/admin/customers/{{ customer.id }}/status" method="POST"
                                 style="display: inline;">
+                                {% if customer.status == 'suspended' %}
                                 <button type="submit"
-                                    style="background: {{ '#f59e0b' if customer.status == 'active' else '#10b981' }}; color: white; border: none; padding: 0.5rem 0.75rem; border-radius: 0.5rem; font-size: 0.8rem; cursor: pointer;"
-                                    title="{{ 'Suspend' if customer.status == 'active' else 'Activate' }}">
-                                    <i
-                                        class="fas {{ 'fa-user-slash' if customer.status == 'active' else 'fa-user-check' }}"></i>
+                                    style="background: #10b981; color: white; border: none; padding: 0.6rem 1rem; border-radius: 0.75rem; font-size: 0.85rem; cursor: pointer; display: flex; align-items: center; gap: 0.5rem; font-weight: 600;"
+                                    title="Activate Account">
+                                    <i class="fas fa-user-check"></i> Activate
                                 </button>
+                                {% else %}
+                                <button type="submit"
+                                    style="background: #fef2f2; color: #ef4444; border: 1px solid #fee2e2; padding: 0.6rem 1rem; border-radius: 0.75rem; font-size: 0.85rem; cursor: pointer; display: flex; align-items: center; gap: 0.5rem; font-weight: 600;"
+                                    title="Suspend Account">
+                                    <i class="fas fa-user-slash"></i> Suspend
+                                </button>
+                                {% endif %}
                             </form>
                         </div>
                     </td>

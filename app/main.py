@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from .db.database import engine, Base
-from .routers import website, auth, admin, bookings, oauth, caterers, caterer_dashboard, customer_dashboard, verification
+from .routers import website, auth, admin, bookings, oauth, caterers, packages, caterer_dashboard, customer_dashboard, verification, kyc, quotations, payments
 from .db import models
 
 # Create tables
@@ -22,10 +22,14 @@ app.include_router(admin.router)
 app.include_router(bookings.router)
 app.include_router(oauth.router)
 app.include_router(caterers.router)
+app.include_router(packages.router)
 
 app.include_router(caterer_dashboard.router)
 app.include_router(customer_dashboard.router)
 app.include_router(verification.router)
+app.include_router(kyc.router)
+app.include_router(quotations.router)
+app.include_router(payments.router)
 
 from .services.realtime import manager
 from fastapi import WebSocket, WebSocketDisconnect

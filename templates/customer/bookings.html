@@ -2,40 +2,149 @@
 
 {% block title %}My Bookings - OccaServe Dashboard{% endblock %}
 
+{% block extra_css %}
+<style>
+    .bookings-hero {
+        background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+        border-radius: 2.5rem;
+        padding: 4rem 3rem;
+        margin-bottom: 3rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .bookings-hero h1 {
+        font-family: 'Playfair Display', serif;
+        font-size: 3rem;
+        color: #1e40af;
+        margin-bottom: 0.5rem;
+    }
+
+    .bookings-hero p {
+        color: #3b82f6;
+        font-size: 1.15rem;
+    }
+
+    .bookings-table-container {
+        background: var(--white);
+        border-radius: 2rem;
+        padding: 2.5rem;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        border: 1px solid var(--border-color);
+    }
+
+    .bookings-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0 1rem;
+    }
+
+    .bookings-table th {
+        text-align: left;
+        color: var(--text-light);
+        font-size: 0.85rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        padding: 0 1.5rem;
+    }
+
+    .booking-row {
+        background: #f8fafc;
+        border-radius: 1.25rem;
+        transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+    }
+
+    .booking-row:hover {
+        transform: scale(1.01);
+        background: white;
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
+        z-index: 10;
+        position: relative;
+    }
+
+    .booking-status {
+        padding: 0.5rem 1rem;
+        border-radius: 2rem;
+        font-size: 0.75rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        display: inline-block;
+    }
+
+    .status-pending {
+        background: #fef3c7;
+        color: #92400e;
+    }
+
+    .status-confirmed {
+        background: #dcfce7;
+        color: #166534;
+    }
+
+    .status-completed {
+        background: #dbeafe;
+        color: #1e40af;
+    }
+
+    .status-cancelled {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+
+    .btn-view-details {
+        padding: 0.6rem 1.25rem;
+        background: white;
+        border: 1px solid var(--border-color);
+        color: var(--secondary-color);
+        border-radius: 0.75rem;
+        font-size: 0.85rem;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.2s;
+    }
+
+    .btn-view-details:hover {
+        border-color: var(--primary-color);
+        color: var(--primary-color);
+        background: var(--background-soft);
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="page-header">
-    <div style="display: flex; justify-content: space-between; align-items: flex-end;">
-        <div>
-            <h1>My Bookings</h1>
-            <p>Track and manage all your catering reservations.</p>
-        </div>
-        <a href="/customer/marketplace" class="btn-primary">
-            <i class="fas fa-plus" style="margin-right: 0.5rem;"></i> New Booking
-        </a>
+<div class="bookings-hero">
+    <div>
+        <h1>My Bookings</h1>
+        <p>Track and manage all your catering reservations in one place.</p>
     </div>
+    <a href="/customer/marketplace" class="btn-primary"
+        style="padding: 1.25rem 2rem; border-radius: 1.25rem; box-shadow: 0 10px 15px -3px rgba(34, 197, 94, 0.2);">
+        <i class="fas fa-plus" style="margin-right: 0.5rem;"></i> New Booking
+    </a>
 </div>
 
-<div
-    style="background: var(--white); border-radius: 2rem; padding: 2.5rem; box-shadow: var(--shadow-md); border: 1px solid var(--border-color);">
+<div class="bookings-table-container">
     {% if bookings %}
     <div style="overflow-x: auto;">
-        <table style="width: 100%; border-collapse: separate; border-spacing: 0 1.25rem;">
+        <table class="bookings-table">
             <thead>
-                <tr
-                    style="text-align: left; color: var(--text-light); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.05em;">
-                    <th style="padding: 0 1.5rem;">Event Info</th>
-                    <th style="padding: 0 1.5rem;">Caterer</th>
-                    <th style="padding: 0 1.5rem;">Guests</th>
-                    <th style="padding: 0 1.5rem;">Amount</th>
-                    <th style="padding: 0 1.5rem;">Status</th>
-                    <th style="padding: 0 1.5rem; text-align: right;">Actions</th>
+                <tr>
+                    <th>Event Info</th>
+                    <th>Caterer</th>
+                    <th>Guests</th>
+                    <th>Amount</th>
+                    <th>Status</th>
+                    <th style="text-align: right;">Actions</th>
                 </tr>
             </thead>
             <tbody>
                 {% for booking in bookings %}
-                <tr style="background: #f8fafc; border-radius: 1rem; transition: all 0.3s ease;"
-                    onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='#f8fafc'">
-                    <td style="padding: 1.5rem; border-radius: 1rem 0 0 1rem;">
+                <tr class="booking-row">
+                    <td style="padding: 1.5rem; border-radius: 1.25rem 0 0 1.25rem;">
                         <div style="font-weight: 700; color: var(--secondary-color); margin-bottom: 0.25rem;">
                             {{ booking.event_date.strftime('%b %d, %Y') }}
                         </div>
@@ -50,31 +159,22 @@
                         <div style="font-size: 0.85rem; color: var(--text-light);">{{ booking.package.name if
                             booking.package else 'Custom Menu' }}</div>
                     </td>
-                    <td style="padding: 1.5rem; color: var(--text-color);">
-                        <i class="fas fa-users" style="margin-right: 0.5rem; opacity: 0.5;"></i>
-                        {{ booking.guest_count }} guests
+                    <td style="padding: 1.5rem; color: var(--secondary-color); font-weight: 500;">
+                        <span
+                            style="background: #f1f5f9; padding: 0.4rem 0.8rem; border-radius: 0.5rem; font-size: 0.85rem;">
+                            {{ booking.guest_count }} guests
+                        </span>
                     </td>
-                    <td style="padding: 1.5rem; font-weight: 700; color: var(--secondary-color);">
+                    <td style="padding: 1.5rem; font-weight: 800; color: var(--primary-color); font-size: 1.05rem;">
                         ₱{{ "{:,.2f}".format(booking.total_amount) if booking.total_amount else 'TBD' }}
                     </td>
                     <td style="padding: 1.5rem;">
-                        {% set status_colors = {
-                        'pending': '#92400e; background: #fef3c7;',
-                        'confirmed': '#166534; background: #dcfce7;',
-                        'completed': '#1e40af; background: #dbeafe;',
-                        'cancelled': '#991b1b; background: #fee2e2;'
-                        } %}
-                        {% set style = status_colors.get(booking.status, '#374151; background: #f1f5f9;') %}
-                        <span
-                            style="padding: 0.5rem 1rem; border-radius: 2rem; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; {{ style }}">
-                            {{ booking.status }}
+                        <span class="booking-status status-{{ booking.status or 'pending' }}">
+                            {{ booking.status or 'pending' }}
                         </span>
                     </td>
-                    <td style="padding: 1.5rem; border-radius: 0 1rem 1rem 0; text-align: right;">
-                        <div style="display: flex; gap: 0.5rem; justify-content: flex-end;">
-                            <button class="btn-outline" style="padding: 0.5rem 1rem; font-size: 0.85rem;">View
-                                Details</button>
-                        </div>
+                    <td style="padding: 1.5rem; border-radius: 0 1.25rem 1.25rem 0; text-align: right;">
+                        <a href="/bookings/manage/{{ booking.id }}" class="btn-view-details">Manage</a>
                     </td>
                 </tr>
                 {% endfor %}
@@ -82,14 +182,20 @@
         </table>
     </div>
     {% else %}
-    <div style="text-align: center; padding: 5rem 2rem;">
-        <img src="https://illustrations.popsy.co/gray/paper-plane.svg" alt="Empty"
-            style="width: 200px; margin-bottom: 2rem; opacity: 0.5;">
-        <h3 style="color: var(--secondary-color); font-size: 1.5rem; margin-bottom: 1rem;">No bookings yet</h3>
+    <div class="empty-state" style="border: none; padding: 4rem 2rem;">
+        <div
+            style="width: 120px; height: 120px; background: #eff6ff; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 2rem;">
+            <i class="fas fa-calendar-times" style="font-size: 3rem; color: #60a5fa;"></i>
+        </div>
+        <h2 style="font-family: 'Playfair Display', serif; font-size: 2.5rem; color: var(--secondary-color);">No
+            bookings yet</h2>
         <p
-            style="color: var(--text-light); margin-bottom: 2.5rem; max-width: 400px; margin-left: auto; margin-right: auto;">
-            Start planning your next event! Browse through our curated list of top-rated caterers.</p>
-        <a href="/caterers" class="btn-primary" style="padding: 1rem 2.5rem;">Browse Caterers</a>
+            style="color: var(--text-light); max-width: 450px; margin: 1.5rem auto; font-size: 1.1rem; line-height: 1.6;">
+            Your upcoming events will appear here once you start booking. Explore our caterers to get started!
+        </p>
+        <a href="/customer/marketplace" class="btn-primary"
+            style="padding: 1.25rem 3rem; border-radius: 1.25rem; display: inline-block; margin-top: 1rem;">Browse
+            Caterers</a>
     </div>
     {% endif %}
 </div>

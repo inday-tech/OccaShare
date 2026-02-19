@@ -165,6 +165,13 @@ def verify_caterer(caterer_id: int, action: str = Form(...), db: Session = Depen
     if action == "approve":
         caterer.verification_status = "Verified"
         caterer.is_verified = True
+        # Explicitly activate the associated user account and clear all barriers
+        if caterer.user_id:
+            caterer_user = db.query(models.User).get(caterer.user_id)
+            if caterer_user:
+                caterer_user.status = "active"
+                caterer_user.is_email_verified = True
+                caterer_user.is_verified = True
     else:
         caterer.verification_status = "Rejected"
         caterer.is_verified = False
@@ -178,9 +185,17 @@ def toggle_caterer_status(caterer_id: int, db: Session = Depends(database.get_db
     if not caterer:
         raise HTTPException(status_code=404, detail="Caterer not found")
     
-    # Toggle status of the associated user account
-    caterer_user = caterer.user
-    caterer_user.status = "suspended" if caterer_user.status == "active" else "active"
+    # Toggle status of the associated user account using direct lookup
+    if caterer.user_id:
+        caterer_user = db.query(models.User).get(caterer.user_id)
+        if caterer_user:
+            if caterer_user.status == "active":
+                caterer_user.status = "suspended"
+            else:
+                # Activate and clear barriers if coming from suspended or pending
+                caterer_user.status = "active"
+                caterer_user.is_email_verified = True
+                caterer_user.is_verified = True
     
     db.commit()
     return RedirectResponse(url="/admin/caterers", status_code=status.HTTP_303_SEE_OTHER)
@@ -191,7 +206,13 @@ def toggle_customer_status(customer_id: int, db: Session = Depends(database.get_
     if not customer:
         raise HTTPException(status_code=404, detail="Customer not found")
     
-    customer.status = "suspended" if customer.status == "active" else "active"
+    if customer.status == "active":
+        customer.status = "suspended"
+    else:
+        customer.status = "active"
+        customer.is_email_verified = True
+        customer.is_verified = True
+        
     db.commit()
     return RedirectResponse(url="/admin/customers", status_code=status.HTTP_303_SEE_OTHER)
 
@@ -203,6 +224,8 @@ def verify_customer(customer_id: int, action: str = Form(...), db: Session = Dep
     
     if action == "approve":
         customer.is_verified = True
+        customer.is_email_verified = True
+        customer.status = "active"
     else:
         customer.is_verified = False
     
@@ -232,4 +255,82 @@ async def view_verification(
         "caterer_profile": caterer_profile,
         "active_page": target_user.role + "s"
     })
+
+@router.get("/kyc")
+async def view_kyc_queue(
+    request: Request,
+    db: Session = Depends(database.get_db),
+    user: models.User = Depends(admin_only)
+):
+    high_risk_bookings = db.query(models.Booking).filter(
+        models.Booking.status.in_(["flagged", "pending"])
+    ).all()
+    
+    return templates.TemplateResponse("admin/kyc_logs.html", {
+        "request": request,
+        "user": user,
+        "high_risk_bookings": high_risk_bookings,
+        "active_page": "kyc"
+    })
+
+# --- New KYC & Fraud Admin Endpoints ---
+
+@router.get("/api/bookings")
+async def api_list_bookings(
+    status: Optional[str] = None,
+    db: Session = Depends(database.get_db),
+    user: models.User = Depends(admin_only)
+):
+    query = db.query(models.Booking)
+    if status:
+        query = query.filter(models.Booking.status == status)
+    return query.all()
+
+@router.get("/bookings/{booking_id}/kyc")
+async def view_booking_kyc(
+    booking_id: int,
+    request: Request,
+    db: Session = Depends(database.get_db),
+    user: models.User = Depends(admin_only)
+):
+    booking = db.query(models.Booking).get(booking_id)
+    if not booking:
+        raise HTTPException(status_code=404, detail="Booking not found")
+    
+    kyc_results = db.query(models.OCRVerification).filter(models.OCRVerification.booking_id == booking_id).first()
+    fraud_flags = db.query(models.FraudFlag).filter(models.FraudFlag.booking_id == booking_id).all()
+    
+    return templates.TemplateResponse("admin/booking_kyc.html", {
+        "request": request,
+        "user": user,
+        "booking": booking,
+        "kyc": kyc_results,
+        "flags": fraud_flags,
+        "active_page": "bookings"
+    })
+
+@router.post("/bookings/{booking_id}/flag")
+async def flag_booking(
+    booking_id: int,
+    flag_type: str = Form(...),
+    description: str = Form(...),
+    db: Session = Depends(database.get_db),
+    user: models.User = Depends(admin_only)
+):
+    flag = models.FraudFlag(
+        booking_id=booking_id,
+        flag_type=flag_type,
+        description=description
+    )
+    db.add(flag)
+    db.commit()
+    return RedirectResponse(url=f"/admin/bookings/{booking_id}/kyc", status_code=303)
+
+@router.get("/api/reports/export")
+async def export_reports(
+    db: Session = Depends(database.get_db),
+    user: models.User = Depends(admin_only)
+):
+    # Mock CSV export
+    return {"message": "Export started. You will receive an email shortly."}
 

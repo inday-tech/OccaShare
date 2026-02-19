@@ -412,12 +412,23 @@ async def add_package(
     request: Request,
     name: str = Form(...),
     description: str = Form(...),
-    price: float = Form(...),
+    price: float = Form(0.0), # Flat price (old field)
     min_guests: int = Form(...),
+    max_guests: Optional[int] = Form(None),
     service_type: str = Form("General"),
+    price_per_head: Optional[float] = Form(None),
+    min_contract_amount: Optional[float] = Form(None),
+    additional_guest_price: Optional[float] = Form(None),
+    service_duration: int = Form(4),
+    overtime_fee: float = Form(0.0),
+    location_coverage: Optional[str] = Form(None),
+    inclusions: list[str] = Form([]),
     db: Session = Depends(database.get_db),
     user: models.User = Depends(caterer_only)
 ):
+    
+    # Structure inclusions as JSON
+    inclusions_data = {item: True for item in inclusions}
     
     new_package = models.CateringPackage(
         caterer_id=user.caterer_profile.id,
@@ -425,7 +436,16 @@ async def add_package(
         description=description,
         price=price,
         min_guests=min_guests,
-        service_type=service_type
+        max_guests=max_guests,
+        service_type=service_type,
+        price_per_head=price_per_head,
+        min_contract_amount=min_contract_amount,
+        additional_guest_price=additional_guest_price,
+        service_duration=service_duration,
+        overtime_fee=overtime_fee,
+        location_coverage=location_coverage,
+        inclusions=inclusions_data,
+        status="active"
     )
     db.add(new_package)
     db.commit()
@@ -439,6 +459,30 @@ async def add_package(
     })
     
     return RedirectResponse(url="/caterer/packages", status_code=303)
+
+@router.get("/packages/{pkg_id}/menu")
+async def get_package_menu(
+    pkg_id: int,
+    db: Session = Depends(database.get_db),
+    user: models.User = Depends(caterer_only)
+):
+    package = db.query(models.CateringPackage).get(pkg_id)
+    if not package or package.caterer_id != user.caterer_profile.id:
+        raise HTTPException(status_code=403, detail="Forbidden")
+    
+    return [
+        {
+            "id": i.id,
+            "name": i.name,
+            "category": i.category,
+            "description": i.description,
+            "serving_size": i.serving_size,
+            "is_addon": i.is_addon,
+            "addon_price": i.addon_price,
+            "image_url": i.image_url
+        }
+        for i in package.menu_items
+    ]
 
 @router.post("/packages/{pkg_id}/delete")
 async def delete_package(
@@ -462,20 +506,58 @@ async def add_menu_item(
     package_id: int,
     name: str = Form(...),
     category: str = Form(...),
+    description: Optional[str] = Form(None),
+    serving_size: Optional[str] = Form(None),
     is_addon: bool = Form(False),
     addon_price: float = Form(0.0),
-    db: Session = Depends(database.get_db)
+    dietary_tags: list[str] = Form([]),
+    allergen_info: list[str] = Form([]),
+    image: Optional[UploadFile] = File(None),
+    db: Session = Depends(database.get_db),
+    user: models.User = Depends(caterer_only)
 ):
+    package = db.query(models.CateringPackage).get(package_id)
+    if not package or package.caterer_id != user.caterer_profile.id:
+        raise HTTPException(status_code=403, detail="Forbidden")
+
+    image_url = None
+    if image and image.filename:
+        file_ext = os.path.splitext(image.filename)[1]
+        file_name = f"dish_{uuid.uuid4().hex[:8]}{file_ext}"
+        file_path = os.path.join(UPLOAD_DIR, file_name)
+        with open(file_path, "wb") as buffer:
+            shutil.copyfileobj(image.file, buffer)
+        image_url = f"/static/uploads/caterer/{file_name}"
+
     new_item = models.MenuItem(
         package_id=package_id,
         name=name,
+        description=description,
         category=category,
+        serving_size=serving_size,
         is_addon=is_addon,
-        addon_price=addon_price
+        addon_price=addon_price,
+        dietary_tags=dietary_tags,
+        allergen_info=allergen_info,
+        image_url=image_url
     )
     db.add(new_item)
     db.commit()
     return RedirectResponse(url="/caterer/packages", status_code=303)
+
+@router.post("/packages/menu/{item_id}/delete")
+async def delete_menu_item(
+    item_id: int,
+    db: Session = Depends(database.get_db),
+    user: models.User = Depends(caterer_only)
+):
+    item = db.query(models.MenuItem).get(item_id)
+    if not item or item.package.caterer_id != user.caterer_profile.id:
+        raise HTTPException(status_code=403, detail="Forbidden")
+    
+    db.delete(item)
+    db.commit()
+    return {"status": "success"}
 @router.post("/bookings/{booking_id}/accept")
 async def accept_booking(
     request: Request,

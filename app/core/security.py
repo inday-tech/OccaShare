@@ -40,6 +40,18 @@ from ..db import database, models
 
 # ... (Previous config and hash functions) ...
 
+def verify_token(token: str, db: Session):
+    """Helper to verify a raw JWT string and return the user."""
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        email: str = payload.get("sub")
+        if email is None:
+            return None
+        user = db.query(models.User).filter(models.User.email == email).first()
+        return user
+    except JWTError:
+        return None
+
 async def get_current_user(request: Request, db: Session = Depends(database.get_db)):
     """Centralized dependency to get the current user from session cookies."""
     credentials_exception = HTTPException(

@@ -191,6 +191,7 @@ async def customer_marketplace(
     db: Session = Depends(database.get_db),
     user: models.User = Depends(customer_only)
 ):
+    # Only show verified caterers
     query = db.query(models.CatererProfile).filter(models.CatererProfile.verification_status == "Verified")
 
     if q:
@@ -222,11 +223,10 @@ async def customer_marketplace(
     elif sort == "price_low":
         # Simplified sort by first package price
         query = query.join(models.CateringPackage).order_by(models.CateringPackage.price.asc())
-    else:
-        query = query.order_by(models.CatererProfile.created_at.desc())
 
+    # Execute query
     caterers = query.all()
-    
+
     # Get unique cities and types for filters
     cities = db.query(models.CatererProfile.city).distinct().all()
     types = db.query(models.CatererProfile.business_type).distinct().all()
