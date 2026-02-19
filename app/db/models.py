@@ -35,6 +35,7 @@ class User(Base):
     
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+    is_kyc_complete = Column(Boolean, default=False)
 
     caterer_profile = relationship("CatererProfile", back_populates="user", uselist=False)
     bookings = relationship("Booking", back_populates="user")
@@ -42,6 +43,7 @@ class User(Base):
     inquiries = relationship("Inquiry", back_populates="user")
     identity_verification = relationship("IdentityVerification", back_populates="user", uselist=False)
     notifications = relationship("Notification", back_populates="user")
+    verification_attempts = relationship("VerificationAttempt", back_populates="user")
 
 class CatererProfile(Base):
     __tablename__ = "caterer_profiles"
@@ -92,11 +94,50 @@ class CateringPackage(Base):
     max_guests = Column(Integer, nullable=True)
     image_url = Column(String)
     service_type = Column(String, default="General") # Wedding, Birthday, Corporate, etc.
+    
+    # NEW: Rich Pricing & Details
+    price_per_head = Column(Float, nullable=True)
+    min_contract_amount = Column(Float, nullable=True)
+    additional_guest_price = Column(Float, nullable=True)
+    service_duration = Column(Integer, default=4) # In hours
+    overtime_fee = Column(Float, default=0.0)
+    location_coverage = Column(String, nullable=True) # City / Area
+    
+    # Structured Data
+    inclusions = Column(JSONB, nullable=True) # Checklist fields
+    policies = Column(JSONB, nullable=True) # Cancellation, Payment terms, etc.
+    
     is_active = Column(Boolean, default=True)
+    status = Column(String, default="active") # active, inactive, draft
+    is_featured = Column(Boolean, default=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     caterer = relationship("CatererProfile", back_populates="packages")
+    menu_items = relationship("MenuItem", back_populates="package", cascade="all, delete-orphan")
+
     bookings = relationship("Booking", back_populates="package")
+
+class MenuItem(Base):
+    __tablename__ = "menu_items"
+
+    id = Column(Integer, primary_key=True, index=True)
+    package_id = Column(Integer, ForeignKey("catering_packages.id"))
+    name = Column(String)
+    description = Column(Text, nullable=True)
+    category = Column(String) # Starter, Soup, Salad, Main Dish (Beef), etc.
+    
+    # Dietary & Allergen Info
+    dietary_tags = Column(ARRAY(String), nullable=True) # Vegetarian, Vegan, Halal
+    allergen_info = Column(ARRAY(String), nullable=True) # Nuts, Dairy, Seafood
+    
+    serving_size = Column(String, nullable=True) # "Good for 1", "Per tray"
+    is_addon = Column(Boolean, default=False)
+    addon_price = Column(Float, default=0.0)
+    image_url = Column(String, nullable=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+    package = relationship("CateringPackage", back_populates="menu_items")
+
 
 class CatererGallery(Base):
     __tablename__ = "caterer_gallery"
@@ -125,9 +166,13 @@ class Booking(Base):
     venue_address = Column(Text, nullable=True)
     guest_count = Column(Integer)
     total_amount = Column(Float)
+    total_price = Column(Float, nullable=True) # Alias to match user request structure
+    reservation_fee = Column(DECIMAL, nullable=True)
     status = Column(String, default="pending")
     payment_status = Column(String, default="pending") # pending, paid, deposit_paid
     payment_method = Column(String, nullable=True) # GCash, Credit Card, etc.
+    payment_reference = Column(String, nullable=True)
+    payment_proof_url = Column(String, nullable=True)
     ocr_verification = relationship("OCRVerification", back_populates="booking", uselist=False)
 
     ocr_verified = Column(Boolean, default=False)
@@ -136,11 +181,31 @@ class Booking(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
+    expires_at = Column(DateTime(timezone=True), nullable=True)
+    reservation_fee = Column(DECIMAL, nullable=True)
+    event_location = Column(Text, nullable=True) # Alias for venue_address
+
     user = relationship("User", back_populates="bookings")
     caterer = relationship("CatererProfile", back_populates="bookings")
     package = relationship("CateringPackage", back_populates="bookings")
     review = relationship("Review", back_populates="booking", uselist=False)
     history = relationship("BookingHistory", back_populates="booking")
+    quotation = relationship("Quotation", back_populates="booking", uselist=False)
+    verification_attempts = relationship("VerificationAttempt", back_populates="booking")
+    fraud_flags = relationship("FraudFlag", back_populates="booking")
+    selected_items = relationship("BookingMenuItem", back_populates="booking", cascade="all, delete-orphan")
+
+class BookingMenuItem(Base):
+    __tablename__ = "booking_menu_items"
+
+    id = Column(Integer, primary_key=True, index=True)
+    booking_id = Column(Integer, ForeignKey("bookings.id"))
+    menu_item_id = Column(Integer, ForeignKey("menu_items.id"))
+    is_add_on = Column(Boolean, default=False)
+    price = Column(Float) # Price at the time of booking
+
+    booking = relationship("Booking", back_populates="selected_items")
+    menu_item = relationship("MenuItem")
 
 class BookingHistory(Base):
     __tablename__ = "booking_history"
@@ -256,3 +321,43 @@ class Notification(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     user = relationship("User")
+
+class VerificationAttempt(Base):
+    __tablename__ = "verification_attempts"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"))
+    booking_id = Column(Integer, ForeignKey("bookings.id"))
+    step = Column(String(20), nullable=False) # 'upload', 'ocr', 'liveness', 'match'
+    status = Column(String(20), nullable=False) # pending/verified/failed
+    details = Column(JSONB) # raw OCR data or error codes
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+    user = relationship("User", back_populates="verification_attempts")
+    booking = relationship("Booking", back_populates="verification_attempts")
+
+class Quotation(Base):
+    __tablename__ = "quotations"
+
+    id = Column(Integer, primary_key=True, index=True)
+    booking_id = Column(Integer, ForeignKey("bookings.id"), unique=True)
+    package_details = Column(JSONB)
+    addons = Column(JSONB)
+    total_amount = Column(DECIMAL)
+    downpayment_percent = Column(Integer) # CHECK (downpayment_percent BETWEEN 30 AND 50) - handle in app logic or custom CheckConstraint
+    contract_url = Column(String) # signed PDF
+    status = Column(String(20), default='draft') # draft, sent, signed
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+    booking = relationship("Booking", back_populates="quotation")
+
+class FraudFlag(Base):
+    __tablename__ = "fraud_flags"
+
+    id = Column(Integer, primary_key=True, index=True)
+    booking_id = Column(Integer, ForeignKey("bookings.id"))
+    flag_type = Column(String(50)) # 'multiple_ids','high_risk_location'…
+    description = Column(Text)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+    booking = relationship("Booking", back_populates="fraud_flags")

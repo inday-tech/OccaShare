@@ -1,0 +1,356 @@
+{% extends "customer/layout.html" %}
+
+{% block title %}{{ caterer.business_name }} - OccaServe{% endblock %}
+
+{% block extra_css %}
+<!-- FullCalendar CSS -->
+<link href='https://cdn.jsdelivr.net/npm/fullcalendar@5.10.1/main.min.css' rel='stylesheet' />
+<style>
+    /* Profile Specific Styles */
+    .profile-header-premium {
+        position: relative;
+        border-radius: 2rem;
+        overflow: hidden;
+        margin-bottom: 2.5rem;
+        box-shadow: var(--shadow-md);
+        background: var(--white);
+    }
+
+    .profile-cover-img {
+        height: 300px;
+        background-size: cover;
+        background-position: center;
+        background-color: var(--slate-100);
+    }
+
+    .profile-info-overlay {
+        padding: 0 3rem 2.5rem;
+        margin-top: -60px;
+        display: flex;
+        align-items: flex-end;
+        gap: 2.5rem;
+    }
+
+    .profile-avatar-premium {
+        width: 160px;
+        height: 160px;
+        border-radius: 2rem;
+        border: 6px solid var(--white);
+        box-shadow: var(--shadow-lg);
+        background: var(--white);
+        overflow: hidden;
+        flex-shrink: 0;
+    }
+
+    .profile-avatar-premium img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .profile-main-info {
+        flex: 1;
+        padding-bottom: 0.5rem;
+    }
+
+    .profile-main-info h1 {
+        font-family: 'Playfair Display', serif;
+        font-size: 2.5rem;
+        color: var(--secondary-color);
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .verified-badge-large {
+        color: var(--primary-color);
+        font-size: 1.5rem;
+    }
+
+    .info-pills {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+        margin-top: 1rem;
+    }
+
+    .info-pill {
+        background: var(--background-soft);
+        padding: 0.5rem 1rem;
+        border-radius: 0.75rem;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: var(--text-color);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .profile-grid-dashboard {
+        display: grid;
+        grid-template-columns: 1fr 340px;
+        gap: 2.5rem;
+    }
+
+    .profile-section-card {
+        background: var(--white);
+        border-radius: 2rem;
+        padding: 2.5rem;
+        border: 1px solid var(--border-color);
+        box-shadow: var(--shadow-sm);
+        margin-bottom: 2.5rem;
+    }
+
+    .section-title-premium {
+        font-family: 'Playfair Display', serif;
+        font-size: 1.6rem;
+        color: var(--secondary-color);
+        margin-bottom: 2rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .section-title-premium i {
+        color: var(--primary-color);
+    }
+
+    /* FullCalendar Customization */
+    .fc-event.blocked-date {
+        background-color: #fee2e2 !important;
+        border-color: #fecaca !important;
+        color: #ef4444 !important;
+        cursor: not-allowed;
+    }
+
+    .fc-day-past {
+        background-color: #f8fafc !important;
+    }
+
+    /* Booking Widget Sidebar */
+    .booking-card-dashboard {
+        position: sticky;
+        top: 2rem;
+        background: var(--white);
+        border-radius: 2rem;
+        padding: 2.5rem;
+        border: 1px solid var(--border-color);
+        box-shadow: var(--shadow-md);
+        text-align: center;
+    }
+
+    .booking-card-dashboard h3 {
+        font-family: 'Playfair Display', serif;
+        font-size: 1.4rem;
+        margin-bottom: 1.5rem;
+        color: var(--secondary-color);
+    }
+
+    .booking-card-dashboard p {
+        color: var(--text-light);
+        font-size: 0.95rem;
+        line-height: 1.6;
+        margin-bottom: 2rem;
+    }
+
+    .btn-block-premium {
+        width: 100%;
+        padding: 1.25rem;
+        border-radius: 1rem;
+        font-size: 1.1rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="profile-header-premium">
+    <div class="profile-cover-img" style="background-image: url('{{ caterer.cover_image_url }}');"></div>
+    <div class="profile-info-overlay">
+        <div class="profile-avatar-premium">
+            {% if caterer.logo_url %}
+            <img src="{{ caterer.logo_url }}" alt="{{ caterer.business_name }}">
+            {% else %}
+            <img src="https://ui-avatars.com/api/?name={{ caterer.business_name }}&background=random"
+                alt="{{ caterer.business_name }}">
+            {% endif %}
+        </div>
+        <div class="profile-main-info">
+            <h1>
+                {{ caterer.business_name }}
+                {% if caterer.is_verified %}
+                <i class="fas fa-check-circle verified-badge-large" title="Verified Caterer"></i>
+                {% endif %}
+            </h1>
+            <p style="color: var(--text-light); font-size: 1.1rem; max-width: 800px;">{{ caterer.description }}</p>
+            <div class="info-pills">
+                <div class="info-pill">
+                    <i class="fas fa-star" style="color: #f59e0b;"></i>
+                    {{ "%.1f"|format(caterer.rating) }} ({{ caterer.review_count }} Reviews)
+                </div>
+                <div class="info-pill">
+                    <i class="fas fa-map-marker-alt"></i>
+                    {{ caterer.city }}
+                </div>
+                <div class="info-pill">
+                    <i class="fas fa-utensils"></i>
+                    {{ caterer.business_type or 'Professional Caterer' }}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="profile-grid-dashboard">
+    <div class="content-side">
+        <!-- Packages Section -->
+        <section class="profile-section-card">
+            <h3 class="section-title-premium"><i class="fas fa-concierge-bell"></i> Available Packages</h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem;">
+                {% for pkg in packages %}
+                <div
+                    style="border: 1px solid var(--border-color); border-radius: 1.5rem; overflow: hidden; display: flex; flex-direction: column; transition: all 0.3s; background: var(--white); height: 100%;">
+                    <div
+                        style="height: 160px; background-image: url('{{ pkg.image_url if pkg.image_url else 'https://images.unsplash.com/photo-1555244162-803834f70033?q=80&w=2070&auto=format&fit=crop' }}'); background-size: cover; background-position: center;">
+                    </div>
+                    <div style="padding: 1.5rem; flex: 1; display: flex; flex-direction: column;">
+                        <h4 style="font-size: 1.2rem; margin-bottom: 0.5rem; color: var(--secondary-color);">{{ pkg.name
+                            }}</h4>
+                        <p
+                            style="font-size: 0.85rem; color: var(--text-light); line-height: 1.5; margin-bottom: 1.5rem; flex: 1;">
+                            {{ pkg.description|truncate(100) }}</p>
+
+                        <div style="display: flex; justify-content: space-between; align-items: flex-end;">
+                            <div>
+                                <span style="display: block; font-size: 0.75rem; color: var(--text-light);">Starting
+                                    at</span>
+                                <span style="font-weight: 800; font-size: 1.25rem; color: var(--primary-color);">₱{{
+                                    "{:,.0f}".format(pkg.price_per_head or pkg.price) }}</span>
+                                <span style="font-size: 0.7rem; color: var(--text-light);"> / guest</span>
+                            </div>
+                            <a href="/packages/{{ pkg.id }}" class="btn-primary"
+                                style="padding: 0.6rem 1.2rem; border-radius: 0.75rem; font-size: 0.85rem; text-decoration: none;">View
+                                Details</a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+
+        <!-- Gallery Section -->
+        <section class="profile-section-card">
+            <h3 class="section-title-premium"><i class="far fa-images"></i> Event Gallery</h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 1rem;">
+                {% for item in gallery_items[:8] %}
+                <div
+                    style="border-radius: 1rem; overflow: hidden; height: 160px; border: 1px solid var(--border-color);">
+                    <img src="{{ item.media_url }}" alt="Gallery"
+                        style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease;"
+                        onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
+                </div>
+                {% else %}
+                <div style="grid-column: 1/-1; padding: 3rem; text-align: center; color: var(--text-light);">No gallery
+                    photos yet.</div>
+                {% endfor %}
+            </div>
+        </section>
+
+        <!-- Availability Section -->
+        <section class="profile-section-card">
+            <h3 class="section-title-premium"><i class="far fa-calendar-alt"></i> Availability</h3>
+            <div id="availabilityCalendar"></div>
+        </section>
+
+        <!-- Reviews Section -->
+        <section class="profile-section-card">
+            <h3 class="section-title-premium"><i class="far fa-comments"></i> Guest Reviews</h3>
+            <div style="display: flex; flex-direction: column; gap: 2rem;">
+                {% for review in reviews %}
+                <div style="border-bottom: 1px solid var(--border-color); padding-bottom: 1.5rem;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 0.75rem;">
+                        <div style="display: flex; align-items: center; gap: 0.75rem;">
+                            <img src="https://ui-avatars.com/api/?name={{ review.user.first_name }}+{{ review.user.last_name }}&background=random"
+                                width="40" height="40" style="border-radius: 50%;">
+                            <div>
+                                <h5 style="margin: 0; font-size: 0.95rem;">{{ review.user.first_name }} {{
+                                    review.user.last_name }}</h5>
+                                <div style="color: #f59e0b; font-size: 0.7rem;">
+                                    {% for i in range(5) %}
+                                    <i class="{% if i < review.rating %}fas{% else %}far{% endif %} fa-star"></i>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                        <span style="font-size: 0.8rem; color: var(--text-light);">{{ review.created_at.strftime('%b %d,
+                            %Y') }}</span>
+                    </div>
+                    <p
+                        style="color: var(--text-color); font-size: 0.95rem; line-height: 1.6; margin: 0; padding-left: 3rem;">
+                        "{{ review.comment }}"</p>
+                </div>
+                {% else %}
+                <p style="text-align: center; color: var(--text-light);">No reviews yet.</p>
+                {% endfor %}
+            </div>
+        </section>
+    </div>
+
+    <!-- Booking Sidebar -->
+    <div class="sidebar-side">
+        <div class="booking-card-dashboard">
+            <div
+                style="width: 60px; height: 60px; background: var(--background-soft); color: var(--primary-color); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; margin: 0 auto 1.5rem;">
+                <i class="fas fa-calendar-check"></i>
+            </div>
+            <h3>Reserve Your Date</h3>
+            <p>Ready to bring {{ caterer.business_name }}'s flavors to your event? Start your booking process now.</p>
+
+            <button onclick="startBooking('{{ caterer.id }}')" class="btn-primary btn-block-premium">
+                Book This Caterer
+            </button>
+            <button class="btn-outline btn-block-premium" style="margin-bottom: 0;">
+                Send Message
+            </button>
+
+            <div
+                style="margin-top: 1.5rem; font-size: 0.8rem; color: var(--text-light); display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+                <i class="fas fa-shield-alt" style="color: #10b981;"></i> Secure Booking Protocol
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- FullCalendar JS -->
+<script src='https://cdn.jsdelivr.net/npm/fullcalendar@5.10.1/main.min.js'></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var calendarEl = document.getElementById('availabilityCalendar');
+        var calendar = new FullCalendar.Calendar(calendarEl, {
+            initialView: 'dayGridMonth',
+            headerToolbar: {
+                left: 'prev,next today',
+                center: 'title',
+                right: ''
+            },
+            events: '/caterer/api/events?caterer_id={{ caterer.id }}',
+            height: 'auto',
+            dayMaxEvents: true,
+            eventDidMount: function (info) {
+                if (info.event.title === 'BLOCKED') {
+                    info.el.classList.add('blocked-date');
+                }
+            }
+        });
+        calendar.render();
+    });
+
+    function startBooking(catererId) {
+        window.location.href = `/bookings/start/${catererId}`;
+    }
+</script>
+{% endblock %}

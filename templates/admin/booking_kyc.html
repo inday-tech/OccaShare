@@ -1,0 +1,189 @@
+{% extends "admin/layout.html" %}
+
+{% block title %}Booking KYC Detail - OccaServe{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+        <div>
+            <h1>KYC Review: Booking #{{ booking.id }}</h1>
+            <p>Verification details and audit trail for this booking.</p>
+        </div>
+        <div class="status-badge status-{{ booking.status }}">
+            {{ booking.status|capitalize }}
+        </div>
+    </div>
+</div>
+
+<div class="kyc-review-grid">
+    <!-- Left: Identity Documents -->
+    <div class="review-card">
+        <h3>Identity Documents</h3>
+        <div class="doc-comparison">
+            <div class="doc-item">
+                <p class="label">Government ID</p>
+                <div class="img-container">
+                    <img src="{{ booking.ocr_verification.document_url }}" alt="ID Document">
+                </div>
+            </div>
+            <div class="doc-item">
+                <p class="label">Live Selfie</p>
+                <div class="img-container">
+                    <img src="{{ booking.ocr_verification.selfie_url }}" alt="Selfie">
+                </div>
+            </div>
+        </div>
+
+        <div class="match-score">
+            <span>Face Match Score:</span>
+            <span class="score-value success">95% Match</span>
+        </div>
+    </div>
+
+    <!-- Right: OCR & Details -->
+    <div class="review-card">
+        <h3>Extracted OCR Data</h3>
+        <div class="ocr-data-list">
+            {% for key, value in booking.ocr_verification.ocr_data.items() %}
+            <div class="ocr-item">
+                <span class="label">{{ key|replace('_', ' ')|capitalize }}</span>
+                <span class="value">{{ value }}</span>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div style="margin-top: 2rem;">
+            <h3>Fraud/Risk Controls</h3>
+            <form action="/admin/bookings/{{ booking.id }}/flag" method="POST" class="fraud-form">
+                <div class="form-group">
+                    <label>Flag Type</label>
+                    <select name="flag_type" class="form-control">
+                        <option value="suspicious">Suspicious Activity</option>
+                        <option value="id_mismatch">ID Mismatch</option>
+                        <option value="multiple_accounts">Multiple Accounts</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea name="description" class="form-control" placeholder="Add custom notes..."></textarea>
+                </div>
+                <button type="submit" class="btn btn-danger">Add Fraud Flag</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="audit-trail mt-4">
+    <div class="review-card">
+        <h3>Verification Audit Trail</h3>
+        <table class="audit-table">
+            <thead>
+                <tr>
+                    <th>Timestamp</th>
+                    <th>Step</th>
+                    <th>Status</th>
+                    <th>Details</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for attempt in attempts %}
+                <tr>
+                    <td>{{ attempt.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                    <td><span class="step-tag">{{ attempt.step|capitalize }}</span></td>
+                    <td><span class="status-tag {{ attempt.status }}">{{ attempt.status|capitalize }}</span></td>
+                    <td>
+                        <pre>{{ attempt.details|tojson(indent=2) }}</pre>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<style>
+    .kyc-review-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
+    }
+
+    .review-card {
+        background: #fff;
+        padding: 2rem;
+        border-radius: 1.25rem;
+        border: 1px solid var(--border-color);
+        box-shadow: var(--shadow-sm);
+    }
+
+    .img-container {
+        border-radius: 0.75rem;
+        overflow: hidden;
+        border: 1px solid var(--border-color);
+        background: #f1f5f9;
+        height: 250px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .img-container img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+    }
+
+    .doc-comparison {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+    }
+
+    .label {
+        font-size: 0.85rem;
+        color: #64748b;
+        font-weight: 600;
+        text-transform: uppercase;
+        margin-bottom: 0.5rem;
+    }
+
+    .match-score {
+        margin-top: 1.5rem;
+        padding: 1rem;
+        background: #f0fdf4;
+        border-radius: 0.75rem;
+        display: flex;
+        justify-content: space-between;
+        font-weight: 700;
+    }
+
+    .ocr-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid #f1f5f9;
+    }
+
+    .status-tag.verified {
+        color: #10b981;
+    }
+
+    .status-tag.failed {
+        color: #ef4444;
+    }
+
+    .audit-table {
+        width: 100%;
+        margin-top: 1.5rem;
+        border-collapse: collapse;
+    }
+
+    .audit-table th,
+    .audit-table td {
+        text-align: left;
+        padding: 1rem;
+        border-bottom: 1px solid #f1f5f9;
+        font-size: 0.9rem;
+    }
+</style>
+{% endblock %}

@@ -1,0 +1,221 @@
+{% extends "customer/booking_wizard/wizard_base.html" %}
+
+{% block title %}Quotation & Contract - OccaServe{% endblock %}
+
+{% block content %}
+<div class="quotation-step">
+    <h2 class="wizard-title">Review Your Quotation</h2>
+    <p class="wizard-subtitle">Please review the costs and sign the service contract to proceed.</p>
+
+    <div class="quote-card">
+        <div class="quote-header">
+            <div>
+                <h3>{{ quotation.package_details.name }}</h3>
+                <p>{{ quotation.package_details.description }}</p>
+            </div>
+            <div class="quote-id">Quote #{{ quotation.id }}</div>
+        </div>
+
+        <div class="quote-body">
+            <div class="quote-row">
+                <span>Base Price ({{ quotation.package_details.unit_price }} x {{ quotation.package_details.guest_count
+                    }} guests)</span>
+                <span class="price">₱{{ "{:,.2f}".format(quotation.total_amount) }}</span>
+            </div>
+            {% for addon in quotation.addons %}
+            <div class="quote-row">
+                <span>{{ addon.name }}</span>
+                <span class="price">₱{{ "{:,.2f}".format(addon.price) }}</span>
+            </div>
+            {% endfor %}
+            <div class="quote-row total">
+                <span>Total Project Cost</span>
+                <span class="price">₱{{ "{:,.2f}".format(quotation.total_amount) }}</span>
+            </div>
+            <div class="quote-row deposit">
+                <span>Reservation Fee ({{ quotation.downpayment_percent }}% Downpayment)</span>
+                <span class="price">₱{{ "{:,.2f}".format(quotation.total_amount * quotation.downpayment_percent / 100)
+                    }}</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="contract-section">
+        <h3>Service Contract</h3>
+        <div class="contract-viewer">
+            <p><strong>RESERVATION AND CANCELLATION POLICY</strong></p>
+            <p>1. A non-refundable reservation fee of {{ quotation.downpayment_percent }}% is required to secure the
+                date.</p>
+            <p>2. Full payment must be settled at least 7 days before the event.</p>
+            <p>3. Cancellations made within 48 hours of booking are eligible for a partial refund...</p>
+            <!-- Add more mock contract text -->
+        </div>
+
+        <div class="signature-zone">
+            <p>Type your full name to sign digitally:</p>
+            <input type="text" id="signature_name" class="form-control" placeholder="Type name here"
+                oninput="toggleSignButton()">
+
+            <label class="checkbox-container">
+                <input type="checkbox" id="agree_terms" onchange="toggleSignButton()">
+                <span class="checkmark"></span>
+                I agree to the terms and conditions outlined in the service contract.
+            </label>
+        </div>
+    </div>
+
+    <div class="wizard-actions">
+        <button type="button" class="btn-prev" onclick="history.back()">
+            <i class="fas fa-arrow-left"></i> Back
+        </button>
+        <button type="button" id="btn-sign" class="btn btn-primary" disabled onclick="submitSignature()">
+            Sign & Proceed to Payment <i class="fas fa-file-signature"></i>
+        </button>
+    </div>
+</div>
+
+<style>
+    .quote-card {
+        background: #f1f5f9;
+        border-radius: 1.5rem;
+        padding: 2.5rem;
+        margin-bottom: 3rem;
+    }
+
+    .quote-header {
+        display: flex;
+        justify-content: space-between;
+        border-bottom: 1px solid #cbd5e1;
+        padding-bottom: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .quote-id {
+        font-weight: 700;
+        color: var(--primary-color);
+    }
+
+    .quote-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 0.75rem;
+        font-size: 1.1rem;
+    }
+
+    .quote-row.total {
+        margin-top: 1.5rem;
+        padding-top: 1.5rem;
+        border-top: 2px solid #cbd5e1;
+        font-weight: 700;
+        font-size: 1.4rem;
+    }
+
+    .quote-row.deposit {
+        color: var(--secondary-color);
+        font-weight: 600;
+    }
+
+    .contract-viewer {
+        height: 200px;
+        overflow-y: scroll;
+        background: #fff;
+        border: 1px solid var(--border-color);
+        border-radius: 0.5rem;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        font-size: 0.9rem;
+        line-height: 1.6;
+    }
+
+    .signature-zone {
+        margin-bottom: 2rem;
+    }
+
+    .checkbox-container {
+        display: block;
+        position: relative;
+        padding-left: 35px;
+        margin-top: 1.5rem;
+        cursor: pointer;
+        font-size: 1rem;
+        user-select: none;
+    }
+
+    .checkbox-container input {
+        position: absolute;
+        opacity: 0;
+        cursor: pointer;
+        height: 0;
+        width: 0;
+    }
+
+    .checkmark {
+        position: absolute;
+        top: 0;
+        left: 0;
+        height: 25px;
+        width: 25px;
+        background-color: #eee;
+        border-radius: 4px;
+    }
+
+    .checkbox-container:hover input~.checkmark {
+        background-color: #ccc;
+    }
+
+    .checkbox-container input:checked~.checkmark {
+        background-color: var(--primary-color);
+    }
+
+    .checkmark:after {
+        content: "";
+        position: absolute;
+        display: none;
+    }
+
+    .checkbox-container input:checked~.checkmark:after {
+        display: block;
+    }
+
+    .checkbox-container .checkmark:after {
+        left: 9px;
+        top: 5px;
+        width: 5px;
+        height: 10px;
+        border: solid white;
+        border-width: 0 3px 3px 0;
+        transform: rotate(45deg);
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function toggleSignButton() {
+        const name = document.getElementById('signature_name').value;
+        const agree = document.getElementById('agree_terms').checked;
+        document.getElementById('btn-sign').disabled = !(name.length > 5 && agree);
+    }
+
+    async function submitSignature() {
+        const bookingId = "{{ quotation.booking_id }}";
+        const signature = document.getElementById('signature_name').value;
+
+        const formData = new FormData();
+        formData.append('signature_data', signature);
+
+        try {
+            const res = await fetch(`/api/bookings/${bookingId}/contract/sign`, {
+                method: 'POST',
+                body: formData
+            });
+            const data = await res.json();
+            if (data.success) {
+                window.location.href = `/bookings/step/payment/${bookingId}`;
+            }
+        } catch (err) {
+            alert('Error signing contract: ' + err);
+        }
+    }
+</script>
+{% endblock %}

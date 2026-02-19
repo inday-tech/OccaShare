@@ -1,0 +1,137 @@
+{% extends "admin/layout.html" %}
+
+{% block title %}KYC & Fraud Review - Admin Dashboard{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>KYC & Fraud Review Queue</h1>
+    <p>Monitor high-risk verifications and review flagged activities.</p>
+</div>
+
+<div class="review-filters mb-4">
+    <div class="search-box">
+        <i class="fas fa-search"></i>
+        <input type="text" placeholder="Search by booking or customer name..." class="form-control">
+    </div>
+    <div class="filter-group">
+        <select class="form-control">
+            <option>All Risk Levels</option>
+            <option>High Risk Only</option>
+            <option>OCR Failures</option>
+        </select>
+    </div>
+</div>
+
+<div class="review-card">
+    <table class="audit-table">
+        <thead>
+            <tr>
+                <th>Booking</th>
+                <th>Customer</th>
+                <th>Last Step</th>
+                <th>Status</th>
+                <th>Risk Flags</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for booking in high_risk_bookings %}
+            <tr>
+                <td><strong>#BK-{{ booking.id }}</strong></td>
+                <td>{{ booking.user.first_name }} {{ booking.user.last_name }}</td>
+                <td><span class="step-tag">{{ booking.verification_attempts[-1].step if booking.verification_attempts
+                        else 'N/A' }}</span></td>
+                <td>
+                    <span class="status-badge status-{{ booking.status }}">
+                        {{ booking.status|capitalize }}
+                    </span>
+                </td>
+                <td>
+                    {% for flag in booking.fraud_flags %}
+                    <span class="flag-pill {{ flag.flag_type }}">{{ flag.flag_type|replace('_', ' ')|capitalize
+                        }}</span>
+                    {% endfor %}
+                    {% if not booking.fraud_flags %}
+                    <span class="text-muted">None</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <a href="/admin/bookings/{{ booking.id }}/kyc" class="btn btn-sm btn-outline">Review Details</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<style>
+    .review-filters {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+
+    .search-box {
+        position: relative;
+        flex: 1;
+    }
+
+    .search-box i {
+        position: absolute;
+        left: 1rem;
+        top: 1rem;
+        color: #94a3b8;
+    }
+
+    .search-box input {
+        padding-left: 3rem;
+        border-radius: 2rem;
+    }
+
+    .filter-group select {
+        border-radius: 2rem;
+        width: 200px;
+    }
+
+    .flag-pill {
+        font-size: 0.75rem;
+        padding: 0.25rem 0.6rem;
+        border-radius: 1rem;
+        font-weight: 700;
+    }
+
+    .flag-pill.high_risk {
+        background: #fee2e2;
+        color: #ef4444;
+    }
+
+    .flag-pill.ocr_failure {
+        background: #fef3c7;
+        color: #d97706;
+    }
+
+    .audit-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .audit-table th,
+    .audit-table td {
+        padding: 1.25rem;
+        border-bottom: 1px solid #f1f5f9;
+        text-align: left;
+    }
+
+    .status-badge {
+        padding: 0.4rem 0.8rem;
+        border-radius: 2rem;
+        font-size: 0.8rem;
+        font-weight: 700;
+    }
+
+    .status-badge.status-flagged {
+        background: #fef2f2;
+        color: #ef4444;
+    }
+</style>
+{% endblock %}

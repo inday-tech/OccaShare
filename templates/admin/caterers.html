@@ -44,32 +44,72 @@
                         <div style="font-weight: 600;">{{ caterer.contact_phone }}</div>
                     </td>
                     <td style="padding: 1.5rem;">
-                        {% if caterer.verification_status == 'Verified' %}
-                        <span
-                            style="padding: 0.5rem 1rem; border-radius: 2rem; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; background: #dcfce7; color: #166534;">Verified</span>
-                        {% elif caterer.verification_status == 'Pending' %}
-                        <span
-                            style="padding: 0.5rem 1rem; border-radius: 2rem; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; background: #fef3c7; color: #92400e;">Pending
-                            Evaluation</span>
-                        {% else %}
-                        <span
-                            style="padding: 0.5rem 1rem; border-radius: 2rem; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; background: #fee2e2; color: #991b1b;">{{
-                            caterer.verification_status }}</span>
-                        {% endif %}
+                        <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                            <!-- Verification Status -->
+                            {% if caterer.verification_status == 'Verified' %}
+                            <span
+                                style="padding: 0.25rem 0.75rem; border-radius: 2rem; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; background: #dcfce7; color: #166534; width: fit-content; border: 1px solid #bbf7d0;">
+                                <i class="fas fa-check-circle"></i> Verified
+                            </span>
+                            {% elif caterer.verification_status == 'Pending' %}
+                            <span
+                                style="padding: 0.25rem 0.75rem; border-radius: 2rem; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; background: #fef3c7; color: #92400e; width: fit-content; border: 1px solid #fde68a;">
+                                <i class="fas fa-clock"></i> Pending Profile
+                            </span>
+                            {% else %}
+                            <span
+                                style="padding: 0.25rem 0.75rem; border-radius: 2rem; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; background: #fee2e2; color: #991b1b; width: fit-content; border: 1px solid #fecaca;">
+                                {{ caterer.verification_status }}
+                            </span>
+                            {% endif %}
+
+                            <!-- Account Status -->
+                            {% if caterer.user.status == 'active' %}
+                            <span
+                                style="padding: 0.25rem 0.75rem; border-radius: 2rem; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; background: #eff6ff; color: #1e40af; width: fit-content; border: 1px solid #dbeafe;">
+                                <i class="fas fa-user"></i> Active Account
+                            </span>
+                            {% elif caterer.user.status == 'pending_approval' %}
+                            <span
+                                style="padding: 0.25rem 0.75rem; border-radius: 2rem; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; background: #fff7ed; color: #9a3412; width: fit-content; border: 1px solid #ffedd5;">
+                                <i class="fas fa-user-clock"></i> Pending Approval
+                            </span>
+                            {% else %}
+                            <span
+                                style="padding: 0.25rem 0.75rem; border-radius: 2rem; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; background: #f4f4f5; color: #3f3f46; width: fit-content; border: 1px solid #e4e4e7;">
+                                <i class="fas fa-user-slash"></i> {{ caterer.user.status|title }}
+                            </span>
+                            {% endif %}
+                        </div>
                     </td>
                     <td style="padding: 1.5rem; border-radius: 0 1rem 1rem 0; text-align: right;">
-                        <div style="display: flex; gap: 0.5rem; justify-content: flex-end;">
+                        <div style="display: flex; gap: 0.75rem; justify-content: flex-end; align-items: center;">
                             <a href="/admin/verify/{{ caterer.user_id }}" class="btn-outline"
-                                style="padding: 0.5rem 1rem; font-size: 0.85rem; text-decoration: none;">Verify Info</a>
+                                style="padding: 0.6rem 1.2rem; font-size: 0.85rem; text-decoration: none; display: flex; align-items: center; gap: 0.5rem; border-radius: 0.75rem;">
+                                <i class="fas fa-eye"></i> Review & Verify
+                            </a>
 
                             <form action="/admin/caterers/{{ caterer.id }}/status" method="POST"
                                 style="display: inline;">
+                                {% if caterer.user.status == 'suspended' %}
                                 <button type="submit"
-                                    style="background: {{ '#f59e0b' if caterer.user.status == 'active' else '#10b981' }}; color: white; border: none; padding: 0.5rem 0.75rem; border-radius: 0.5rem; font-size: 0.8rem; cursor: pointer;"
-                                    title="{{ 'Suspend' if caterer.user.status == 'active' else 'Activate' }}">
-                                    <i
-                                        class="fas {{ 'fa-user-slash' if caterer.user.status == 'active' else 'fa-user-check' }}"></i>
+                                    style="background: #10b981; color: white; border: none; padding: 0.6rem 1rem; border-radius: 0.75rem; font-size: 0.85rem; cursor: pointer; display: flex; align-items: center; gap: 0.5rem; font-weight: 600;"
+                                    title="Activate Account">
+                                    <i class="fas fa-user-check"></i> Activate
                                 </button>
+                                {% elif caterer.user.status == 'pending_approval' %}
+                                <button type="submit"
+                                    style="background: #10b981; color: white; border: none; padding: 0.6rem 1rem; border-radius: 0.75rem; font-size: 0.85rem; cursor: pointer; display: flex; align-items: center; gap: 0.5rem; font-weight: 600;"
+                                    title="Approve and Activate">
+                                    <i class="fas fa-check-double"></i> Approve & Activate
+                                </button>
+                                {% else %}
+                                <button type="submit"
+                                    style="background: #fef2f2; color: #ef4444; border: 1px solid #fee2e2; padding: 0.6rem 1rem; border-radius: 0.75rem; font-size: 0.85rem; cursor: pointer; display: flex; align-items: center; gap: 0.5rem; font-weight: 600;"
+                                    title="Suspend Account">
+                                    <i class="fas fa-user-slash"></i> Suspend
+                                </button>
+                                {% endif %}
                             </form>
                         </div>
                     </td>

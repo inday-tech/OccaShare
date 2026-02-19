@@ -31,7 +31,8 @@ def register_caterer_page(request: Request, next: Optional[str] = None):
 async def register(
     request: Request,
     role: str = Form("customer"),
-    full_name: str = Form(...),
+    first_name: str = Form(...),
+    last_name: str = Form(...),
     email: str = Form(...),
     mobile_number: str = Form(...),
     address: str = Form(...),
@@ -61,8 +62,8 @@ async def register(
     except ValidationError:
         errors.append("Invalid email address")
 
-    if not full_name.strip():
-        errors.append("Full name is required")
+    if not first_name.strip() or not last_name.strip():
+        errors.append("First and last names are required")
 
     if not mobile_number.isdigit():
         errors.append("Mobile number must contain only digits")
@@ -95,10 +96,7 @@ async def register(
     
     hashed_password = auth.get_password_hash(password)
     
-    # Simple split of full_name into first and last
-    name_parts = full_name.split(" ", 1)
-    first_name = name_parts[0]
-    last_name = name_parts[1] if len(name_parts) > 1 else ""
+    # Names are already provided separately
 
     otp = utils.get_random_digits(6)
     # Set expiration to 1 minute from now
@@ -111,7 +109,7 @@ async def register(
         first_name=first_name,
         last_name=last_name,
         phone_number=mobile_number,
-        status="active",
+        status="pending_approval" if role == "caterer" else "active",
         is_verified=False,
         is_email_verified=False,
         verification_code=otp,
@@ -298,21 +296,16 @@ def check_verify_status(email: str, db: Session = Depends(database.get_db)):
     return {"verified": user.is_email_verified}
 
 @router.get("/login", response_class=HTMLResponse)
-def login_page(request: Request, db: Session = Depends(database.get_db)):
+def login_page(request: Request, next: Optional[str] = None, db: Session = Depends(database.get_db)):
     # Check if already logged in
     token = request.cookies.get("access_token")
     if token and token.startswith("Bearer "):
         token = token.split(" ")[1]
-        try:
-            payload = jwt.decode(token, auth.SECRET_KEY, algorithms=[auth.ALGORITHM])
-            email: str = payload.get("sub")
-            if email:
-                user = db.query(models.User).filter(models.User.email == email).first()
-                if user:
-                    return RedirectResponse(url=utils.get_dashboard_url(user.role))
-        except JWTError:
-            pass
-    return templates.TemplateResponse("auth/login.html", {"request": request})
+        user = auth.verify_token(token, db)
+        if user:
+            return RedirectResponse(url=next if next else utils.get_dashboard_url(user.role))
+            
+    return templates.TemplateResponse("auth/login.html", {"request": request, "next_url": next})
 
 @router.post("/login")
 def login(
@@ -343,7 +336,7 @@ def login(
     if email.lower() == "admin":
         search_email = "admin@occaserve.com"
         
-    user = db.query(models.User).filter(models.User.email == search_email).first()
+    user = db.query(models.User).filter(func.lower(models.User.email) == search_email.lower().strip()).first()
 
     if not user or not auth.verify_password(password, user.password_hash):
         return templates.TemplateResponse("auth/login.html", {

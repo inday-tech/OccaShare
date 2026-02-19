@@ -1,0 +1,443 @@
+{% extends "customer/layout.html" %}
+
+{% block title %}{{ package.name }} - OccaServe{% endblock %}
+
+{% block extra_css %}
+<style>
+    .pkg-header {
+        background: var(--white);
+        border-radius: 2rem;
+        padding: 3rem;
+        margin-bottom: 2rem;
+        border: 1px solid var(--border-color);
+        box-shadow: var(--shadow-sm);
+        display: grid;
+        grid-template-columns: 1fr 400px;
+        gap: 3rem;
+    }
+
+    .pkg-title-area h1 {
+        font-family: 'Playfair Display', serif;
+        font-size: 2.5rem;
+        color: var(--secondary-color);
+        margin-bottom: 1rem;
+    }
+
+    .pkg-metrics {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1.5rem;
+        margin: 2rem 0;
+    }
+
+    .metric-pill {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        background: var(--slate-50);
+        padding: 0.75rem 1.25rem;
+        border-radius: 1rem;
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: var(--text-color);
+    }
+
+    .metric-pill i {
+        color: var(--primary-color);
+        font-size: 1.1rem;
+    }
+
+    .booking-sidebar {
+        background: var(--white);
+        border-radius: 2rem;
+        padding: 2.5rem;
+        border: 1px solid var(--border-color);
+        box-shadow: var(--shadow-md);
+        position: sticky;
+        top: 2rem;
+    }
+
+    .menu-section {
+        margin-bottom: 3rem;
+    }
+
+    .menu-category-title {
+        font-family: 'Playfair Display', serif;
+        font-size: 1.5rem;
+        color: var(--secondary-color);
+        margin-bottom: 1.5rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 2px solid var(--primary-color);
+        display: inline-block;
+    }
+
+    .item-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .menu-item-card {
+        background: var(--white);
+        border: 1px solid var(--border-color);
+        border-radius: 1.25rem;
+        padding: 1.25rem;
+        display: flex;
+        gap: 1.25rem;
+        transition: all 0.3s ease;
+    }
+
+    .menu-item-card:hover {
+        border-color: var(--primary-color);
+        transform: translateY(-3px);
+    }
+
+    .item-img {
+        width: 80px;
+        height: 80px;
+        border-radius: 1rem;
+        object-fit: cover;
+        background: var(--slate-100);
+    }
+
+    .item-info h4 {
+        margin: 0 0 0.5rem 0;
+        font-size: 1.1rem;
+        color: var(--secondary-color);
+    }
+
+    .item-info p {
+        margin: 0;
+        font-size: 0.85rem;
+        color: var(--text-light);
+        line-height: 1.4;
+    }
+
+    .tag-list {
+        display: flex;
+        gap: 0.4rem;
+        margin-top: 0.75rem;
+        flex-wrap: wrap;
+    }
+
+    .tag {
+        font-size: 0.7rem;
+        padding: 0.2rem 0.6rem;
+        border-radius: 0.5rem;
+        background: var(--slate-100);
+        color: var(--slate-600);
+        font-weight: 600;
+    }
+
+    .price-summary-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 0.75rem;
+        font-size: 0.95rem;
+    }
+
+    .total-row {
+        border-top: 1.5px dashed var(--border-color);
+        margin-top: 1.5rem;
+        padding-top: 1.5rem;
+        font-size: 1.25rem;
+        font-weight: 800;
+        color: var(--secondary-color);
+    }
+
+    .btn-book {
+        width: 100%;
+        padding: 1.25rem;
+        border-radius: 1rem;
+        font-size: 1.1rem;
+        font-weight: 700;
+        margin-top: 2rem;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+
+    .availability-status {
+        font-size: 0.85rem;
+        margin-top: 1rem;
+        text-align: center;
+        display: none;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-top: 2rem;">
+    <!-- Breadcrumbs -->
+    <div style="margin-bottom: 2rem; font-size: 0.9rem; color: var(--text-light);">
+        <a href="/customer/marketplace" style="color: inherit;">Marketplace</a> /
+        <a href="/caterers/{{ package.caterer.id }}" style="color: inherit;">{{ package.caterer.business_name }}</a> /
+        <span style="color: var(--primary-color); font-weight: 600;">{{ package.name }}</span>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 400px; gap: 3rem; align-items: flex-start;">
+        <!-- Left: Details & Menu -->
+        <div class="content-area">
+            <div class="pkg-title-area">
+                <span class="service-badge" style="margin-bottom: 1rem; display: inline-block;">{{ package.service_type
+                    }}</span>
+                <h1>{{ package.name }}</h1>
+                <p style="font-size: 1.1rem; color: var(--text-light); line-height: 1.6;">{{ package.description }}</p>
+            </div>
+
+            <div class="pkg-metrics">
+                <div class="metric-pill">
+                    <i class="fas fa-users"></i>
+                    {{ package.min_guests }} - {{ package.max_guests or '∞' }} Guests
+                </div>
+                <div class="metric-pill">
+                    <i class="fas fa-clock"></i>
+                    {{ package.service_duration }} Hours Service
+                </div>
+                <div class="metric-pill">
+                    <i class="fas fa-map-marker-alt"></i>
+                    Coverage: {{ package.location_coverage or 'Nationwide' }}
+                </div>
+                <div class="metric-pill">
+                    <i class="fas fa-money-bill-wave"></i>
+                    ₱{{ "{:,.2f}".format(package.price_per_head or package.price) }} / Person
+                </div>
+            </div>
+
+            <!-- Inclusions Section -->
+            {% if package.inclusions %}
+            <div class="menu-section">
+                <h3 class="menu-category-title">Package Inclusions</h3>
+                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem;">
+                    {% for key, val in package.inclusions.items() %}
+                    {% if val %}
+                    <div
+                        style="display: flex; align-items: center; gap: 0.75rem; color: var(--slate-700); font-weight: 500;">
+                        <i class="fas fa-check-circle" style="color: var(--primary-color);"></i>
+                        {{ key }}
+                    </div>
+                    {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Category Menu -->
+            {% for cat, items in categorised_menu.items() %}
+            <div class="menu-section">
+                <h3 class="menu-category-title">{{ cat }}</h3>
+                <div class="item-grid">
+                    {% for item in items %}
+                    <div class="menu-item-card">
+                        <img src="{{ item.image_url or '/static/img/placeholder-dish.jpg' }}" class="item-img"
+                            alt="{{ item.name }}">
+                        <div class="item-info" style="flex: 1;">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <h4>{{ item.name }}</h4>
+                                <label
+                                    style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; color: var(--primary-color);">
+                                    <input type="checkbox" name="selected_items" value="{{ item.id }}"
+                                        style="width: 18px; height: 18px;">
+                                    Select
+                                </label>
+                            </div>
+                            <p>{{ item.description or 'A delicious selection prepared with fresh ingredients.' }}</p>
+                            <div class="tag-list">
+                                {% if item.dietary_tags %}
+                                {% for tag in item.dietary_tags %}
+                                <span class="tag">{{ tag }}</span>
+                                {% endfor %}
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endfor %}
+
+            <!-- Add-ons Section -->
+            {% if addons %}
+            <div class="menu-section">
+                <h3 class="menu-category-title">Optional Add-ons</h3>
+                <p style="color: var(--text-light); margin-bottom: 2rem;">Enhance your event with these premium options.
+                </p>
+                <div class="item-grid">
+                    {% for item in addons %}
+                    <div class="menu-item-card" style="position: relative;">
+                        <img src="{{ item.image_url or '/static/img/placeholder-dish.jpg' }}" class="item-img"
+                            alt="{{ item.name }}">
+                        <div class="item-info" style="flex: 1;">
+                            <div style="display: flex; justify-content: space-between;">
+                                <h4>{{ item.name }}</h4>
+                                <span style="font-weight: 700; color: var(--primary-color);">+₱{{
+                                    "{:,.2f}".format(item.addon_price) }}</span>
+                            </div>
+                            <p>{{ item.description }}</p>
+                            <label
+                                style="display: flex; align-items: center; gap: 0.5rem; margin-top: 1rem; cursor: pointer; color: var(--primary-color); font-weight: 700;">
+                                <input type="checkbox" name="selected_addons" value="{{ item.id }}"
+                                    data-price="{{ item.addon_price }}" onchange="calculateTotal()"
+                                    style="width: 18px; height: 18px;">
+                                Add to Quote
+                            </label>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Policies -->
+            <div class="menu-section"
+                style="background: var(--slate-50); padding: 2.5rem; border-radius: 2rem; border: 1px solid var(--border-color);">
+                <h3 style="font-family: 'Playfair Display', serif; margin-bottom: 1.5rem;">Policies & Terms</h3>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+                    <div>
+                        <h4 style="font-size: 1rem; margin-bottom: 0.5rem;"><i class="fas fa-undo"
+                                style="margin-right: 0.5rem; color: #ef4444;"></i> Cancellation</h4>
+                        <p style="font-size: 0.9rem; color: var(--text-light);">50% refund if cancelled 15 days before
+                            the event. No refund for cancellations within 7 days.</p>
+                    </div>
+                    <div>
+                        <h4 style="font-size: 1rem; margin-bottom: 0.5rem;"><i class="fas fa-credit-card"
+                                style="margin-right: 0.5rem; color: var(--primary-color);"></i> Payment Terms</h4>
+                        <p style="font-size: 0.9rem; color: var(--text-light);">{{ package.policies.payment_terms if
+                            package.policies else '30% Reservation fee required to confirm booking. Balance must be paid
+                            3 days before the event.' }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right: Booking Summary / Start -->
+        <div class="sidebar-area">
+            <div class="booking-sidebar" style="text-align: center;">
+                <div style="margin-bottom: 2rem;">
+                    <div
+                        style="font-size: 0.9rem; color: #64748b; text-transform: uppercase; letter-spacing: 0.1em; font-weight: 700; margin-bottom: 0.5rem;">
+                        Catering Package</div>
+                    <h3
+                        style="font-family: 'Outfit', sans-serif; margin-bottom: 0; font-size: 1.8rem; font-weight: 800; color: var(--secondary-color);">
+                        Reserve Your Event</h3>
+                </div>
+
+                <div
+                    style="background: #f8fafc; border-radius: 1.5rem; padding: 2rem; margin-bottom: 2rem; text-align: left;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 1rem;">
+                        <span style="color: #64748b; font-weight: 500;">Starting at</span>
+                        <span style="font-weight: 800; color: var(--primary-color); font-size: 1.25rem;">₱{{
+                            "{:,.2f}".format(package.price_per_head or package.price) }} / head</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 1.5rem;">
+                        <span style="color: #64748b; font-weight: 500;">Minimum guests</span>
+                        <span style="font-weight: 800; color: var(--secondary-color);">{{ package.min_guests }}
+                            Pax</span>
+                    </div>
+
+                    <div style="border-top: 1px solid #e2e8f0; padding-top: 1.5rem;">
+                        <ul
+                            style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.75rem;">
+                            <li
+                                style="display: flex; align-items: center; gap: 0.75rem; font-weight: 600; font-size: 0.9rem; color: #475569;">
+                                <i class="fas fa-shield-check" style="color: #0ea5e9;"></i> Secure Identity Verification
+                            </li>
+                            <li
+                                style="display: flex; align-items: center; gap: 0.75rem; font-weight: 600; font-size: 0.9rem; color: #475569;">
+                                <i class="fas fa-file-signature" style="color: #0ea5e9;"></i> Digital Contract Signing
+                            </li>
+                            <li
+                                style="display: flex; align-items: center; gap: 0.75rem; font-weight: 600; font-size: 0.9rem; color: #0ea5e9;">
+                                <i class="fas fa-bolt" style="color: #f59e0b;"></i> Instant Availability Check
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <a id="submitBtn" href="/bookings/start/{{ package.caterer.id }}?package_id={{ package.id }}"
+                    class="btn-primary"
+                    style="display: flex; align-items: center; justify-content: center; gap: 0.75rem; padding: 1.25rem; border-radius: 1.25rem; font-weight: 800; font-size: 1.1rem; text-decoration: none; transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);">
+                    Book Now <i class="fas fa-arrow-right"></i>
+                </a>
+
+                <p style="font-size: 0.85rem; color: #94a3b8; margin-top: 1.5rem; font-weight: 500;">
+                    Complete our secure 4-step verification to confirm your booking.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    const basePricePerHead = Number("{{ package.price_per_head or package.price or 0 }}");
+    const packageId = Number("{{ package.id }}");
+    const catererId = Number("{{ package.caterer.id }}");
+
+    function calculateTotal() {
+        const guests = parseInt(document.getElementById('guest_count').value) || 0;
+        document.getElementById('display-guests').innerText = guests;
+
+        const baseTotal = guests * basePricePerHead;
+        document.getElementById('display-base-price').innerText = '₱' + baseTotal.toLocaleString(undefined, { minimumFractionDigits: 2 });
+
+        const addonCheckboxes = document.querySelectorAll('input[name="selected_addons"]:checked');
+        const addonContainer = document.getElementById('addon-rows');
+        addonContainer.innerHTML = '';
+
+        let addonTotal = 0;
+        addonCheckboxes.forEach(cb => {
+            const price = parseFloat(cb.dataset.price);
+            addonTotal += price;
+
+            const row = document.createElement('div');
+            row.className = 'price-summary-row';
+            row.innerHTML = `<span>+ ${cb.closest('.menu-item-card').querySelector('h4').innerText}</span><span>₱${price.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>`;
+            addonContainer.appendChild(row);
+        });
+
+        const grandTotal = baseTotal + addonTotal;
+        const resFee = grandTotal * 0.20;
+
+        document.getElementById('display-grand-total').innerText = '₱' + grandTotal.toLocaleString(undefined, { minimumFractionDigits: 2 });
+        document.getElementById('display-res-fee').innerText = '₱' + resFee.toLocaleString(undefined, { minimumFractionDigits: 2 });
+
+        document.getElementById('total_price_input').value = grandTotal;
+        document.getElementById('reservation_fee_input').value = resFee;
+    }
+
+    async function checkAvailability() {
+        const date = document.getElementById('event_date').value;
+        const msg = document.getElementById('availability-msg');
+        const submitBtn = document.getElementById('submitBtn');
+
+        if (!date) return;
+
+        msg.style.display = 'block';
+        msg.style.color = 'var(--text-light)';
+        msg.innerText = 'Checking availability...';
+
+        try {
+            const response = await fetch(`/packages/api/check-availability?caterer_id=${catererId}&date_str=${date}`);
+            const data = await response.json();
+
+            if (data.available) {
+                msg.style.color = '#10b981';
+                msg.innerHTML = '<i class="fas fa-check-circle"></i> Date is available!';
+                submitBtn.disabled = false;
+                submitBtn.style.opacity = '1';
+            } else {
+                msg.style.color = '#ef4444';
+                msg.innerHTML = `<i class="fas fa-times-circle"></i> ${data.reason || 'Not available'}`;
+                submitBtn.disabled = true;
+                submitBtn.style.opacity = '0.5';
+            }
+        } catch (error) {
+            msg.innerText = 'Error checking availability.';
+        }
+    }
+
+    // Initial calculation
+    calculateTotal();
+</script>
+{% endblock %}

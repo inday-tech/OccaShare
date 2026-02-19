@@ -1,74 +1,229 @@
 {% extends "customer/booking_wizard/wizard_base.html" %}
 
-{% block title %}Booking Details - OccaServe{% endblock %}
+{% block title %}Event Details - Phase 1 - OccaServe{% endblock %}
+
+{% block extra_css %}
+<style>
+    .details-grid {
+        display: grid;
+        grid-template-columns: 1fr 320px;
+        gap: 3rem;
+        align-items: flex-start;
+    }
+
+    .form-section-title {
+        font-family: 'Outfit', sans-serif;
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--secondary-color);
+        margin-bottom: 2rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .calculator-card {
+        background: #f8fafc;
+        border-radius: 1.5rem;
+        padding: 2rem;
+        border: 1px solid var(--border-color);
+        position: sticky;
+        top: 2rem;
+    }
+
+    .calc-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 1rem;
+        font-size: 0.95rem;
+        color: #64748b;
+    }
+
+    .calc-total {
+        border-top: 1.5px dashed #e2e8f0;
+        margin-top: 1.5rem;
+        padding-top: 1.5rem;
+        display: flex;
+        justify-content: space-between;
+        font-weight: 800;
+        font-size: 1.25rem;
+        color: var(--secondary-color);
+    }
+
+    .availability-chip {
+        padding: 0.5rem 1rem;
+        border-radius: 2rem;
+        font-size: 0.85rem;
+        font-weight: 700;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-top: 0.75rem;
+        display: none;
+    }
+</style>
+{% endblock %}
 
 {% block content %}
-<div class="wizard-header-content">
-    <h2 class="wizard-title font-playfair">Nearly there! Tell us more about the event.</h2>
-    <p class="wizard-subtitle">These details help the caterer understand your vision and prepare accordingly.</p>
+<div class="wizard-header-content" style="text-align: left; margin-bottom: 3rem;">
+    <h2 class="wizard-title" style="text-align: left; font-family: 'Outfit', sans-serif; font-weight: 800;">Event
+        Details</h2>
+    <p class="wizard-subtitle" style="text-align: left;">Phase 1: Configure your event requirements and check
+        availability.</p>
 </div>
 
-<form action="/bookings/step/details" method="POST" style="max-width: 600px; margin: 0 auto;">
-    <div class="form-group" style="margin-bottom: 2rem;">
-        <label style="display: block; font-weight: 600; margin-bottom: 0.75rem; color: var(--secondary-color);">Event
-            Name</label>
-        <div style="position: relative;">
-            <i class="fas fa-magic"
-                style="position: absolute; left: 1.25rem; top: 50%; transform: translateY(-50%); color: var(--primary-color);"></i>
-            <input type="text" name="event_name" required class="form-input" placeholder="e.g., Garcia Family Reunion"
-                style="width: 100%; padding: 1rem 1rem 1rem 3rem; border-radius: 1rem; border: 1px solid var(--border-color); font-family: inherit;">
+<form action="/bookings/step/details" method="POST" id="detailsForm">
+    <input type="hidden" name="caterer_id" value="{{ caterer.id }}">
+    <input type="hidden" name="package_id" value="{{ package.id if package else '' }}">
+    <input type="hidden" name="total_price" id="total_price_input">
+    <input type="hidden" name="reservation_fee" id="reservation_fee_input">
+
+    <div class="details-grid">
+        <div class="form-area">
+            <h3 class="form-section-title"><i class="fas fa-calendar-star" style="color: var(--primary-color);"></i>
+                Essential Info</h3>
+
+            <div class="form-group" style="margin-bottom: 1.5rem;">
+                <label class="form-label">Event Name</label>
+                <input type="text" name="event_name" class="form-input" placeholder="e.g., Rodriguez Wedding" required>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
+                <div class="form-group">
+                    <label class="form-label">Event Type</label>
+                    <select name="event_type" class="form-input" required>
+                        <option value="Wedding">Wedding</option>
+                        <option value="Birthday">Birthday</option>
+                        <option value="Corporate">Corporate</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Number of Guests</label>
+                    <input type="number" name="guest_count" id="guest_count" class="form-input"
+                        value="{{ package.min_guests or 50 }}" min="{{ package.min_guests or 1 }}"
+                        oninput="updateCalculator()" required>
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2rem;">
+                <div class="form-group">
+                    <label class="form-label">Event Date</label>
+                    <input type="date" name="event_date" id="event_date" class="form-input" required
+                        onchange="checkAvailability()">
+                    <div id="availability-chip" class="availability-chip"></div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Event Time</label>
+                    <input type="time" name="event_time" class="form-input" required>
+                </div>
+            </div>
+
+            <h3 class="form-section-title"><i class="fas fa-map-pin" style="color: var(--primary-color);"></i> Logistics
+            </h3>
+            <div class="form-group" style="margin-bottom: 2rem;">
+                <label class="form-label">Venue Location</label>
+                <textarea name="venue_address" class="form-input" rows="3"
+                    placeholder="Provide complete address for logistics planning..." required></textarea>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Special Requests (Optional)</label>
+                <textarea name="special_requests" class="form-input" rows="3"
+                    placeholder="e.g., Vegan options, specific theme colors..."></textarea>
+            </div>
+        </div>
+
+        <div class="calculator-area">
+            <div class="calculator-card">
+                <h4
+                    style="font-family: 'Outfit', sans-serif; font-weight: 700; margin-bottom: 1.5rem; color: var(--secondary-color);">
+                    Cost Projection</h4>
+
+                <div class="calc-row">
+                    <span>Base Price per Head</span>
+                    <span style="font-weight: 700;">₱{{ "{:,.2f}".format(package.price_per_head or package.price or 0)
+                        }}</span>
+                </div>
+                <div class="calc-row">
+                    <span>Estimated Guests</span>
+                    <span id="calc-guests" style="font-weight: 700;">{{ package.min_guests or 50 }}</span>
+                </div>
+
+                <div class="calc-total">
+                    <span>Total Estimate</span>
+                    <span id="calc-grand-total">₱0.00</span>
+                </div>
+
+                <div style="margin-top: 1.5rem; font-size: 0.85rem; color: #94a3b8; line-height: 1.4;">
+                    <i class="fas fa-info-circle"></i> Reservation requires a 20-30% downpayment after verification.
+                </div>
+            </div>
         </div>
     </div>
 
-    <div class="form-group" style="margin-bottom: 2rem;">
-        <label style="display: block; font-weight: 600; margin-bottom: 0.75rem; color: var(--secondary-color);">Event
-            Type</label>
-        <div style="position: relative;">
-            <i class="fas fa-tag"
-                style="position: absolute; left: 1.25rem; top: 50%; transform: translateY(-50%); color: var(--primary-color);"></i>
-            <select name="event_type" required class="form-input"
-                style="width: 100%; padding: 1rem 1rem 1rem 3rem; border-radius: 1rem; border: 1px solid var(--border-color); font-family: inherit; appearance: none; background: white;">
-                <option value="" disabled selected>Select event type</option>
-                <option value="Wedding">Wedding</option>
-                <option value="Birthday">Birthday</option>
-                <option value="Corporate">Corporate</option>
-                <option value="Private Party">Private Party</option>
-                <option value="Other">Other</option>
-            </select>
-            <i class="fas fa-chevron-down"
-                style="position: absolute; right: 1.25rem; top: 50%; transform: translateY(-50%); color: var(--text-light); pointer-events: none;"></i>
-        </div>
-    </div>
-
-    <div class="form-group" style="margin-bottom: 2rem;">
-        <label style="display: block; font-weight: 600; margin-bottom: 0.75rem; color: var(--secondary-color);">Venue /
-            Address</label>
-        <div style="position: relative;">
-            <i class="fas fa-map-marker-alt"
-                style="position: absolute; left: 1.25rem; top: 1.25rem; color: var(--primary-color);"></i>
-            <textarea name="venue_address" required class="form-input" rows="3"
-                placeholder="Full address or name of the venue..."
-                style="width: 100%; padding: 1rem 1rem 1rem 3rem; border-radius: 1rem; border: 1px solid var(--border-color); font-family: inherit; resize: none;"></textarea>
-        </div>
-    </div>
-
-    <div class="form-group" style="margin-bottom: 3.5rem;">
-        <label
-            style="display: block; font-weight: 600; margin-bottom: 0.75rem; color: var(--secondary-color);">Additional
-            Notes / Special Requests</label>
-        <textarea name="special_requests" class="form-input" rows="4"
-            placeholder="Dietary restrictions, specific menu preferences, or any other notes for the caterer..."
-            style="width: 100%; padding: 1.25rem; border-radius: 1rem; border: 1px solid var(--border-color); font-family: inherit; resize: none;">{{ booking_data.special_requests or '' }}</textarea>
-    </div>
-
-    <div class="wizard-actions">
-        <a href="/bookings/step/date" class="btn-prev">
-            <i class="fas fa-arrow-left"></i> Back to Date
+    <div class="wizard-actions" style="border-top: 1px solid #e2e8f0; padding-top: 2rem; margin-top: 3rem;">
+        <a href="/caterers/{{ caterer.id }}" class="btn-prev">
+            <i class="fas fa-times"></i> Cancel Booking
         </a>
-        <button type="submit" class="btn-primary"
-            style="padding: 1.25rem 2.5rem; border-radius: 1rem; font-weight: 700;">
-            Next: Review Summary <i class="fas fa-chevron-right" style="margin-left: 0.5rem; font-size: 0.8rem;"></i>
+        <button type="submit" id="submitBtn" class="btn-primary"
+            style="padding: 1.25rem 3rem; border-radius: 1.25rem; font-weight: 800;">
+            Next: Verify Identity <i class="fas fa-shield-check" style="margin-left: 0.5rem;"></i>
         </button>
     </div>
 </form>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    const pricePerHead = Number("{{ package.price_per_head or package.price or 0 }}");
+    const catererId = Number("{{ caterer.id }}");
+
+    function updateCalculator() {
+        const guests = parseInt(document.getElementById('guest_count').value) || 0;
+        document.getElementById('calc-guests').innerText = guests;
+
+        const total = guests * pricePerHead;
+        document.getElementById('calc-grand-total').innerText = '₱' + total.toLocaleString(undefined, { minimumFractionDigits: 2 });
+        document.getElementById('total_price_input').value = total;
+        document.getElementById('reservation_fee_input').value = total * 0.3; // Default 30% for estimate
+    }
+
+    async function checkAvailability() {
+        const date = document.getElementById('event_date').value;
+        const chip = document.getElementById('availability-chip');
+        const submitBtn = document.getElementById('submitBtn');
+
+        if (!date) return;
+
+        chip.style.display = 'inline-flex';
+        chip.style.background = '#f1f5f9';
+        chip.style.color = '#64748b';
+        chip.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Checking...';
+
+        try {
+            const response = await fetch(`/packages/api/check-availability?caterer_id=${catererId}&date_str=${date}`);
+            const data = await response.json();
+
+            if (data.available) {
+                chip.style.background = '#dcfce7';
+                chip.style.color = '#166534';
+                chip.innerHTML = '<i class="fas fa-check-circle"></i> Date Available';
+                submitBtn.disabled = false;
+                submitBtn.style.opacity = '1';
+            } else {
+                chip.style.background = '#fee2e2';
+                chip.style.color = '#991b1b';
+                chip.innerHTML = '<i class="fas fa-times-circle"></i> Fully Booked';
+                submitBtn.disabled = true;
+                submitBtn.style.opacity = '0.5';
+            }
+        } catch (error) {
+            chip.innerHTML = 'Error checking date';
+        }
+    }
+
+    // Initial run
+    updateCalculator();
+</script>
 {% endblock %}

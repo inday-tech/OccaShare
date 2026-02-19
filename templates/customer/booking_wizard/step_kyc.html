@@ -1,0 +1,313 @@
+{% extends "customer/booking_wizard/wizard_base.html" %}
+
+{% block title %}Identity Verification - OccaServe{% endblock %}
+
+{% block content %}
+<div class="kyc-step">
+    <h2 class="wizard-title">Identity Verification</h2>
+    <p class="wizard-subtitle">We need to verify your identity to ensure a secure booking experience.</p>
+
+    <div id="kyc-form-container">
+        <!-- Step 1: ID Upload -->
+        <div id="step-id-upload" class="kyc-substep active">
+            <div class="upload-zone" onclick="document.getElementById('id_document').click()">
+                <i class="fas fa-id-card fa-3x"></i>
+                <h3>Upload Government ID</h3>
+                <p>Drag and drop or click to upload (JPG, PNG, PDF)</p>
+                <input type="file" id="id_document" style="display: none;" onchange="handleIdUpload(this)">
+            </div>
+            <div id="id-preview" class="image-preview" style="display: none;">
+                <img id="id-image" src="" alt="ID Preview">
+                <button type="button" class="btn-remove" onclick="resetIdUpload()">Remove</button>
+            </div>
+        </div>
+
+        <!-- Step 2: Selfie -->
+        <div id="step-selfie" class="kyc-substep" style="display: none;">
+            <div class="camera-zone">
+                <div class="camera-circle">
+                    <i class="fas fa-camera fa-2x"></i>
+                    <video id="camera-stream" autoplay playsinline style="display: none;"></video>
+                    <canvas id="selfie-canvas" style="display: none;"></canvas>
+                </div>
+                <h3>Take a Selfie</h3>
+                <p>Position your face within the frame and look directly at the camera.</p>
+                <button type="button" class="btn btn-primary" onclick="startCamera()">Start Camera</button>
+                <button type="button" id="btn-capture" class="btn btn-secondary" style="display: none;"
+                    onclick="captureSelfie()">Capture</button>
+            </div>
+            <div id="selfie-preview" class="image-preview" style="display: none;">
+                <img id="selfie-image" src="" alt="Selfie Preview">
+                <button type="button" class="btn-remove" onclick="resetSelfie()">Retake</button>
+            </div>
+        </div>
+
+        <!-- Step 3: Processing -->
+        <div id="step-processing" class="kyc-substep" style="display: none;">
+            <div class="processing-status">
+                <div class="spinner"></div>
+                <h3 id="status-text">Verifying your identity...</h3>
+                <p id="status-subtext">This will only take a moment.</p>
+                <div class="progress-steps">
+                    <div id="proc-ocr" class="proc-item"><i class="fas fa-circle-notch fa-spin"></i> Extracting ID Data
+                    </div>
+                    <div id="proc-liveness" class="proc-item"><i class="fas fa-circle text-muted"></i> Liveness Check
+                    </div>
+                    <div id="proc-match" class="proc-item"><i class="fas fa-circle text-muted"></i> Face Matching</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="wizard-actions">
+        <a href="/bookings/step/details" class="btn-prev">
+            <i class="fas fa-arrow-left"></i> Back to Details
+        </a>
+        <button type="button" id="btn-next" class="btn btn-primary" style="display: none;" onclick="submitKyc()">
+            Continue to Quotation <i class="fas fa-arrow-right"></i>
+        </button>
+    </div>
+</div>
+
+<style>
+    .kyc-substep {
+        animation: fadeIn 0.3s ease-in-out;
+    }
+
+    .upload-zone,
+    .camera-zone {
+        border: 2px dashed var(--border-color);
+        border-radius: 1.5rem;
+        padding: 4rem;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.2s;
+        background: #f8fafc;
+    }
+
+    .upload-zone:hover {
+        border-color: var(--primary-color);
+        background: #f1f5f9;
+    }
+
+    .upload-zone i {
+        color: var(--primary-color);
+        margin-bottom: 1.5rem;
+    }
+
+    .image-preview {
+        margin-top: 2rem;
+        text-align: center;
+    }
+
+    .image-preview img {
+        max-width: 100%;
+        max-height: 300px;
+        border-radius: 1rem;
+        box-shadow: var(--shadow-md);
+    }
+
+    .btn-remove {
+        display: block;
+        margin: 1rem auto;
+        color: #ef4444;
+        background: none;
+        border: none;
+        font-weight: 600;
+        cursor: pointer;
+    }
+
+    .camera-circle {
+        width: 250px;
+        height: 250px;
+        border-radius: 50%;
+        background: #000;
+        margin: 0 auto 2rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        border: 4px solid var(--white);
+        box-shadow: var(--shadow-lg);
+    }
+
+    .camera-circle video {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .proc-item {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1rem;
+        font-size: 1.1rem;
+        color: #64748b;
+    }
+
+    .proc-item.active {
+        color: var(--primary-color);
+        font-weight: 600;
+    }
+
+    .proc-item.success {
+        color: #22c55e;
+    }
+
+    .proc-item.success i {
+        color: #22c55e;
+    }
+
+    .spinner {
+        width: 60px;
+        height: 60px;
+        border: 5px solid #f3f3f3;
+        border-top: 5px solid var(--primary-color);
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 2rem;
+    }
+
+    @keyframes spin {
+        0% {
+            transform: rotate(0deg);
+        }
+
+        100% {
+            transform: rotate(360deg);
+        }
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    let bookingId = "{{ booking_id }}";
+    let idFile = null;
+    let selfieBlob = null;
+
+    function handleIdUpload(input) {
+        if (input.files && input.files[0]) {
+            idFile = input.files[0];
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                document.getElementById('id-image').src = e.target.result;
+                document.getElementById('step-id-upload').style.display = 'none';
+                document.getElementById('id-preview').style.display = 'block';
+                // Automatically move to selfie after a short delay
+                setTimeout(() => {
+                    document.getElementById('id-preview').style.display = 'none';
+                    document.getElementById('step-selfie').style.display = 'block';
+                }, 1500);
+            };
+            reader.readAsDataURL(idFile);
+        }
+    }
+
+    function resetIdUpload() {
+        idFile = null;
+        document.getElementById('id-preview').style.display = 'none';
+        document.getElementById('step-id-upload').style.display = 'block';
+    }
+
+    async function startCamera() {
+        const video = document.getElementById('camera-stream');
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+            video.srcObject = stream;
+            video.style.display = 'block';
+            document.querySelector('.camera-circle i').style.display = 'none';
+            document.getElementById('btn-capture').style.display = 'inline-block';
+        } catch (err) {
+            alert('Could not access camera: ' + err);
+        }
+    }
+
+    function captureSelfie() {
+        const video = document.getElementById('camera-stream');
+        const canvas = document.getElementById('selfie-canvas');
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        canvas.getContext('2d').drawImage(video, 0, 0);
+
+        canvas.toBlob(blob => {
+            selfieBlob = blob;
+            document.getElementById('selfie-image').src = canvas.toDataURL();
+            document.getElementById('step-selfie').style.display = 'none';
+            document.getElementById('selfie-preview').style.display = 'block';
+
+            // Stop camera
+            video.srcObject.getTracks().forEach(track => track.stop());
+
+            // Process automatically
+            startVerification();
+        }, 'image/jpeg');
+    }
+
+    async function startVerification() {
+        document.getElementById('selfie-preview').style.display = 'none';
+        document.getElementById('step-processing').style.display = 'block';
+
+        // 1. Upload ID & OCR
+        updateProcStep('proc-ocr', 'active');
+        const formData = new FormData();
+        formData.append('id_document', idFile);
+
+        try {
+            let res = await fetch(`/api/bookings/${bookingId}/upload-id`, { method: 'POST', body: formData });
+            let data = await res.json();
+            if (!data.success) throw new Error(data.error);
+            updateProcStep('proc-ocr', 'success');
+
+            // 2. Upload Selfie & Liveness
+            updateProcStep('proc-liveness', 'active');
+            const selfieData = new FormData();
+            selfieData.append('selfie', selfieBlob, 'selfie.jpg');
+            res = await fetch(`/api/bookings/${bookingId}/selfie`, { method: 'POST', body: selfieData });
+            data = await res.json();
+            if (!data.success) throw new Error(data.error);
+            updateProcStep('proc-liveness', 'success');
+
+            // 3. Match
+            updateProcStep('proc-match', 'active');
+            res = await fetch(`/api/bookings/${bookingId}/verify`);
+            data = await res.json();
+            if (!data.success) throw new Error(data.message);
+            updateProcStep('proc-match', 'success');
+
+            document.getElementById('status-text').innerText = 'Verification Successful!';
+            document.getElementById('status-subtext').innerText = 'Taking you to your quotation...';
+            document.getElementById('btn-next').style.display = 'inline-block';
+
+            // Auto redirect after success message
+            setTimeout(() => {
+                window.location.href = `/bookings/step/quotation/${bookingId}`;
+            }, 2000);
+
+        } catch (err) {
+            document.getElementById('status-text').innerText = 'Verification Failed';
+            document.getElementById('status-subtext').innerText = err.message;
+            document.querySelector('.spinner').style.display = 'none';
+            // Show retry button
+            let retryBtn = document.createElement('button');
+            retryBtn.className = 'btn btn-secondary';
+            retryBtn.innerText = 'Try Again';
+            retryBtn.onclick = () => window.location.reload();
+            document.getElementById('step-processing').appendChild(retryBtn);
+        }
+    }
+
+    function updateProcStep(id, status) {
+        const el = document.getElementById(id);
+        if (status === 'active') {
+            el.classList.add('active');
+            el.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> ' + el.innerText;
+        } else if (status === 'success') {
+            el.classList.remove('active');
+            el.classList.add('success');
+            el.innerHTML = '<i class="fas fa-check-circle"></i> ' + el.innerText.replace('...', '');
+        }
+    }
+</script>
+{% endblock %}
