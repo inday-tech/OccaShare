@@ -15,59 +15,90 @@
     </div>
 </div>
 
-<div class="kyc-review-grid">
+<div class="kyc-review-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
     <!-- Left: Identity Documents -->
     <div class="review-card">
-        <h3>Identity Documents</h3>
-        <div class="doc-comparison">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+            <h3>Biometric Evidence</h3>
+            <span class="badge"
+                style="background: var(--slate-100); color: var(--slate-700); padding: 0.25rem 0.75rem; border-radius: 1rem; font-size: 0.75rem; font-weight: 600;">
+                ID: {{ kyc.verification_type or 'Government ID' }}
+            </span>
+        </div>
+
+        <div class="doc-comparison" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
             <div class="doc-item">
-                <p class="label">Government ID</p>
-                <div class="img-container">
-                    <img src="{{ booking.ocr_verification.document_url }}" alt="ID Document">
+                <p class="label-tiny">Government ID</p>
+                <div class="img-container"
+                    style="border-radius: 0.75rem; overflow: hidden; border: 1px solid var(--border-color); height: 180px;">
+                    <img src="{{ kyc.document_url }}" style="width: 100%; height: 100%; object-fit: contain;"
+                        alt="ID Document">
                 </div>
+                <div style="margin-top: 0.5rem; font-size: 0.75rem; font-weight: 700; color: #64748b;">NUM: {{
+                    kyc.id_number }}</div>
             </div>
             <div class="doc-item">
-                <p class="label">Live Selfie</p>
-                <div class="img-container">
-                    <img src="{{ booking.ocr_verification.selfie_url }}" alt="Selfie">
+                <p class="label-tiny">Liveness Check</p>
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.25rem;">
+                    <div class="img-container small"
+                        style="height: 60px; border-radius: 0.25rem; overflow: hidden; border: 1px solid #e2e8f0;">
+                        <img src="{{ kyc.selfie_url }}" style="width: 100%; height: 100%; object-fit: cover;">
+                    </div>
+                    <div class="img-container small"
+                        style="height: 60px; border-radius: 0.25rem; overflow: hidden; border: 1px solid #e2e8f0;">
+                        <img src="{{ kyc.selfie_2_url or kyc.selfie_url }}"
+                            style="width: 100%; height: 100%; object-fit: cover;">
+                    </div>
+                    <div class="img-container small"
+                        style="height: 60px; border-radius: 0.25rem; overflow: hidden; border: 1px solid #e2e8f0;">
+                        <img src="{{ kyc.selfie_3_url or kyc.selfie_url }}"
+                            style="width: 100%; height: 100%; object-fit: cover;">
+                    </div>
+                </div>
+                <div class="badge {% if kyc.liveness_status == 'passed' %}badge-success{% else %}badge-danger{% endif %}"
+                    style="margin-top: 0.5rem; display: inline-block;">
+                    Liveness: {{ kyc.liveness_status|capitalize }}
                 </div>
             </div>
         </div>
 
-        <div class="match-score">
-            <span>Face Match Score:</span>
-            <span class="score-value success">95% Match</span>
+        <div class="match-score"
+            style="margin-top: 1.5rem; padding: 1rem; background: #f8fafc; border-radius: 0.75rem; display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-weight: 600; color: #4b5563;">AI Fraud Score:</span>
+            <span class="score-value"
+                style="font-size: 1.25rem; font-weight: 800; color: {% if kyc.fraud_score >= 75 %}#10b981{% elif kyc.fraud_score >= 60 %}#f59e0b{% else %}#ef4444{% endif %};">
+                {{ kyc.fraud_score }}/100
+            </span>
         </div>
     </div>
 
-    <!-- Right: OCR & Details -->
+    <!-- Right: OCR & Actions -->
     <div class="review-card">
-        <h3>Extracted OCR Data</h3>
-        <div class="ocr-data-list">
-            {% for key, value in booking.ocr_verification.ocr_data.items() %}
-            <div class="ocr-item">
-                <span class="label">{{ key|replace('_', ' ')|capitalize }}</span>
-                <span class="value">{{ value }}</span>
+        <h3>Compliance & Actions</h3>
+
+        <div class="ocr-data-list"
+            style="margin: 1.5rem 0; background: #f1f5f9; padding: 1rem; border-radius: 0.75rem;">
+            <div style="font-size: 0.7rem; font-weight: 800; color: #64748b; text-transform: uppercase;">System Notes
             </div>
-            {% endfor %}
+            <p style="font-size: 0.85rem; color: #1e293b; margin-top: 0.5rem;">
+                {{ kyc.failure_reason or 'No critical flags detected by automated scan.' }}
+            </p>
         </div>
 
         <div style="margin-top: 2rem;">
-            <h3>Fraud/Risk Controls</h3>
-            <form action="/admin/bookings/{{ booking.id }}/flag" method="POST" class="fraud-form">
-                <div class="form-group">
-                    <label>Flag Type</label>
-                    <select name="flag_type" class="form-control">
-                        <option value="suspicious">Suspicious Activity</option>
-                        <option value="id_mismatch">ID Mismatch</option>
-                        <option value="multiple_accounts">Multiple Accounts</option>
-                    </select>
+            <h3>Manual Audit Action</h3>
+            <form action="/admin/kyc/{{ kyc.id }}/action" method="POST" class="fraud-form">
+                <div class="form-group" style="margin-bottom: 1rem;">
+                    <label style="font-size: 0.8rem; font-weight: 700;">Decision Notes</label>
+                    <textarea name="notes" class="form-control" placeholder="Add manual review findings here..."
+                        style="width: 100%; min-height: 80px; padding: 0.75rem; border-radius: 0.5rem; border: 1px solid #e2e8f0;"></textarea>
                 </div>
-                <div class="form-group">
-                    <label>Description</label>
-                    <textarea name="description" class="form-control" placeholder="Add custom notes..."></textarea>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <button type="submit" name="action" value="approve" class="btn btn-primary"
+                        style="background: #10b981; border: none;">Approve KYC</button>
+                    <button type="submit" name="action" value="reject" class="btn btn-danger"
+                        style="background: #ef4444; border: none;">Flag/Reject</button>
                 </div>
-                <button type="submit" class="btn btn-danger">Add Fraud Flag</button>
             </form>
         </div>
     </div>
@@ -75,25 +106,23 @@
 
 <div class="audit-trail mt-4">
     <div class="review-card">
-        <h3>Verification Audit Trail</h3>
-        <table class="audit-table">
+        <h3>Security Audit Trail (User History)</h3>
+        <table class="audit-table" style="width: 100%; border-collapse: collapse; margin-top: 1rem;">
             <thead>
-                <tr>
-                    <th>Timestamp</th>
-                    <th>Step</th>
-                    <th>Status</th>
-                    <th>Details</th>
+                <tr style="text-align: left; border-bottom: 2px solid #f1f5f9;">
+                    <th style="padding: 1rem;">Timestamp</th>
+                    <th style="padding: 1rem;">Action</th>
+                    <th style="padding: 1rem;">IP Address</th>
+                    <th style="padding: 1rem;">Notes</th>
                 </tr>
             </thead>
             <tbody>
-                {% for attempt in attempts %}
-                <tr>
-                    <td>{{ attempt.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</td>
-                    <td><span class="step-tag">{{ attempt.step|capitalize }}</span></td>
-                    <td><span class="status-tag {{ attempt.status }}">{{ attempt.status|capitalize }}</span></td>
-                    <td>
-                        <pre>{{ attempt.details|tojson(indent=2) }}</pre>
-                    </td>
+                {% for log in audit_trail %}
+                <tr style="border-bottom: 1px solid #f1f5f9; font-size: 0.85rem;">
+                    <td style="padding: 1rem;">{{ log.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                    <td style="padding: 1rem;"><strong>{{ log.action|replace('_', ' ')|capitalize }}</strong></td>
+                    <td style="padding: 1rem;">{{ log.ip_address }}</td>
+                    <td style="padding: 1rem;">{{ log.notes }}</td>
                 </tr>
                 {% endfor %}
             </tbody>
@@ -102,12 +131,6 @@
 </div>
 
 <style>
-    .kyc-review-grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 2rem;
-    }
-
     .review-card {
         background: #fff;
         padding: 2rem;
@@ -116,74 +139,38 @@
         box-shadow: var(--shadow-sm);
     }
 
-    .img-container {
-        border-radius: 0.75rem;
-        overflow: hidden;
-        border: 1px solid var(--border-color);
-        background: #f1f5f9;
-        height: 250px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-
-    .img-container img {
-        width: 100%;
-        height: 100%;
-        object-fit: contain;
-    }
-
-    .doc-comparison {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 1rem;
-    }
-
-    .label {
-        font-size: 0.85rem;
+    .label-tiny {
+        font-size: 0.7rem;
         color: #64748b;
-        font-weight: 600;
+        font-weight: 800;
         text-transform: uppercase;
         margin-bottom: 0.5rem;
     }
 
-    .match-score {
-        margin-top: 1.5rem;
-        padding: 1rem;
-        background: #f0fdf4;
-        border-radius: 0.75rem;
-        display: flex;
-        justify-content: space-between;
+    .badge {
+        font-size: 0.7rem;
+        padding: 0.2rem 0.6rem;
+        border-radius: 0.5rem;
         font-weight: 700;
     }
 
-    .ocr-item {
-        display: flex;
-        justify-content: space-between;
-        padding: 0.75rem 0;
-        border-bottom: 1px solid #f1f5f9;
+    .badge-success {
+        background: #dcfce7;
+        color: #166534;
     }
 
-    .status-tag.verified {
-        color: #10b981;
+    .badge-danger {
+        background: #fee2e2;
+        color: #991b1b;
     }
 
-    .status-tag.failed {
-        color: #ef4444;
-    }
-
-    .audit-table {
-        width: 100%;
-        margin-top: 1.5rem;
-        border-collapse: collapse;
-    }
-
-    .audit-table th,
-    .audit-table td {
-        text-align: left;
-        padding: 1rem;
-        border-bottom: 1px solid #f1f5f9;
-        font-size: 0.9rem;
+    .btn {
+        padding: 0.75rem 1rem;
+        border-radius: 0.5rem;
+        font-weight: 700;
+        cursor: pointer;
+        color: white;
     }
 </style>
+{% endblock %}
 {% endblock %}

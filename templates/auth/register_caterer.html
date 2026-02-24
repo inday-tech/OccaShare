@@ -516,7 +516,25 @@
                         </div>
 
                         <div class="form-group">
-                            <label for="gov_id">Valid ID</label>
+                            <label for="id_type">Valid ID Type</label>
+                            <select id="id_type" name="id_type" class="minimal-input" required>
+                                <option value="">Select ID Type</option>
+                                <option value="Passport">Passport</option>
+                                <option value="Driver's License">Driver's License</option>
+                                <option value="PhilID (National ID)">PhilID (National ID)</option>
+                                <option value="UMID">Unified Multi-Purpose ID (UMID)</option>
+                                <option value="SSS ID">SSS ID</option>
+                                <option value="PRC ID">PRC ID</option>
+                                <option value="Postal ID">Postal ID</option>
+                                <option value="Voter's ID">Voter's ID</option>
+                                <option value="TIN ID">TIN ID</option>
+                                <option value="PhilHealth ID">PhilHealth ID</option>
+                                <option value="School ID">School ID</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="gov_id">Valid ID Photo</label>
                             <div class="file-upload-box">
                                 <i class="fas fa-id-card"></i>
                                 <p id="govIdName">GovID.pdf / jpg</p>

@@ -64,7 +64,36 @@ async def start_booking(request: Request, caterer_id: int, package_id: Optional[
         "user_id": user.id
     }
     
-    # Always go to Phase 1 (Details) now
+    # If no package selected, go to Menu Selection first
+    if not package_id:
+        return RedirectResponse(url=f"/bookings/step/menu/{caterer_id}", status_code=303)
+    
+    # Always go to Phase 1 (Details) if package is already selected
+    return RedirectResponse(url="/bookings/step/details", status_code=303)
+
+# New: Package Selection Step (If not selected from Marketplace)
+@router.get("/step/menu/{caterer_id}", response_class=HTMLResponse)
+async def step_menu_page(caterer_id: int, request: Request, db: Session = Depends(database.get_db)):
+    caterer = db.query(models.CatererProfile).get(caterer_id)
+    if not caterer: raise HTTPException(status_code=404)
+    
+    packages = db.query(models.CateringPackage).filter(models.CateringPackage.caterer_id == caterer_id).all()
+    user = get_current_user_from_session(request, db)
+    
+    return templates.TemplateResponse("customer/booking_wizard/step_menu.html", {
+        "request": request,
+        "caterer": caterer,
+        "packages": packages,
+        "user": user,
+        "current_step": 0, # Step 0 for menu selection if needed
+        "active_page": "bookings"
+    })
+
+@router.post("/step/menu")
+async def step_menu_submit(request: Request, package_id: int = Form(...)):
+    data = request.session.get("booking_data", {})
+    data["package_id"] = package_id
+    request.session["booking_data"] = data
     return RedirectResponse(url="/bookings/step/details", status_code=303)
 
 # Phase 1: Booking Details (Event Info, Date/Time, Guests)
@@ -80,12 +109,15 @@ async def step_details_page(request: Request, db: Session = Depends(database.get
     
     caterer = db.query(models.CatererProfile).get(data["caterer_id"])
     
+    user = get_current_user_from_session(request, db)
     return templates.TemplateResponse("customer/booking_wizard/step_details.html", {
         "request": request,
         "booking_data": data,
         "package": package,
         "caterer": caterer,
-        "current_step": 1
+        "user": user,
+        "current_step": 1,
+        "active_page": "bookings"
     })
 
 @router.post("/step/details")
@@ -169,10 +201,13 @@ async def step_details_submit(
 async def step_kyc_page(booking_id: int, request: Request, db: Session = Depends(database.get_db)):
     booking = db.query(models.Booking).get(booking_id)
     if not booking: raise HTTPException(status_code=404)
+    user = get_current_user_from_session(request, db)
     return templates.TemplateResponse("customer/booking_wizard/step_kyc.html", {
         "request": request,
         "booking_id": booking_id,
-        "current_step": 2
+        "user": user,
+        "current_step": 2,
+        "active_page": "bookings"
     })
 
 # Phase 3: Quotation Review & Contract
@@ -187,10 +222,13 @@ async def step_quotation_page(booking_id: int, request: Request, db: Session = D
     if not quotation:
         quotation = quotation_service.create_quotation(db, booking, 30)
     
+    user = get_current_user_from_session(request, db)
     return templates.TemplateResponse("customer/booking_wizard/step_quotation.html", {
         "request": request,
         "quotation": quotation,
-        "current_step": 3
+        "user": user,
+        "current_step": 3,
+        "active_page": "bookings"
     })
 
 # Phase 4: Downpayment
@@ -198,12 +236,43 @@ async def step_quotation_page(booking_id: int, request: Request, db: Session = D
 async def step_payment_v2_page(booking_id: int, request: Request, db: Session = Depends(database.get_db)):
     booking = db.query(models.Booking).get(booking_id)
     if not booking: raise HTTPException(status_code=404)
+    user = get_current_user_from_session(request, db)
     return templates.TemplateResponse("customer/booking_wizard/step_payment.html", {
         "request": request,
         "booking_id": booking_id,
         "booking": booking,
-        "current_step": 4
+        "user": user,
+        "current_step": 4,
+        "active_page": "bookings"
     })
+
+@router.post("/step/payment/{booking_id}")
+async def step_payment_submit(
+    booking_id: int,
+    request: Request,
+    payment_method: str = Form(...),
+    db: Session = Depends(database.get_db)
+):
+    booking = db.query(models.Booking).get(booking_id)
+    if not booking:
+        raise HTTPException(status_code=404, detail="Booking not found")
+
+    # Simulate payment processing
+    # In a real app, this would redirect to a payment gateway or handle response
+    booking.payment_method = payment_method
+    booking.payment_status = "paid"  # Simulating successful payment
+    booking.status = "pending"       # Now waiting for caterer to accept
+    
+    # Save to history
+    history = models.BookingHistory(
+        booking_id=booking.id,
+        status="pending",
+        notes=f"Payment of reservation fee completed via {payment_method}. Booking is now pending caterer approval."
+    )
+    db.add(history)
+    db.commit()
+
+    return RedirectResponse(url=f"/bookings/success/{booking.id}", status_code=303)
 
 @router.get("/success/{booking_id}", response_class=HTMLResponse)
 async def booking_success_page(request: Request, booking_id: int, db: Session = Depends(database.get_db)):
@@ -254,70 +323,6 @@ async def submit_review(
     
     db.commit()
     return RedirectResponse(url="/customer/dashboard?success=review_submitted")
-
-# --- KYC API Endpoints (Phase 2 Simulation) ---
-
-@router.post("/{booking_id}/upload-id")
-async def upload_id_document(booking_id: int, id_document: UploadFile = File(...), db: Session = Depends(database.get_db)):
-    booking = db.query(models.Booking).get(booking_id)
-    if not booking:
-        return {"success": False, "error": "Booking not found"}
-        
-    file_url = save_upload_file(id_document)
-    
-    # Store in OCRVerification
-    ocr_verify = db.query(models.OCRVerification).filter(models.OCRVerification.booking_id == booking_id).first()
-    if not ocr_verify:
-        ocr_verify = models.OCRVerification(booking_id=booking_id, user_id=booking.user_id)
-        db.add(ocr_verify)
-    
-    ocr_verify.document_url = file_url
-    ocr_verify.status = "pending"
-    db.commit()
-    
-    return {"success": True, "file_url": file_url}
-
-@router.post("/{booking_id}/selfie")
-async def upload_selfie(booking_id: int, selfie: UploadFile = File(...), db: Session = Depends(database.get_db)):
-    ocr_verify = db.query(models.OCRVerification).filter(models.OCRVerification.booking_id == booking_id).first()
-    if not ocr_verify:
-        return {"success": False, "error": "Upload ID first"}
-        
-    file_url = save_upload_file(selfie)
-    ocr_verify.selfie_url = file_url
-    db.commit()
-    
-    return {"success": True, "file_url": file_url}
-
-@router.get("/{booking_id}/api/verify")
-async def verify_kyc_api(booking_id: int, db: Session = Depends(database.get_db)):
-    booking = db.query(models.Booking).get(booking_id)
-    ocr_verify = db.query(models.OCRVerification).filter(models.OCRVerification.booking_id == booking_id).first()
-    
-    if not ocr_verify or not ocr_verify.document_url or not ocr_verify.selfie_url:
-        return {"success": False, "message": "Missing documents for verification"}
-
-    # Simulate OCR & Face Match process
-    import time
-    time.sleep(1.5) # Simulate processing time
-    
-    verification_result = verification_service.verify_identity(ocr_verify.document_url, ocr_verify.selfie_url)
-    
-    if verification_result["success"]:
-        ocr_verify.status = "verified"
-        ocr_verify.ocr_data = verification_result["ocr_data"]
-        ocr_verify.match_score = 0.98 
-        
-        # Update booking status
-        booking.ocr_verified = True
-        booking.liveness_verified = True
-        
-        db.commit()
-        return {"success": True, "message": "Identity Verified Successfully"}
-    else:
-        ocr_verify.status = "failed"
-        db.commit()
-        return {"success": False, "message": verification_result["failure_reason"]}
 
 @router.post("/{booking_id}/contract/sign")
 async def sign_contract(booking_id: int, signature_data: str = Form(...), db: Session = Depends(database.get_db)):

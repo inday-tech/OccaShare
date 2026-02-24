@@ -1,8 +1,8 @@
 {% extends "customer/booking_wizard/wizard_base.html" %}
 
-{% block title %}Quotation & Contract - OccaServe{% endblock %}
+{% block wizard_title %}Quotation & Contract{% endblock %}
 
-{% block content %}
+{% block wizard_content %}
 <div class="quotation-step">
     <h2 class="wizard-title">Review Your Quotation</h2>
     <p class="wizard-subtitle">Please review the costs and sign the service contract to proceed.</p>
@@ -189,7 +189,7 @@
 </style>
 {% endblock %}
 
-{% block extra_js %}
+{% block step_js %}
 <script>
     function toggleSignButton() {
         const name = document.getElementById('signature_name').value;

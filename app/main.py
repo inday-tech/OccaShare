@@ -29,6 +29,7 @@ app.include_router(customer_dashboard.router)
 app.include_router(verification.router)
 app.include_router(contact.router)
 app.include_router(quotations.router)
+app.include_router(kyc.router)
 app.include_router(payments.router)
 
 from .services.realtime import manager

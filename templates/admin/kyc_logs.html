@@ -26,43 +26,97 @@
     <table class="audit-table">
         <thead>
             <tr>
-                <th>Booking</th>
                 <th>Customer</th>
-                <th>Last Step</th>
+                <th>ID Type</th>
+                <th>Fraud Score</th>
+                <th>Liveness</th>
                 <th>Status</th>
-                <th>Risk Flags</th>
                 <th>Actions</th>
             </tr>
         </thead>
         <tbody>
-            {% for booking in high_risk_bookings %}
+            {% for kyc in kyc_requests %}
             <tr>
-                <td><strong>#BK-{{ booking.id }}</strong></td>
-                <td>{{ booking.user.first_name }} {{ booking.user.last_name }}</td>
-                <td><span class="step-tag">{{ booking.verification_attempts[-1].step if booking.verification_attempts
-                        else 'N/A' }}</span></td>
                 <td>
-                    <span class="status-badge status-{{ booking.status }}">
-                        {{ booking.status|capitalize }}
-                    </span>
+                    <div class="user-info">
+                        <strong>{{ kyc.user.first_name }} {{ kyc.user.last_name }}</strong>
+                        <span class="text-muted d-block" style="font-size: 0.8rem;">{{ kyc.user.email }}</span>
+                    </div>
+                </td>
+                <td>{{ kyc.verification_type or 'N/A' }}</td>
+                <td>
+                    <div
+                        class="score-pill {% if kyc.fraud_score >= 75 %}high{% elif kyc.fraud_score >= 60 %}mid{% else %}low{% endif %}">
+                        {{ kyc.fraud_score }}/100
+                    </div>
                 </td>
                 <td>
-                    {% for flag in booking.fraud_flags %}
-                    <span class="flag-pill {{ flag.flag_type }}">{{ flag.flag_type|replace('_', ' ')|capitalize
-                        }}</span>
-                    {% endfor %}
-                    {% if not booking.fraud_flags %}
-                    <span class="text-muted">None</span>
+                    {% if kyc.liveness_status == 'passed' %}
+                    <span class="text-success"><i class="fas fa-check-circle"></i> Passed</span>
+                    {% elif kyc.liveness_status == 'failed' %}
+                    <span class="text-danger"><i class="fas fa-times-circle"></i> Failed</span>
+                    {% else %}
+                    <span class="text-muted">N/A</span>
                     {% endif %}
                 </td>
                 <td>
-                    <a href="/admin/bookings/{{ booking.id }}/kyc" class="btn btn-sm btn-outline">Review Details</a>
+                    <span class="status-badge status-{{ kyc.verification_status }}">
+                        {{ kyc.verification_status|replace('_', ' ')|capitalize }}
+                    </span>
+                </td>
+                <td>
+                    <a href="/admin/verify/{{ kyc.user_id }}" class="btn btn-sm btn-outline">Review Details</a>
                 </td>
             </tr>
             {% endfor %}
+            {% if not kyc_requests %}
+            <tr>
+                <td colspan="6" style="text-align: center; padding: 3rem;">No pending KYC requests in queue.</td>
+            </tr>
+            {% endif %}
         </tbody>
     </table>
 </div>
+
+<style>
+    .score-pill {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        border-radius: 1rem;
+        font-weight: 700;
+        font-size: 0.85rem;
+    }
+
+    .score-pill.high {
+        background: #dcfce7;
+        color: #166534;
+    }
+
+    .score-pill.mid {
+        background: #fef9c3;
+        color: #854d0e;
+    }
+
+    .score-pill.low {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+
+    .status-badge.status-manual_review {
+        background: #fef3c7;
+        color: #d97706;
+    }
+
+    .status-badge.status-processing {
+        background: #e0f2fe;
+        color: #0369a1;
+    }
+
+    .status-badge.status-blocked {
+        background: #111827;
+        color: #ffffff;
+    }
+</style>
 
 <style>
     .review-filters {

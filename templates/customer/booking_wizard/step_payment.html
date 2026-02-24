@@ -1,8 +1,8 @@
 {% extends "customer/booking_wizard/wizard_base.html" %}
 
-{% block title %}Secure Payment - OccaServe{% endblock %}
+{% block wizard_title %}Secure Payment{% endblock %}
 
-{% block content %}
+{% block wizard_content %}
 <div class="wizard-header-content">
     <h2 class="wizard-title font-playfair">Secure Payment Selection</h2>
     <p class="wizard-subtitle">Choose your preferred payment method. You won't be charged until the caterer accepts your
@@ -81,8 +81,9 @@
     </div>
 
     <div class="wizard-actions" id="wizard-actions">
-        <a href="/bookings/step/verify" class="btn-prev">
-            <i class="fas fa-arrow-left"></i> Back to Verification
+        <a href="/bookings/step/quotation/{{ booking_booking_id if booking_booking_id else booking.id }}"
+            class="btn-prev">
+            <i class="fas fa-arrow-left"></i> Back to Contract
         </a>
         <button type="submit" class="btn-primary"
             style="padding: 1.25rem 2.5rem; border-radius: 1rem; font-weight: 700;">

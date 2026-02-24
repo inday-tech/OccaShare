@@ -36,6 +36,7 @@ class User(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
     is_kyc_complete = Column(Boolean, default=False)
+    kyc_attempts = Column(Integer, default=0)
 
     caterer_profile = relationship("CatererProfile", back_populates="user", uselist=False)
     bookings = relationship("Booking", back_populates="user")
@@ -44,6 +45,8 @@ class User(Base):
     identity_verification = relationship("IdentityVerification", back_populates="user", uselist=False)
     notifications = relationship("Notification", back_populates="user")
     verification_attempts = relationship("VerificationAttempt", back_populates="user")
+    refresh_tokens = relationship("RefreshToken", back_populates="user")
+    audit_logs = relationship("AuditLog", back_populates="user")
 
 class CatererProfile(Base):
     __tablename__ = "caterer_profiles"
@@ -308,10 +311,17 @@ class IdentityVerification(Base):
     user_id = Column(Integer, ForeignKey("users.id"), unique=True)
     verification_type = Column(String, default='government_id')
     document_url = Column(String, nullable=False)
-    selfie_url = Column(String, nullable=False)
+    id_number = Column(String, nullable=True)
+    selfie_url = Column(String, nullable=False) # selfie_1
+    selfie_2_url = Column(String, nullable=True)
+    selfie_3_url = Column(String, nullable=True)
     ocr_data = Column(JSONB)
-    verification_status = Column(String, default='pending') # pending, verified, rejected
+    verification_status = Column(String, default='pending') # pending, processing, approved, rejected, manual_review, blocked
     failure_reason = Column(Text, nullable=True)
+    fraud_score = Column(Integer, default=0)
+    ip_address = Column(String, nullable=True)
+    device_info = Column(JSONB, nullable=True)
+    liveness_status = Column(String, nullable=True)
     verified_at = Column(DateTime(timezone=True), nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
@@ -343,6 +353,29 @@ class VerificationAttempt(Base):
 
     user = relationship("User", back_populates="verification_attempts")
     booking = relationship("Booking", back_populates="verification_attempts")
+
+class RefreshToken(Base):
+    __tablename__ = "refresh_tokens"
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"))
+    token = Column(String, unique=True, index=True)
+    expires_at = Column(DateTime(timezone=True))
+    is_revoked = Column(Boolean, default=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    user = relationship("User", back_populates="refresh_tokens")
+
+class AuditLog(Base):
+    __tablename__ = "audit_logs"
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=True)
+    action = Column(String)
+    old_status = Column(String, nullable=True)
+    new_status = Column(String, nullable=True)
+    ip_address = Column(String, nullable=True)
+    device_info = Column(JSONB, nullable=True)
+    notes = Column(Text, nullable=True)
+    timestamp = Column(DateTime(timezone=True), server_default=func.now())
+    user = relationship("User", back_populates="audit_logs")
 
 class Quotation(Base):
     __tablename__ = "quotations"

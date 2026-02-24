@@ -1,8 +1,8 @@
 {% extends "customer/booking_wizard/wizard_base.html" %}
 
-{% block title %}Identity Verification - OccaServe{% endblock %}
+{% block wizard_title %}Identity Verification{% endblock %}
 
-{% block content %}
+{% block wizard_content %}
 <div class="kyc-step">
     <h2 class="wizard-title">Identity Verification</h2>
     <p class="wizard-subtitle">We need to verify your identity to ensure a secure booking experience.</p>
@@ -10,19 +10,51 @@
     <div id="kyc-form-container">
         <!-- Phase 1: ID Upload -->
         <div id="step-id-upload" class="kyc-substep active">
-            <div class="upload-zone" id="upload-zone" onclick="document.getElementById('id_document').click()">
+            <div class="kyc-controls-grid"
+                style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 2rem;">
+                <div class="id-type-selection">
+                    <label for="id_type"
+                        style="display: block; font-weight: 600; margin-bottom: 0.5rem; color: var(--slate-700);">Select
+                        ID Type</label>
+                    <select id="id_type" class="minimal-input" style="width: 100%;" onchange="validateIdSelection()">
+                        <option value="">-- Choose ID Type --</option>
+                        <option value="Passport">Passport</option>
+                        <option value="Driver's License">Driver's License</option>
+                        <option value="PhilID (National ID)">PhilID (National ID)</option>
+                        <option value="UMID">Unified Multi-Purpose ID (UMID)</option>
+                        <option value="SSS ID">SSS ID</option>
+                        <option value="PRC ID">PRC ID</option>
+                        <option value="Postal ID">Postal ID</option>
+                        <option value="Voter's ID">Voter's ID</option>
+                        <option value="TIN ID">TIN ID</option>
+                        <option value="PhilHealth ID">PhilHealth ID</option>
+                        <option value="School ID">School ID</option>
+                    </select>
+                </div>
+                <div class="id-number-input">
+                    <label for="id_number"
+                        style="display: block; font-weight: 600; margin-bottom: 0.5rem; color: var(--slate-700);">ID
+                        Number</label>
+                    <input type="text" id="id_number" class="minimal-input" placeholder="Enter ID Number"
+                        oninput="validateIdSelection()">
+                </div>
+            </div>
+
+            <div class="upload-zone disabled" id="upload-zone" onclick="handleUploadClick()">
                 <i class="fas fa-id-card fa-3x"></i>
                 <h3>Step 1: Upload Government ID</h3>
-                <p>Ensure the ID is clear and readable (JPG or PNG)</p>
+                <p>Enter ID details first, then upload a clear photo (JPG or PNG)</p>
                 <input type="file" id="id_document" style="display: none;" accept="image/*"
                     onchange="handleIdUpload(this)">
             </div>
             <div id="id-preview" class="image-preview" style="display: none;">
+                <div class="badge badge-success" id="id-valid-badge" style="display: none; margin-bottom: 1rem;"><i
+                        class="fas fa-check-circle"></i> ID Pattern Validated</div>
                 <img id="id-image" src="" alt="ID Preview">
                 <div class="preview-actions">
                     <button type="button" class="btn btn-secondary" onclick="resetIdUpload()">Retake</button>
-                    <button type="button" class="btn btn-primary" onclick="proceedToCamera()">Use this ID <i
-                            class="fas fa-arrow-right"></i></button>
+                    <button type="button" class="btn btn-primary" id="btn-proceed-camera"
+                        onclick="proceedToCamera()">Use this ID <i class="fas fa-arrow-right"></i></button>
                 </div>
             </div>
         </div>
@@ -31,7 +63,14 @@
         <div id="scanner-container" class="kyc-substep" style="display: none;">
             <div class="scanner-header">
                 <h3>Step 2: Liveliness Check</h3>
-                <p>Position your face within the frame.</p>
+                <p>Position your face. We will take 3 quick frames for movement detection.</p>
+                <div class="capture-progress" id="capture-progress" style="display: none;">
+                    <div class="frame-indicators">
+                        <span class="dot" id="dot-1"></span>
+                        <span class="dot" id="dot-2"></span>
+                        <span class="dot" id="dot-3"></span>
+                    </div>
+                </div>
             </div>
             <div class="scanner-viewport person-scanner">
                 <video id="webcam" autoplay playsinline></video>
@@ -39,19 +78,19 @@
                     <div class="face-guide">
                         <div class="scanning-line" id="scan-line"></div>
                     </div>
-                    <div id="scan-feedback" class="scan-feedback">Looking for face...</div>
+                    <div id="scan-feedback" class="scan-feedback">Ready to scan...</div>
                 </div>
                 <canvas id="frame-canvas" style="display: none;"></canvas>
             </div>
 
             <div class="liveliness-prompt" id="liveliness-prompt" style="display: none;">
-                <div class="prompt-icon"><i class="fas fa-eye"></i></div>
-                <div class="prompt-text">Blink your eyes to verify liveliness</div>
+                <div class="prompt-icon"><i class="fas fa-user-check"></i></div>
+                <div class="prompt-text" id="prompt-instruction">Blink or turn slightly when requested</div>
             </div>
 
             <div class="scanner-controls">
                 <button type="button" class="btn btn-primary" id="btn-start-scan" onclick="startRealtimeScanner()">
-                    <i class="fas fa-camera"></i> Start Liveliness Check
+                    <i class="fas fa-video"></i> Start Biometric Scan
                 </button>
             </div>
         </div>
@@ -60,26 +99,23 @@
         <div id="step-processing" class="kyc-substep" style="display: none;">
             <div class="processing-status">
                 <div class="spinner" id="processing-spinner"></div>
-                <h3 id="status-text">Comparing ID with Face...</h3>
-                <p id="status-subtext">This will only take a moment.</p>
+                <h3 id="status-text">Uploading Secure Data...</h3>
+                <p id="status-subtext">Initializing background verification.</p>
+
+                <div id="fraud-meter" style="display: none; margin: 2rem 0;">
+                    <label style="font-size: 0.8rem; font-weight: 600; color: var(--slate-500);">FRAUD SCORE TRUST
+                        LEVEL</label>
+                    <div class="progress" style="height: 8px; border-radius: 4px; background: #e2e8f0;">
+                        <div id="fraud-bar" class="progress-bar"
+                            style="width: 0%; background: var(--primary-color); transition: width 1s ease-in-out;">
+                        </div>
+                    </div>
+                </div>
 
                 <div id="retry-container" style="display: none; margin-top: 2rem;">
                     <button type="button" class="btn btn-primary" onclick="window.location.reload()">
                         <i class="fas fa-redo"></i> Try Again / Ulitin
                     </button>
-                    <p style="margin-top: 1rem; font-size: 0.85rem; color: #64748b;">Please ensure your ID is clear and
-                        your face is well-lit.</p>
-                </div>
-
-                <div class="comparison-preview">
-                    <div class="prev-box">
-                        <label>Uploaded ID</label>
-                        <img id="comp-id" src="">
-                    </div>
-                    <div class="prev-box">
-                        <label>Live Person</label>
-                        <img id="comp-person" src="">
-                    </div>
                 </div>
             </div>
         </div>
@@ -95,6 +131,18 @@
         </button>
     </div>
 </div>
+</div>
+
+<div class="wizard-actions">
+    <a href="/bookings/step/details" class="btn-prev">
+        <i class="fas fa-arrow-left"></i> Back to Details
+    </a>
+    <button type="button" id="btn-next" class="btn btn-primary" style="display: none;"
+        onclick="window.location.href='/bookings/step/quotation/{{ booking_id }}'">
+        Continue to Quotation <i class="fas fa-arrow-right"></i>
+    </button>
+</div>
+</div>
 
 <style>
     .upload-zone {
@@ -107,9 +155,32 @@
         transition: all 0.2s;
     }
 
-    .upload-zone:hover {
+    .upload-zone:hover:not(.disabled) {
         border-color: var(--primary-color);
         background: #f1f5f9;
+    }
+
+    .upload-zone.disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        background: #f1f5f9;
+    }
+
+    .minimal-input {
+        width: 100%;
+        padding: 0.875rem 1rem;
+        border: 2px solid #e2e8f0;
+        border-radius: 0.75rem;
+        font-size: 0.95rem;
+        transition: all 0.2s ease;
+        background: #fff;
+        color: #1a2e18;
+    }
+
+    .minimal-input:focus {
+        outline: none;
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 4px rgba(var(--primary-rgb), 0.1);
     }
 
     .upload-zone i {
@@ -307,6 +378,27 @@
         margin: 0 auto 2rem;
     }
 
+    .frame-indicators {
+        display: flex;
+        gap: 0.5rem;
+        justify-content: center;
+        margin-top: 0.5rem;
+    }
+
+    .dot {
+        width: 12px;
+        height: 12px;
+        background: #e2e8f0;
+        border-radius: 50%;
+        transition: all 0.3s;
+    }
+
+    .dot.active {
+        background: var(--primary-color);
+        transform: scale(1.2);
+        box-shadow: 0 0 10px rgba(var(--primary-rgb), 0.4);
+    }
+
     @keyframes spin {
         0% {
             transform: rotate(0deg);
@@ -319,36 +411,85 @@
 </style>
 {% endblock %}
 
-{% block extra_js %}
+{% block step_js %}
 <script>
     let bookingId = "{{ booking_id }}";
     let stream = null;
-    let capturedIdBase64 = null;
-    let capturedPersonBase64 = null;
+    let idFile = null;
+    let selfieFrames = [];
+    let pollingInterval = null;
 
-    function handleIdUpload(input) {
+    function validateIdSelection() {
+        const idType = document.getElementById('id_type').value;
+        const idNumber = document.getElementById('id_number').value.trim();
+        const uploadZone = document.getElementById('upload-zone');
+
+        if (idType && idNumber.length >= 5) {
+            uploadZone.classList.remove('disabled');
+        } else {
+            uploadZone.classList.add('disabled');
+        }
+    }
+
+    function handleUploadClick() {
+        if (document.getElementById('upload-zone').classList.contains('disabled')) {
+            alert('Please select an ID type and enter the ID number first.');
+            return;
+        }
+        document.getElementById('id_document').click();
+    }
+
+    async function handleIdUpload(input) {
         if (input.files && input.files[0]) {
+            idFile = input.files[0];
             const reader = new FileReader();
             reader.onload = function (e) {
-                capturedIdBase64 = e.target.result;
-                document.getElementById('id-image').src = capturedIdBase64;
+                document.getElementById('id-image').src = e.target.result;
                 document.getElementById('upload-zone').style.display = 'none';
+                document.querySelector('.kyc-controls-grid').style.display = 'none';
                 document.getElementById('id-preview').style.display = 'block';
             };
-            reader.readAsDataURL(input.files[0]);
+            reader.readAsDataURL(idFile);
         }
     }
 
     function resetIdUpload() {
-        capturedIdBase64 = null;
+        idFile = null;
         document.getElementById('id-preview').style.display = 'none';
         document.getElementById('upload-zone').style.display = 'block';
+        document.querySelector('.kyc-controls-grid').style.display = 'grid';
         document.getElementById('id_document').value = '';
     }
 
-    function proceedToCamera() {
-        document.getElementById('step-id-upload').style.display = 'none';
-        document.getElementById('scanner-container').style.display = 'block';
+    async function proceedToCamera() {
+        const idType = document.getElementById('id_type').value;
+        const idNumber = document.getElementById('id_number').value.trim();
+
+        const btn = document.getElementById('btn-proceed-camera');
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Validating...';
+
+        const formData = new FormData();
+        formData.append('id_type', idType);
+        formData.append('id_number', idNumber);
+        formData.append('id_document', idFile);
+
+        try {
+            const res = await fetch(`/api/bookings/${bookingId}/upload-id`, { method: 'POST', body: formData });
+            if (res.ok) {
+                document.getElementById('step-id-upload').style.display = 'none';
+                document.getElementById('scanner-container').style.display = 'block';
+            } else {
+                const data = await res.json();
+                alert('Error: ' + (data.detail || 'Failed to validate ID Pattern'));
+                btn.disabled = false;
+                btn.innerHTML = 'Use this ID <i class="fas fa-arrow-right"></i>';
+            }
+        } catch (err) {
+            alert('Network error. Check connection.');
+            btn.disabled = false;
+            btn.innerHTML = 'Use this ID <i class="fas fa-arrow-right"></i>';
+        }
     }
 
     async function startRealtimeScanner() {
@@ -358,76 +499,121 @@
             video.srcObject = stream;
             document.getElementById('btn-start-scan').style.display = 'none';
             document.getElementById('liveliness-prompt').style.display = 'block';
-
-            // Show scanning line
+            document.getElementById('capture-progress').style.display = 'block';
             document.getElementById('scan-line').style.display = 'block';
-            document.getElementById('scan-feedback').innerText = "Analyzing Biometrics...";
 
-            // Auto capture after 3.5 seconds
-            setTimeout(capturePerson, 3500);
+            // Sequential capture logic
+            const prompts = [
+                "Stay still...",
+                "Blink your eyes!",
+                "Turn your head slightly..."
+            ];
+
+            for (let i = 0; i < 3; i++) {
+                document.getElementById('prompt-instruction').innerText = prompts[i];
+                document.getElementById('scan-feedback').innerText = `Capturing Frame ${i + 1}/3...`;
+                await new Promise(r => setTimeout(r, 1200));
+                captureFrame(i + 1);
+                document.getElementById(`dot-${i + 1}`).classList.add('active');
+            }
+
+            finalizeCapture();
         } catch (err) {
             alert("Camera access denied: " + err);
         }
     }
 
-    function capturePerson() {
+    function captureFrame(index) {
         const video = document.getElementById('webcam');
         const canvas = document.getElementById('frame-canvas');
         canvas.width = video.videoWidth;
         canvas.height = video.videoHeight;
         canvas.getContext('2d').drawImage(video, 0, 0);
 
-        capturedPersonBase64 = canvas.toDataURL('image/jpeg', 0.9);
+        canvas.toBlob((blob) => {
+            selfieFrames.push(new File([blob], `selfie_${index}.jpg`, { type: 'image/jpeg' }));
+        }, 'image/jpeg', 0.9);
+    }
 
-        // Hide scanning line but keep video for a split second
+    async function finalizeCapture() {
         document.getElementById('scan-line').style.display = 'none';
         document.getElementById('scan-feedback').innerText = "Capture Complete";
 
-        // Stop camera after capture
         if (stream) {
             stream.getTracks().forEach(track => track.stop());
         }
 
-        verifyMatch();
-    }
-
-    async function verifyMatch() {
         document.getElementById('scanner-container').style.display = 'none';
         document.getElementById('step-processing').style.display = 'block';
 
-        // Show previews in comparison results
-        document.getElementById('comp-id').src = capturedIdBase64;
-        document.getElementById('comp-person').src = capturedPersonBase64;
+        const formData = new FormData();
+        selfieFrames.forEach(file => formData.append('selfies', file));
 
-        updateStatus("Initializing Secure Comparison...", "Verifying data integrity...");
+        try {
+            const res = await fetch(`/api/bookings/${bookingId}/verify-full`, { method: 'POST', body: formData });
+            const data = await res.json();
 
-        setTimeout(async () => {
-            updateStatus("Matching Face to ID...", "Analyzing biometric markers...");
+            if (res.ok) {
+                updateStatus("Background Processing Started", "Our AI is analyzing your biometrics. Please do not close this window.");
+                startPolling();
+            } else {
+                handleRejection(data.detail);
+            }
+        } catch (err) {
+            handleRejection("Connection lost during upload.");
+        }
+    }
 
-            const formData = new FormData();
-            formData.append('booking_id', bookingId);
-            formData.append('id_image_base64', capturedIdBase64);
-            formData.append('selfie_image_base64', capturedPersonBase64);
-
+    function startPolling() {
+        pollingInterval = setInterval(async () => {
             try {
-                const res = await fetch('/api/verify/compare-id-face', { method: 'POST', body: formData });
+                const res = await fetch(`/api/bookings/${bookingId}/status`);
                 const data = await res.json();
 
-                if (data.success) {
-                    updateStatus("Identity Verified!", "Match score: " + (data.match_score * 100).toFixed(1) + "%");
-                    alert("✅ Verification Successful!\n\nID matched with live capture at " + (data.match_score * 100).toFixed(1) + "%.");
-
-                    document.getElementById('btn-next').style.display = 'inline-block';
-                    setTimeout(() => {
-                        window.location.href = `/bookings/step/quotation/${bookingId}`;
-                    }, 2000);
-                } else {
-                    handleRejection(data.message);
+                if (data.status === 'processing') {
+                    updateStatus("Verification in Progress...", "Analyzing patterns and fraud signals...");
+                } else if (data.status === 'approved') {
+                    stopPolling();
+                    handleApproval(data);
+                } else if (data.status === 'rejected' || data.status === 'blocked') {
+                    stopPolling();
+                    handleRejection(data.reason || "Verification failed.");
+                } else if (data.status === 'manual_review') {
+                    stopPolling();
+                    handleManualReview();
                 }
-            } catch (err) {
-                handleRejection("Network error. Please try again.");
+            } catch (e) {
+                console.error("Polling error", e);
             }
-        }, 1500);
+        }, 3000);
+    }
+
+    function stopPolling() {
+        if (pollingInterval) clearInterval(pollingInterval);
+    }
+
+    function handleApproval(data) {
+        document.getElementById('processing-spinner').style.display = 'none';
+        document.getElementById('fraud-meter').style.display = 'block';
+        document.getElementById('fraud-bar').style.width = data.fraud_score + "%";
+
+        updateStatus("Verification Approved!", "Trust Score: " + data.fraud_score + "/100");
+        document.getElementById('status-text').style.color = "var(--primary-color)";
+
+        setTimeout(() => {
+            document.getElementById('btn-next').style.display = 'inline-block';
+            window.location.href = `/bookings/step/quotation/${bookingId}`;
+        }, 2000);
+    }
+
+    function handleManualReview() {
+        document.getElementById('processing-spinner').style.display = 'none';
+        updateStatus("Pending Manual Review", "Your data requires a second look by our compliance team. We will notify you shortly.");
+        document.getElementById('status-text').style.color = "#f59e0b";
+
+        setTimeout(() => {
+            window.location.href = "/customer/dashboard";
+        }, 3000);
     }
 
     function updateStatus(title, sub) {
@@ -438,10 +624,7 @@
     function handleRejection(msg) {
         document.getElementById('processing-spinner').style.display = 'none';
         document.getElementById('retry-container').style.display = 'block';
-
         updateStatus("Security Rejection", msg);
-
-        // Add error color to status text
         document.getElementById('status-text').style.color = "#dc2626";
     }
 </script>

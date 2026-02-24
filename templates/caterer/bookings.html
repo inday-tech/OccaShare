@@ -87,7 +87,17 @@
                         </span>
                     </td>
                     <td style="padding: 1.5rem; border-radius: 0 1rem 1rem 0; text-align: right;">
-                        <button class="btn-outline" style="padding: 0.5rem 1rem; font-size: 0.8rem;">Details</button>
+                        <button class="btn-outline view-details" data-id="{{ booking.id }}"
+                            data-event-name="{{ booking.event_name or 'N/A' }}"
+                            data-event-type="{{ booking.event_type or 'N/A' }}"
+                            data-venue="{{ booking.venue_address or 'TBD' }}"
+                            data-requests="{{ booking.special_requests or 'None' }}"
+                            data-customer="{{ booking.user.first_name }} {{ booking.user.last_name }}"
+                            data-email="{{ booking.user.email }}" data-amount="₱{{ " {:,.2f}".format(booking.total_price
+                            or booking.total_amount) }}" data-status="{{ booking.status }}"
+                            style="padding: 0.5rem 1rem; font-size: 0.8rem;">
+                            Details
+                        </button>
                     </td>
                 </tr>
                 {% endfor %}
@@ -101,4 +111,144 @@
     </div>
     {% endif %}
 </div>
+
+<!-- Booking Detail Modal -->
+<div id="bookingDetailModal" class="modal"
+    style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.5); backdrop-filter: blur(4px);">
+    <div
+        style="background-color: #fefefe; margin: 5% auto; padding: 2.5rem; border: 1px solid #888; width: 600px; border-radius: 2rem; box-shadow: var(--shadow-lg);">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 2rem;">
+            <div>
+                <h2 id="modalBookingId" style="font-size: 1.5rem; margin-bottom: 0.5rem;">Booking #</h2>
+                <span id="modalStatus"
+                    style="padding: 0.4rem 0.8rem; border-radius: 1rem; font-size: 0.8rem; font-weight: 700; text-transform: uppercase;"></span>
+            </div>
+            <span onclick="closeModal()"
+                style="color: #aaa; font-size: 28px; font-weight: bold; cursor: pointer;">&times;</span>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 2rem;">
+            <div>
+                <label style="font-size: 0.75rem; color: #64748b; font-weight: 800; text-transform: uppercase;">Customer
+                    Info</label>
+                <div id="modalCustomer" style="font-weight: 600; margin-top: 0.5rem;"></div>
+                <div id="modalEmail" style="font-size: 0.9rem; color: #64748b;"></div>
+            </div>
+            <div>
+                <label style="font-size: 0.75rem; color: #64748b; font-weight: 800; text-transform: uppercase;">Event
+                    Details</label>
+                <div id="modalEventName" style="font-weight: 600; margin-top: 0.5rem;"></div>
+                <div id="modalEventType" style="font-size: 0.9rem; color: #64748b;"></div>
+            </div>
+        </div>
+
+        <div style="margin-bottom: 2rem;">
+            <label style="font-size: 0.75rem; color: #64748b; font-weight: 800; text-transform: uppercase;">Venue
+                Address</label>
+            <div id="modalVenue" style="margin-top: 0.5rem; line-height: 1.4;"></div>
+        </div>
+
+        <div style="margin-bottom: 2rem;">
+            <label style="font-size: 0.75rem; color: #64748b; font-weight: 800; text-transform: uppercase;">Special
+                Requests</label>
+            <div id="modalRequests" style="margin-top: 0.5rem; font-style: italic; color: #4b5563;"></div>
+        </div>
+
+        <div id="modalMenuSection">
+            <label style="font-size: 0.75rem; color: #64748b; font-weight: 800; text-transform: uppercase;">Menu
+                Selection</label>
+            <div id="modalMenuItems" style="margin-top: 1rem; background: #f8fafc; padding: 1rem; border-radius: 1rem;">
+                <!-- Menu items injected here -->
+            </div>
+        </div>
+
+        <div style="margin-top: 2.5rem; display: flex; justify-content: flex-end; gap: 1rem;">
+            <button onclick="closeModal()" class="btn-outline" style="padding: 0.75rem 1.5rem;">Close</button>
+            <div id="modalActions">
+                <!-- Action buttons based on status -->
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Add click listeners to all detail buttons
+        document.querySelectorAll('.view-details').forEach(btn => {
+            btn.addEventListener('click', function () {
+                showBookingDetails(this);
+            });
+        });
+    });
+
+    function showBookingDetails(btn) {
+        const data = btn.dataset;
+        document.getElementById('modalBookingId').innerText = 'Booking #' + data.id;
+        document.getElementById('modalCustomer').innerText = data.customer;
+        document.getElementById('modalEmail').innerText = data.email;
+        document.getElementById('modalEventName').innerText = data.eventName;
+        document.getElementById('modalEventType').innerText = data.eventType;
+        document.getElementById('modalVenue').innerText = data.venue;
+        document.getElementById('modalRequests').innerText = data.requests;
+
+        // Status styling
+        const statusEl = document.getElementById('modalStatus');
+        statusEl.innerText = data.status;
+        const statusColors = {
+            'pending': { color: '#92400e', bg: '#fef3c7' },
+            'confirmed': { color: '#166534', bg: '#dcfce7' },
+            'completed': { color: '#1e40af', bg: '#dbeafe' },
+            'cancelled': { color: '#991b1b', bg: '#fee2e2' }
+        };
+        const style = statusColors[data.status] || { color: '#374151', bg: '#f1f5f9' };
+        statusEl.style.color = style.color;
+        statusEl.style.backgroundColor = style.bg;
+
+        // Menu items
+        const menuSource = document.getElementById('booking-items-' + data.id);
+        const menuTarget = document.getElementById('modalMenuItems');
+        if (menuSource) {
+            menuTarget.innerHTML = menuSource.innerHTML;
+            document.getElementById('modalMenuSection').style.display = 'block';
+        } else {
+            menuTarget.innerHTML = '<p style="color: #64748b; font-size: 0.9rem;">No menu items selected.</p>';
+        }
+
+        // Actions
+        const actionsEl = document.getElementById('modalActions');
+        actionsEl.innerHTML = '';
+        if (data.status === 'pending') {
+            actionsEl.innerHTML = `
+                <form action="/caterer/bookings/${data.id}/accept" method="POST" style="display:inline;">
+                    <button type="submit" style="padding: 0.75rem 1.5rem; background: #10b981; color: white; border: none; border-radius: 0.5rem; font-weight: 700; cursor: pointer;">Accept</button>
+                </form>
+                <form action="/caterer/bookings/${data.id}/reject" method="POST" style="display:inline;">
+                    <button type="submit" style="padding: 0.75rem 1.5rem; background: #ef4444; color: white; border: none; border-radius: 0.5rem; font-weight: 700; cursor: pointer;">Reject</button>
+                </form>
+            `;
+        }
+
+        document.getElementById('bookingDetailModal').style.display = 'block';
+    }
+
+    function showMenuDetails(bookingId) {
+        const btn = document.querySelector(`.view-details[data-id="${bookingId}"]`);
+        if (btn) showBookingDetails(btn);
+    }
+
+    function closeModal() {
+        document.getElementById('bookingDetailModal').style.display = 'none';
+    }
+
+    // Close when clicking outside
+    window.onclick = function (event) {
+        const modal = document.getElementById('bookingDetailModal');
+        if (event.target == modal) {
+            closeModal();
+        }
+    }
+</script>
 {% endblock %}

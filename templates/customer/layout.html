@@ -16,6 +16,8 @@
         :root {
             --sidebar-width: 280px;
             --dashboard-bg: #fdfdfb;
+            --booking-accent: #16a34a;
+            --wizard-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.08);
         }
 
         body {
@@ -286,7 +288,12 @@
                 </li>
                 <li>
                     <a href="/customer/bookings" class="{{ 'active' if active_page == 'bookings' }}">
-                        <i class="fas fa-calendar-check"></i> <span>My Bookings</span>
+                        <i class="fas fa-calendar-check"></i>
+                        <span>My Bookings</span>
+                        {% if active_page == 'bookings' and current_step %}
+                        <span
+                            style="margin-left: auto; background: var(--booking-accent); color: white; font-size: 0.65rem; padding: 2px 8px; border-radius: 20px; font-weight: 700; letter-spacing: 0.05em;">BOOKING</span>
+                        {% endif %}
                     </a>
                 </li>
                 <li>

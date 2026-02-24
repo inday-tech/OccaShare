@@ -390,10 +390,57 @@ def login(
         expires_delta=access_token_expires
     )
     
+    # Issue Refresh Token
+    refresh_token = auth.create_refresh_token(user_id=user.id, db=db)
+    
+    # Audit Log
+    new_log = models.AuditLog(
+        user_id=user.id,
+        action="login",
+        ip_address=request.client.host,
+        notes="User logged in via email"
+    )
+    db.add(new_log)
+    db.commit()
+
     # Smart Redirect
     redirect_url = next_url if next_url else utils.get_dashboard_url(user.role)
 
     response = RedirectResponse(url=redirect_url, status_code=status.HTTP_303_SEE_OTHER)
+    response.set_cookie(key="access_token", value=f"Bearer {access_token}", httponly=True)
+    response.set_cookie(key="refresh_token", value=refresh_token, httponly=True, max_age=auth.REFRESH_TOKEN_EXPIRE_DAYS * 86400)
+    return response
+
+@router.post("/refresh")
+async def refresh_token(request: Request, db: Session = Depends(database.get_db)):
+    refresh_token = request.cookies.get("refresh_token")
+    if not refresh_token:
+        raise HTTPException(status_code=401, detail="Refresh token missing")
+    
+    db_token = db.query(models.RefreshToken).filter(
+        models.RefreshToken.token == refresh_token,
+        models.RefreshToken.is_revoked == False,
+        models.RefreshToken.expires_at > datetime.utcnow()
+    ).first()
+    
+    if not db_token:
+        raise HTTPException(status_code=401, detail="Invalid or expired refresh token")
+    
+    user = db.query(models.User).get(db_token.user_id)
+    
+    access_token = auth.create_access_token(data={"sub": user.email, "role": user.role})
+    
+    # Audit Log for token refresh
+    new_log = models.AuditLog(
+        user_id=user.id,
+        action="refresh_token",
+        ip_address=request.client.host,
+        notes="Access token refreshed using refresh token"
+    )
+    db.add(new_log)
+    db.commit()
+
+    response = RedirectResponse(url=request.url, status_code=303)
     response.set_cookie(key="access_token", value=f"Bearer {access_token}", httponly=True)
     return response
 
@@ -454,7 +501,15 @@ async def reset_password(
     return RedirectResponse(url="/auth/login?success=password_reset", status_code=status.HTTP_303_SEE_OTHER)
 
 @router.get("/logout")
-def logout():
+def logout(request: Request, db: Session = Depends(database.get_db)):
+    refresh_token = request.cookies.get("refresh_token")
+    if refresh_token:
+        db_token = db.query(models.RefreshToken).filter(models.RefreshToken.token == refresh_token).first()
+        if db_token:
+            db_token.is_revoked = True
+            db.commit()
+
     response = RedirectResponse(url="/auth/login", status_code=status.HTTP_303_SEE_OTHER)
     response.delete_cookie("access_token")
+    response.delete_cookie("refresh_token")
     return response

@@ -5,9 +5,9 @@ import os
 
 class Settings:
     # EMAIL CONFIGURATION
-    MAIL_USERNAME = "***REMOVED***" 
-    MAIL_PASSWORD = "***REMOVED***" 
-    MAIL_FROM = "***REMOVED***" 
+    MAIL_USERNAME = "dadaycaragay@gmail.com" 
+    MAIL_PASSWORD = "ypgn kdud mvzs jhbo" 
+    MAIL_FROM = "dadaycaragay@gmail.com" 
     MAIL_PORT = 587
     MAIL_SERVER = "smtp.gmail.com"
     MAIL_TLS = True

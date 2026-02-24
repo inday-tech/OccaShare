@@ -1,8 +1,8 @@
 {% extends "customer/booking_wizard/wizard_base.html" %}
 
-{% block title %}Event Details - Phase 1 - OccaServe{% endblock %}
+{% block wizard_title %}Event Details - Phase 1{% endblock %}
 
-{% block extra_css %}
+{% block step_css %}
 <style>
     .details-grid {
         display: grid;
@@ -51,25 +51,37 @@
     }
 
     .availability-chip {
-        padding: 0.5rem 1rem;
-        border-radius: 2rem;
+        padding: 0.6rem 1.25rem;
+        border-radius: 1rem;
         font-size: 0.85rem;
         font-weight: 700;
         display: inline-flex;
         align-items: center;
-        gap: 0.5rem;
-        margin-top: 0.75rem;
+        gap: 0.6rem;
+        margin-top: 1rem;
         display: none;
+        letter-spacing: 0.02em;
+        text-transform: uppercase;
+    }
+
+    .chip-booked {
+        background: #fee2e2;
+        color: #991b1b;
+        border: 1px solid #fecaca;
+    }
+
+    .chip-available {
+        background: #ecfdf5;
+        color: #065f46;
+        border: 1px solid #d1fae5;
     }
 </style>
 {% endblock %}
 
-{% block content %}
-<div class="wizard-header-content" style="text-align: left; margin-bottom: 3rem;">
-    <h2 class="wizard-title" style="text-align: left; font-family: 'Outfit', sans-serif; font-weight: 800;">Event
-        Details</h2>
-    <p class="wizard-subtitle" style="text-align: left;">Phase 1: Configure your event requirements and check
-        availability.</p>
+{% block wizard_content %}
+<div class="wizard-header-content">
+    <h2 class="wizard-title font-playfair">Event Details</h2>
+    <p class="wizard-subtitle">Phase 1: Configure your event requirements and check availability.</p>
 </div>
 
 <form action="/bookings/step/details" method="POST" id="detailsForm">
@@ -174,7 +186,7 @@
 </form>
 {% endblock %}
 
-{% block extra_js %}
+{% block step_js %}
 <script>
     const pricePerHead = Number("{{ package.price_per_head or package.price or 0 }}");
     const catererId = Number("{{ caterer.id }}");

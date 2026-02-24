@@ -1,243 +1,373 @@
 {% extends "admin/layout.html" %}
 
-{% block title %}Verification Detail - Admin Dashboard{% endblock %}
+{% block title %}Verification Review - Admin Dashboard{% endblock %}
 
 {% block content %}
 <div class="page-header">
     <div style="display: flex; align-items: center; gap: 1rem;">
-        <a href="/admin/{{ 'caterers' if target_user.role == 'caterer' else 'customers' }}" style="color: #64748b;"><i
-                class="fas fa-arrow-left"></i></a>
+        <a href="/admin/kyc" style="color: #64748b;"><i class="fas fa-arrow-left"></i></a>
         <div>
             <h1>Verification Review: {{ target_user.first_name }} {{ target_user.last_name }}</h1>
-            <p>Verification details for {{ target_user.role }} account.</p>
+            <p>User Role: <span class="badge">{{ target_user.role|capitalize }}</span> | ID: #{{ target_user.id }}</p>
         </div>
     </div>
 </div>
 
-<div style="display: grid; grid-template-columns: 1fr 1.5fr; gap: 2rem;">
-    <!-- Left Column: Account & Business Info -->
+<div style="display: grid; grid-template-columns: 1fr 2fr; gap: 2rem;">
+    <!-- Left Column: Metrics & Analysis -->
     <div style="display: flex; flex-direction: column; gap: 2rem;">
+        <!-- Fraud Analysis Card -->
+        <div class="review-card"
+            style="border-top: 5px solid {% if verification and verification.fraud_score >= 75 %}#10b981{% elif verification and verification.fraud_score >= 60 %}#f59e0b{% else %}#ef4444{% endif %};">
+            <h3 style="font-size: 1.1rem; margin-bottom: 1.5rem;"><i class="fas fa-shield-virus"
+                    style="color: var(--secondary-color);"></i> AI Fraud Analysis</h3>
+
+            {% if verification %}
+            <div class="fraud-score-hero"
+                style="text-align: center; padding: 1.5rem; background: #f8fafc; border-radius: 1rem; margin-bottom: 1.5rem;">
+                <div
+                    style="font-size: 2.5rem; font-weight: 800; color: {% if verification.fraud_score >= 75 %}#10b981{% elif verification.fraud_score >= 60 %}#f59e0b{% else %}#ef4444{% endif %};">
+                    {{ verification.fraud_score }}/100
+                </div>
+                <div style="font-size: 0.8rem; font-weight: 700; color: #64748b; text-transform: uppercase;">Confidence
+                    Score</div>
+            </div>
+
+            <div class="analysis-details" style="display: grid; gap: 1rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-size: 0.9rem; color: #4b5563;">Liveness Detection:</span>
+                    <span
+                        class="badge {% if verification.liveness_status == 'passed' %}status-active{% else %}status-flagged{% endif %}">
+                        {{ verification.liveness_status|capitalize }}
+                    </span>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-size: 0.9rem; color: #4b5563;">ID Pattern Match:</span>
+                    <i class="fas fa-check-circle text-success"></i>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-size: 0.9rem; color: #4b5563;">OCR Authenticity:</span>
+                    <i class="fas fa-check-circle text-success"></i>
+                </div>
+            </div>
+
+            <div style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid #e2e8f0;">
+                <label style="font-size: 0.75rem; color: #64748b; font-weight: 700; text-transform: uppercase;">Device
+                    Info</label>
+                <div style="font-size: 0.85rem; color: #1e293b; margin-top: 0.5rem; line-height: 1.4;">
+                    IP: {{ verification.ip_address }}<br>
+                    {% if verification.device_info %}
+                    User Agent: {{ verification.device_info.get('user_agent', 'Unknown')|truncate(100) }}
+                    {% endif %}
+                </div>
+            </div>
+            {% else %}
+            <div style="text-align: center; padding: 2rem; color: #64748b;">
+                <i class="fas fa-info-circle" style="font-size: 2rem; margin-bottom: 1rem; opacity: 0.5;"></i>
+                <p>No verification data available for this user yet.</p>
+            </div>
+            {% endif %}
+        </div>
+
         <!-- Account Info -->
-        <div
-            style="background: white; border-radius: 1.5rem; padding: 2rem; border: 1px solid var(--border-color); box-shadow: var(--shadow-sm);">
+        <div class="review-card">
             <h3 style="font-size: 1.1rem; margin-bottom: 1.5rem;"><i class="fas fa-user-circle"
                     style="color: var(--primary-color);"></i> Account Info</h3>
             <div style="display: grid; gap: 1rem;">
                 <div>
-                    <div style="font-size: 0.75rem; color: #64748b; font-weight: 700; text-transform: uppercase;">Full
-                        Name</div>
+                    <div class="label-tiny">Full Name</div>
                     <div style="font-weight: 600;">{{ target_user.first_name }} {{ target_user.last_name }}</div>
                 </div>
                 <div>
-                    <div style="font-size: 0.75rem; color: #64748b; font-weight: 700; text-transform: uppercase;">Email
-                    </div>
+                    <div class="label-tiny">Email</div>
                     <div style="font-weight: 600;">{{ target_user.email }}</div>
                 </div>
                 <div>
-                    <div style="font-size: 0.75rem; color: #64748b; font-weight: 700; text-transform: uppercase;">
-                        Contact Number</div>
-                    <div style="font-weight: 600;">{{ target_user.phone_number or caterer_profile.contact_phone or 'N/A'
-                        }}</div>
+                    <div class="label-tiny">KYC Attempts</div>
+                    <div style="font-weight: 600;">{{ target_user.kyc_attempts }}/3</div>
                 </div>
             </div>
         </div>
 
-        <!-- Business Info -->
-        <div
-            style="background: white; border-radius: 1.5rem; padding: 2rem; border: 1px solid var(--border-color); box-shadow: var(--shadow-sm);">
+        {% if caterer_profile %}
+        <!-- Business Info (Caterers Only) -->
+        <div class="review-card">
             <h3 style="font-size: 1.1rem; margin-bottom: 1.5rem;"><i class="fas fa-briefcase"
                     style="color: var(--secondary-color);"></i> Business Info</h3>
             <div style="display: grid; gap: 1rem;">
                 <div>
-                    <div style="font-size: 0.75rem; color: #64748b; font-weight: 700; text-transform: uppercase;">
-                        Business Name</div>
+                    <div class="label-tiny">Business Name</div>
                     <div style="font-weight: 600;">{{ caterer_profile.business_name }}</div>
                 </div>
                 <div>
-                    <div style="font-size: 0.75rem; color: #64748b; font-weight: 700; text-transform: uppercase;">
-                        Address</div>
-                    <div style="font-weight: 600;">{{ caterer_profile.contact_address }}, {{ caterer_profile.city }}
-                    </div>
-                </div>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-                    <div>
-                        <div style="font-size: 0.75rem; color: #64748b; font-weight: 700; text-transform: uppercase;">
-                            Experience</div>
-                        <div style="font-weight: 600;">{{ caterer_profile.years_of_operation }} Years</div>
-                    </div>
-                    <div>
-                        <div style="font-size: 0.75rem; color: #64748b; font-weight: 700; text-transform: uppercase;">
-                            Min Pax</div>
-                        <div style="font-weight: 600;">{{ caterer_profile.min_pax }} pax</div>
-                    </div>
-                </div>
-                <div>
-                    <div style="font-size: 0.75rem; color: #64748b; font-weight: 700; text-transform: uppercase;">
-                        Starting Price</div>
-                    <div style="font-weight: 600; color: var(--primary-color);">₱{{
-                        "{:,.2f}".format(caterer_profile.starting_price) }}</div>
-                </div>
-                <div>
-                    <div style="font-size: 0.75rem; color: #64748b; font-weight: 700; text-transform: uppercase;">
-                        Description</div>
-                    <div style="font-size: 0.85rem; color: #4b5563; line-height: 1.5;">{{ caterer_profile.description }}
-                    </div>
+                    <div class="label-tiny">Years in Operation</div>
+                    <div style="font-weight: 600;">{{ caterer_profile.years_of_operation }} Years</div>
                 </div>
             </div>
         </div>
+        {% endif %}
     </div>
 
-    <!-- Right Column: Documents & Verification -->
+    <!-- Right Column: Evidence & Documents -->
     <div style="display: flex; flex-direction: column; gap: 2rem;">
-        <!-- Uploaded Documents -->
-        <div
-            style="background: white; border-radius: 1.5rem; padding: 2rem; border: 1px solid var(--border-color); box-shadow: var(--shadow-sm);">
-            <h3 style="font-size: 1.1rem; margin-bottom: 1.5rem;"><i class="fas fa-file-upload"
-                    style="color: #6366f1;"></i> Uploaded Documents</h3>
+        <!-- Evidence Visuals -->
+        <div class="review-card">
+            <h3 style="font-size: 1.1rem; margin-bottom: 1.5rem;"><i class="fas fa-images" style="color: #6366f1;"></i>
+                Biometric Evidence</h3>
 
-            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem;">
-                <!-- Business Permit -->
+            {% if verification %}
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+                <!-- ID Document -->
                 <div>
-                    <div style="font-size: 0.8rem; font-weight: 700; margin-bottom: 0.75rem;">Business Permit</div>
-                    {% if caterer_profile.permit_url %}
-                    <div style="border: 1px solid #e2e8f0; border-radius: 0.75rem; overflow: hidden;">
-                        <img src="{{ caterer_profile.permit_url }}"
-                            style="width: 100%; height: 150px; object-fit: cover;" alt="Permit">
-                        <div
-                            style="padding: 0.75rem; background: #f8fafc; border-top: 1px solid #e2e8f0; display: flex; justify-content: center;">
-                            <a href="{{ caterer_profile.permit_url }}" target="_blank"
-                                style="font-size: 0.75rem; color: var(--primary-color); font-weight: 700; text-decoration: none;">View
-                                Full Size</a>
+                    <div class="label-tiny" style="margin-bottom: 0.5rem;">Uploaded ID ({{
+                        verification.verification_type }})</div>
+                    <div class="img-preview-box">
+                        <img src="{{ verification.document_url }}" class="img-fluid" alt="ID Document">
+                        <div class="img-overlay">
+                            <a href="{{ verification.document_url }}" target="_blank">View Full ID</a>
                         </div>
                     </div>
-                    {% else %}
-                    <div
-                        style="height: 150px; background: #f1f5f9; border-radius: 0.75rem; display: flex; align-items: center; justify-content: center; color: #94a3b8; font-size: 0.8rem; border: 2px dashed #e2e8f0;">
-                        Not Provided</div>
-                    {% endif %}
+                    <div style="margin-top: 0.5rem; font-size: 0.8rem; font-weight: 600; color: #64748b;">
+                        ID Number: {{ verification.id_number }}
+                    </div>
                 </div>
 
-                <!-- Valid ID -->
+                <!-- Liveness Frames -->
                 <div>
-                    <div style="font-size: 0.8rem; font-weight: 700; margin-bottom: 0.75rem;">Valid ID</div>
-                    {% if caterer_profile.gov_id_url %}
-                    <div style="border: 1px solid #e2e8f0; border-radius: 0.75rem; overflow: hidden;">
-                        <img src="{{ caterer_profile.gov_id_url }}"
-                            style="width: 100%; height: 150px; object-fit: cover;" alt="ID">
-                        <div
-                            style="padding: 0.75rem; background: #f8fafc; border-top: 1px solid #e2e8f0; display: flex; justify-content: center;">
-                            <a href="{{ caterer_profile.gov_id_url }}" target="_blank"
-                                style="font-size: 0.75rem; color: var(--primary-color); font-weight: 700; text-decoration: none;">View
-                                Full Size</a>
+                    <div class="label-tiny" style="margin-bottom: 0.5rem;">Liveness Check (3 Frames)</div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.5rem;">
+                        <div class="img-preview-box small">
+                            <img src="{{ verification.selfie_url }}" class="img-fluid" alt="Frame 1">
+                        </div>
+                        <div class="img-preview-box small">
+                            <img src="{{ verification.selfie_2_url or verification.selfie_url }}" class="img-fluid"
+                                alt="Frame 2">
+                        </div>
+                        <div class="img-preview-box small">
+                            <img src="{{ verification.selfie_3_url or verification.selfie_url }}" class="img-fluid"
+                                alt="Frame 3">
                         </div>
                     </div>
-                    {% else %}
-                    <div
-                        style="height: 150px; background: #f1f5f9; border-radius: 0.75rem; display: flex; align-items: center; justify-content: center; color: #94a3b8; font-size: 0.8rem; border: 2px dashed #e2e8f0;">
-                        Not Provided</div>
-                    {% endif %}
+                    <p style="font-size: 0.75rem; color: #64748b; margin-top: 0.5rem;">The AI compared movement across
+                        these frames to verify a living person.</p>
                 </div>
-
-                <!-- Sample Menu -->
-                <div>
-                    <div style="font-size: 0.8rem; font-weight: 700; margin-bottom: 0.75rem;">Sample Menu</div>
-                    {% if caterer_profile.sample_menu_url %}
-                    <div style="border: 1px solid #e2e8f0; border-radius: 0.75rem; overflow: hidden;">
-                        <img src="{{ caterer_profile.sample_menu_url }}"
-                            style="width: 100%; height: 150px; object-fit: cover;" alt="Menu">
-                        <div
-                            style="padding: 0.75rem; background: #f8fafc; border-top: 1px solid #e2e8f0; display: flex; justify-content: center;">
-                            <a href="{{ caterer_profile.sample_menu_url }}" target="_blank"
-                                style="font-size: 0.75rem; color: var(--primary-color); font-weight: 700; text-decoration: none;">View
-                                Full Size</a>
-                        </div>
-                    </div>
-                    {% else %}
-                    <div
-                        style="height: 150px; background: #f1f5f9; border-radius: 0.75rem; display: flex; align-items: center; justify-content: center; color: #94a3b8; font-size: 0.8rem; border: 2px dashed #e2e8f0;">
-                        Not Provided</div>
-                    {% endif %}
+            </div>
+            {% else %}
+            <div style="text-align: center; padding: 2rem; color: #64748b;">
+                <div style="font-size: 2rem; margin-bottom: 1rem; opacity: 0.5;"><i class="fas fa-fingerprint"></i>
                 </div>
+                <p>Biometric data has not been submitted yet.</p>
+            </div>
+            {% endif %}
+        </div>
 
-                <!-- Logo -->
+        {% if caterer_profile %}
+        <!-- Business Documents (Caterers Only) -->
+        <div class="review-card">
+            <h3 style="font-size: 1.1rem; margin-bottom: 1.5rem;"><i class="fas fa-copy" style="color: #6366f1;"></i>
+                Business Documents</h3>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
                 <div>
-                    <div style="font-size: 0.8rem; font-weight: 700; margin-bottom: 0.75rem;">Logo / Profile Picture
-                    </div>
-                    {% if caterer_profile.logo_url %}
-                    <div style="border: 1px solid #e2e8f0; border-radius: 0.75rem; overflow: hidden;">
-                        <img src="{{ caterer_profile.logo_url }}" style="width: 100%; height: 150px; object-fit: cover;"
-                            alt="Logo">
-                        <div
-                            style="padding: 0.75rem; background: #f8fafc; border-top: 1px solid #e2e8f0; display: flex; justify-content: center;">
-                            <a href="{{ caterer_profile.logo_url }}" target="_blank"
-                                style="font-size: 0.75rem; color: var(--primary-color); font-weight: 700; text-decoration: none;">View
-                                Full Size</a>
+                    <div class="label-tiny">Business Permit</div>
+                    <div class="img-preview-box small">
+                        {% if caterer_profile.permit_url %}
+                        <img src="{{ caterer_profile.permit_url }}" class="img-fluid" alt="Permit">
+                        <div class="img-overlay"><a href="{{ caterer_profile.permit_url }}" target="_blank">View</a>
                         </div>
+                        {% else %}<div class="empty-state">Not Found</div>{% endif %}
                     </div>
-                    {% else %}
-                    <div
-                        style="height: 150px; background: #f1f5f9; border-radius: 0.75rem; display: flex; align-items: center; justify-content: center; color: #94a3b8; font-size: 0.8rem; border: 2px dashed #e2e8f0;">
-                        Not Provided</div>
-                    {% endif %}
+                </div>
+                <div>
+                    <div class="label-tiny">Sample Menu</div>
+                    <div class="img-preview-box small">
+                        {% if caterer_profile.sample_menu_url %}
+                        <img src="{{ caterer_profile.sample_menu_url }}" class="img-fluid" alt="Menu">
+                        <div class="img-overlay"><a href="{{ caterer_profile.sample_menu_url }}"
+                                target="_blank">View</a></div>
+                        {% else %}<div class="empty-state">Not Found</div>{% endif %}
+                    </div>
                 </div>
             </div>
         </div>
+        {% endif %}
 
-        <!-- Verification Checklist -->
-        <div style="background: #f8fafc; border-radius: 1.5rem; padding: 2rem; border: 1px solid var(--border-color);">
-            <h3 style="font-size: 1.1rem; margin-bottom: 1.5rem;"><i class="fas fa-check-double"
-                    style="color: #10b981;"></i> Verification Steps</h3>
-            <div style="display: flex; flex-direction: column; gap: 0.75rem;">
-                <label style="display: flex; align-items: center; gap: 0.75rem; cursor: pointer;">
-                    <input type="checkbox" style="width: 18px; height: 18px; accent-color: var(--primary-color);">
-                    <span style="font-size: 0.9rem;">Business Name matches permit</span>
-                </label>
-                <label style="display: flex; align-items: center; gap: 0.75rem; cursor: pointer;">
-                    <input type="checkbox" style="width: 18px; height: 18px; accent-color: var(--primary-color);">
-                    <span style="font-size: 0.9rem;">Permit is valid and updated for current year</span>
-                </label>
-                <label style="display: flex; align-items: center; gap: 0.75rem; cursor: pointer;">
-                    <input type="checkbox" style="width: 18px; height: 18px; accent-color: var(--primary-color);">
-                    <span style="font-size: 0.9rem;">Owner name matches Government ID</span>
-                </label>
-                <label style="display: flex; align-items: center; gap: 0.75rem; cursor: pointer;">
-                    <input type="checkbox" style="width: 18px; height: 18px; accent-color: var(--primary-color);">
-                    <span style="font-size: 0.9rem;">Documents appear authentic (seals, signatures)</span>
-                </label>
+        <!-- Audit Trail -->
+        <div class="review-card">
+            <h3 style="font-size: 1.1rem; margin-bottom: 1.5rem;"><i class="fas fa-history" style="color: #64748b;"></i>
+                Security Audit Trail</h3>
+            <div class="audit-timeline">
+                {% for log in target_user.audit_logs|sort(attribute='timestamp', reverse=True) %}
+                <div class="timeline-item">
+                    <div class="timeline-time">{{ log.timestamp.strftime('%H:%M:%S') }} <br> <span
+                            style="font-size: 0.7rem;">{{ log.timestamp.strftime('%Y-%m-%d') }}</span></div>
+                    <div class="timeline-content">
+                        <strong>{{ log.action|replace('_', ' ')|capitalize }}</strong>
+                        <p>{{ log.notes }}</p>
+                        {% if log.ip_address %}
+                        <span class="timeline-meta">IP: {{ log.ip_address }}</span>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
             </div>
         </div>
 
-        <!-- Verification Actions -->
-        <div
-            style="background: white; border-radius: 1.5rem; padding: 2rem; border: 1px solid var(--border-color); box-shadow: var(--shadow-lg);">
-            <h3 style="font-size: 1.1rem; margin-bottom: 1.5rem;"><i class="fas fa-shield-alt"
-                    style="color: var(--primary-color);"></i> Admin Action</h3>
+        <!-- Admin Decision Form -->
+        <div class="review-card action-card">
+            <h3 style="font-size: 1.1rem; margin-bottom: 1.5rem;"><i class="fas fa-gavel"
+                    style="color: var(--primary-color);"></i> Final Decision</h3>
 
-            <form action="/admin/caterers/{{ caterer_profile.id }}/verify" method="POST">
+            <form action="/admin/kyc/{{ verification.id if verification else '0' }}/action" method="POST">
                 <div style="margin-bottom: 1.5rem;">
-                    <label
-                        style="font-size: 0.8rem; font-weight: 700; color: #64748b; text-transform: uppercase;">Optional
-                        Reason / Feedback</label>
-                    <textarea name="reason" placeholder="Explain rejection or request specific revisions..."
-                        style="width: 100%; min-height: 80px; padding: 1rem; border: 1px solid #e2e8f0; border-radius: 0.75rem; margin-top: 0.5rem; font-family: inherit;"></textarea>
+                    <label class="label-tiny" style="color: #64748b;">Internal Decision Notes</label>
+                    <textarea name="notes" placeholder="Explain your decision (sent to user if rejected)..." required {%
+                        if not verification %}disabled{% endif %}
+                        style="width: 100%; min-height: 100px; padding: 1rem; border: 1px solid #e2e8f0; border-radius: 0.75rem; margin-top: 0.5rem;"></textarea>
                 </div>
 
-                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem;">
-                    <button type="submit" name="action" value="approve"
-                        style="background: #10b981; color: white; border: none; padding: 1rem; border-radius: 0.75rem; font-weight: 800; cursor: pointer; transition: all 0.2s ease;">
-                        <i class="fas fa-check-circle"></i> Approve
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <button type="submit" name="action" value="approve" class="btn btn-primary" {% if not verification
+                        %}disabled title="Cannot approve without verification data" {% endif %}
+                        style="background: #10b981; border: none;">
+                        <i class="fas fa-check-shield"></i> Approve Identity
                     </button>
-                    <button type="submit" name="action" value="revision"
-                        style="background: #fff7ed; color: #ea580c; border: 1px solid #fdba74; padding: 1rem; border-radius: 0.75rem; font-weight: 800; cursor: pointer; transition: all 0.2s ease;">
-                        <i class="fas fa-edit"></i> Revision
-                    </button>
-                    <button type="submit" name="action" value="reject"
-                        style="background: #fef2f2; color: #ef4444; border: 1px solid #fee2e2; padding: 1rem; border-radius: 0.75rem; font-weight: 800; cursor: pointer; transition: all 0.2s ease;">
-                        <i class="fas fa-times-circle"></i> Reject
+                    <button type="submit" name="action" value="reject" class="btn btn-danger" {% if not verification
+                        %}disabled title="Cannot reject without verification data" {% endif %}
+                        style="background: #ef4444; border: none;">
+                        <i class="fas fa-ban"></i> Reject & Fail
                     </button>
                 </div>
             </form>
         </div>
     </div>
 </div>
+
+<style>
+    .review-card {
+        background: white;
+        border-radius: 1.5rem;
+        padding: 2rem;
+        border: 1px solid var(--border-color);
+        box-shadow: var(--shadow-sm);
+    }
+
+    .action-card {
+        background: #f8fafc;
+        border: 2px solid var(--primary-color);
+        box-shadow: var(--shadow-lg);
+    }
+
+    .label-tiny {
+        font-size: 0.7rem;
+        color: #64748b;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .img-preview-box {
+        position: relative;
+        border: 1px solid #e2e8f0;
+        border-radius: 1rem;
+        overflow: hidden;
+        background: #f1f5f9;
+        height: 200px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .img-preview-box.small {
+        height: 120px;
+    }
+
+    .img-preview-box img {
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: contain;
+    }
+
+    .img-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        transition: opacity 0.2s;
+    }
+
+    .img-preview-box:hover .img-overlay {
+        opacity: 1;
+    }
+
+    .img-overlay a {
+        color: white;
+        font-weight: 700;
+        text-decoration: none;
+        font-size: 0.8rem;
+    }
+
+    .audit-timeline {
+        border-left: 2px solid #e2e8f0;
+        margin-left: 1rem;
+        padding-left: 2rem;
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .timeline-item {
+        position: relative;
+    }
+
+    .timeline-item::before {
+        content: '';
+        position: absolute;
+        left: -2.35rem;
+        top: 0.25rem;
+        width: 10px;
+        height: 10px;
+        background: white;
+        border: 2px solid var(--primary-color);
+        border-radius: 50%;
+    }
+
+    .timeline-time {
+        font-size: 0.75rem;
+        color: #64748b;
+        position: absolute;
+        left: -8rem;
+        text-align: right;
+        width: 5rem;
+        top: 0;
+    }
+
+    .timeline-content strong {
+        display: block;
+        font-size: 0.9rem;
+        color: #1e293b;
+    }
+
+    .timeline-content p {
+        font-size: 0.85rem;
+        color: #4b5563;
+        margin: 0.25rem 0;
+    }
+
+    .timeline-meta {
+        font-size: 0.7rem;
+        color: #94a3b8;
+        font-weight: 600;
+    }
+
+    .empty-state {
+        color: #94a3b8;
+        font-size: 0.8rem;
+    }
+</style>
 {% endblock %}

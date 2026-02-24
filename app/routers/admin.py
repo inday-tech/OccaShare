@@ -290,14 +290,15 @@ async def view_kyc_queue(
     db: Session = Depends(database.get_db),
     user: models.User = Depends(admin_only)
 ):
-    high_risk_bookings = db.query(models.Booking).filter(
-        models.Booking.status.in_(["flagged", "pending"])
+    # Get all verifications in process or manual review
+    kyc_requests = db.query(models.IdentityVerification).filter(
+        models.IdentityVerification.verification_status.in_(["manual_review", "processing"])
     ).all()
     
     return templates.TemplateResponse("admin/kyc_logs.html", {
         "request": request,
         "user": user,
-        "high_risk_bookings": high_risk_bookings,
+        "kyc_requests": kyc_requests,
         "active_page": "kyc"
     })
 
@@ -325,17 +326,52 @@ async def view_booking_kyc(
     if not booking:
         raise HTTPException(status_code=404, detail="Booking not found")
     
-    kyc_results = db.query(models.OCRVerification).filter(models.OCRVerification.booking_id == booking_id).first()
-    fraud_flags = db.query(models.FraudFlag).filter(models.FraudFlag.booking_id == booking_id).all()
+    kyc = db.query(models.IdentityVerification).filter(models.IdentityVerification.user_id == booking.user_id).first()
+    audit_trail = db.query(models.AuditLog).filter(models.AuditLog.user_id == booking.user_id).order_by(models.AuditLog.timestamp.desc()).all()
     
     return templates.TemplateResponse("admin/booking_kyc.html", {
         "request": request,
         "user": user,
         "booking": booking,
-        "kyc": kyc_results,
-        "flags": fraud_flags,
+        "kyc": kyc,
+        "audit_trail": audit_trail,
         "active_page": "bookings"
     })
+
+@router.post("/kyc/{kyc_id}/action")
+async def kyc_manual_action(
+    kyc_id: int,
+    action: str = Form(...),
+    notes: str = Form(None),
+    db: Session = Depends(database.get_db),
+    user: models.User = Depends(admin_only)
+):
+    kyc = db.query(models.IdentityVerification).get(kyc_id)
+    if not kyc:
+        raise HTTPException(status_code=404, detail="KYC record not found")
+    
+    target_user = db.query(models.User).get(kyc.user_id)
+    
+    if action == "approve":
+        kyc.verification_status = "approved"
+        target_user.is_verified = True
+        target_user.is_kyc_complete = True
+    else:
+        kyc.verification_status = "rejected"
+        kyc.failure_reason = notes or "Rejected after manual review."
+    
+    # Audit Log
+    audit = models.AuditLog(
+        user_id=target_user.id,
+        action="manual_kyc_decision",
+        old_status="manual_review",
+        new_status=kyc.verification_status,
+        notes=f"Admin {user.email}: {notes}"
+    )
+    db.add(audit)
+    db.commit()
+    
+    return RedirectResponse(url="/admin/kyc", status_code=303)
 
 @router.post("/bookings/{booking_id}/flag")
 async def flag_booking(
