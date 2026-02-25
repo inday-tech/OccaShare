@@ -1,0 +1,195 @@
+{% set nav_page = 'how-it-works' %}
+{% extends "landing_base.html" %}
+
+{% block title %}How It Works - OccaServe{% endblock %}
+
+{% block content %}
+
+<!-- Page Hero -->
+<div class="page-hero" style="background: linear-gradient(135deg, #1a3a0f 0%, #2d6a1b 50%, #4a9e2e 100%);">
+    <div class="container">
+        <h1>How OccaServe Works</h1>
+        <p>Booking world-class catering for your event has never been simpler. We connect you with vetted professionals
+            in three easy steps.</p>
+    </div>
+</div>
+
+<!-- Steps Section -->
+<section class="section">
+    <div class="container">
+        <div class="section-header">
+            <h2>Your Journey to a Perfect Event</h2>
+            <p>From discovery to celebration — here's exactly how OccaServe builds unforgettable experiences.</p>
+        </div>
+
+        <div style="display: grid; gap: 4rem; margin-top: 3rem;">
+            <!-- Step 1 -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; align-items: center;">
+                <div
+                    style="background: linear-gradient(135deg, var(--primary-light, #e8f5d0), #fff); border-radius: 1.5rem; padding: 4rem; text-align: center;">
+                    <div
+                        style="width: 100px; height: 100px; background: var(--primary-color, #99cc66); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem; font-size: 2.5rem; color: white;">
+                        <i class="fas fa-search"></i>
+                    </div>
+                    <div
+                        style="font-family: 'Playfair Display', serif; font-size: 5rem; font-weight: 700; color: rgba(153,204,102,0.2); line-height: 1;">
+                        01</div>
+                </div>
+                <div>
+                    <div
+                        style="text-transform: uppercase; letter-spacing: 0.1em; font-size: 0.8rem; font-weight: 700; color: var(--primary-color, #99cc66); margin-bottom: 0.75rem;">
+                        Step One</div>
+                    <h2 style="font-family: 'Playfair Display', serif; font-size: 2.25rem; margin-bottom: 1.25rem;">
+                        Discover the Perfect Caterer</h2>
+                    <p style="color: var(--text-light, #666); line-height: 1.8; margin-bottom: 1.5rem;">Browse our
+                        curated marketplace of verified professional caterers. Filter by event type — whether it's a
+                        grand wedding, intimate birthday, or large corporate gala. Read reviews, explore menus, and
+                        compare packages side by side.</p>
+                    <ul style="list-style: none; padding: 0; display: flex; flex-direction: column; gap: 0.75rem;">
+                        <li style="display: flex; align-items: center; gap: 0.75rem; color: var(--text-light, #666);"><i
+                                class="fas fa-check-circle" style="color: var(--primary-color, #99cc66);"></i> Filter by
+                            event type, location & budget</li>
+                        <li style="display: flex; align-items: center; gap: 0.75rem; color: var(--text-light, #666);"><i
+                                class="fas fa-check-circle" style="color: var(--primary-color, #99cc66);"></i> Read
+                            verified customer reviews</li>
+                        <li style="display: flex; align-items: center; gap: 0.75rem; color: var(--text-light, #666);"><i
+                                class="fas fa-check-circle" style="color: var(--primary-color, #99cc66);"></i> View
+                            detailed caterer profiles & menus</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Step 2 -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; align-items: center;">
+                <div style="order: 2;">
+                    <div
+                        style="background: linear-gradient(135deg, #fff7e0, #fff); border-radius: 1.5rem; padding: 4rem; text-align: center;">
+                        <div
+                            style="width: 100px; height: 100px; background: #f59e0b; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem; font-size: 2.5rem; color: white;">
+                            <i class="fas fa-utensils"></i>
+                        </div>
+                        <div
+                            style="font-family: 'Playfair Display', serif; font-size: 5rem; font-weight: 700; color: rgba(245,158,11,0.15); line-height: 1;">
+                            02</div>
+                    </div>
+                </div>
+                <div style="order: 1;">
+                    <div
+                        style="text-transform: uppercase; letter-spacing: 0.1em; font-size: 0.8rem; font-weight: 700; color: #f59e0b; margin-bottom: 0.75rem;">
+                        Step Two</div>
+                    <h2 style="font-family: 'Playfair Display', serif; font-size: 2.25rem; margin-bottom: 1.25rem;">
+                        Customize Your Experience</h2>
+                    <p style="color: var(--text-light, #666); line-height: 1.8; margin-bottom: 1.5rem;">Choose from a
+                        variety of curated packages or request a fully custom quote. Tailor the menu to your guests'
+                        dietary preferences, cultural traditions, and taste. Discuss your vision directly with the
+                        caterer through our messaging platform.</p>
+                    <ul style="list-style: none; padding: 0; display: flex; flex-direction: column; gap: 0.75rem;">
+                        <li style="display: flex; align-items: center; gap: 0.75rem; color: var(--text-light, #666);"><i
+                                class="fas fa-check-circle" style="color: #f59e0b;"></i> Choose from pre-built packages
+                        </li>
+                        <li style="display: flex; align-items: center; gap: 0.75rem; color: var(--text-light, #666);"><i
+                                class="fas fa-check-circle" style="color: #f59e0b;"></i> Request custom menus & quotes
+                        </li>
+                        <li style="display: flex; align-items: center; gap: 0.75rem; color: var(--text-light, #666);"><i
+                                class="fas fa-check-circle" style="color: #f59e0b;"></i> Communicate directly with
+                            caterers</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Step 3 -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; align-items: center;">
+                <div
+                    style="background: linear-gradient(135deg, #e0f2fe, #fff); border-radius: 1.5rem; padding: 4rem; text-align: center;">
+                    <div
+                        style="width: 100px; height: 100px; background: #0ea5e9; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem; font-size: 2.5rem; color: white;">
+                        <i class="fas fa-calendar-check"></i>
+                    </div>
+                    <div
+                        style="font-family: 'Playfair Display', serif; font-size: 5rem; font-weight: 700; color: rgba(14,165,233,0.15); line-height: 1;">
+                        03</div>
+                </div>
+                <div>
+                    <div
+                        style="text-transform: uppercase; letter-spacing: 0.1em; font-size: 0.8rem; font-weight: 700; color: #0ea5e9; margin-bottom: 0.75rem;">
+                        Step Three</div>
+                    <h2 style="font-family: 'Playfair Display', serif; font-size: 2.25rem; margin-bottom: 1.25rem;">Book
+                        & Relax</h2>
+                    <p style="color: var(--text-light, #666); line-height: 1.8; margin-bottom: 1.5rem;">Secure your
+                        booking with our safe and seamless payment process. Once confirmed, sit back and let our
+                        professional caterers handle everything — from setup to service to cleanup. Your only job is to
+                        enjoy the moment.</p>
+                    <ul style="list-style: none; padding: 0; display: flex; flex-direction: column; gap: 0.75rem;">
+                        <li style="display: flex; align-items: center; gap: 0.75rem; color: var(--text-light, #666);"><i
+                                class="fas fa-check-circle" style="color: #0ea5e9;"></i> Secure online payment via
+                            PayMongo</li>
+                        <li style="display: flex; align-items: center; gap: 0.75rem; color: var(--text-light, #666);"><i
+                                class="fas fa-check-circle" style="color: #0ea5e9;"></i> Booking confirmation &
+                            reminders</li>
+                        <li style="display: flex; align-items: center; gap: 0.75rem; color: var(--text-light, #666);"><i
+                                class="fas fa-check-circle" style="color: #0ea5e9;"></i> Full professional setup &
+                            service</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- FAQ Section -->
+<section class="section section-alt">
+    <div class="container">
+        <div class="section-header">
+            <h2>Frequently Asked Questions</h2>
+            <p>Everything you need to know about booking with OccaServe.</p>
+        </div>
+
+        <div style="max-width: 750px; margin: 0 auto; display: flex; flex-direction: column; gap: 1rem;">
+            {% set faqs = [
+            ("How long does booking take?", "Most bookings are confirmed within 24 hours. After submitting your request
+            and completing payment, the caterer reviews and confirms your event details."),
+            ("Can I cancel or modify my booking?", "Yes. You can request modifications or cancellations through your
+            dashboard. Cancellation policies vary by caterer and are clearly stated on each profile."),
+            ("Are caterers verified?", "All caterers on OccaServe go through a verification process including document
+            review and background checks before they can accept bookings."),
+            ("What payment methods are accepted?", "We support credit/debit cards, GCash, and other digital wallets
+            through our secure PayMongo integration."),
+            ("Can I book for large events?", "Absolutely! Many of our caterers specialize in large-scale events. Simply
+            filter by guest count or reach out to discuss your specific needs."),
+            ] %}
+            {% for q, a in faqs %}
+            <div
+                style="background: white; border-radius: 1rem; border: 1px solid var(--border-color, #e5e7eb); overflow: hidden;">
+                <details style="padding: 1.5rem; cursor: pointer;">
+                    <summary
+                        style="font-weight: 600; font-size: 1rem; color: var(--text-dark, #1a2e18); list-style: none; display: flex; justify-content: space-between; align-items: center;">
+                        {{ q }}
+                        <i class="fas fa-chevron-down"
+                            style="color: var(--primary-color, #99cc66); font-size: 0.85rem; transition: transform 0.3s;"></i>
+                    </summary>
+                    <p
+                        style="margin-top: 1rem; color: var(--text-light, #6b7280); line-height: 1.7; border-top: 1px solid var(--border-color, #e5e7eb); padding-top: 1rem;">
+                        {{ a }}</p>
+                </details>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section">
+    <div class="container">
+        <div class="cta-content">
+            <h2>Ready to Get Started?</h2>
+            <p>Join thousands of events already powered by OccaServe. Your perfect caterer is just a few clicks away.
+            </p>
+            <div class="cta-buttons">
+                <a href="/#caterers" class="btn-primary">Browse Caterers</a>
+                <a href="/auth/register" class="btn-outline-white">Create an Account</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock %}

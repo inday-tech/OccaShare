@@ -1,349 +1,346 @@
-<!DOCTYPE html>
-<html lang="en">
+{% set nav_page = 'register' %}
+{% extends "landing_base.html" %}
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Caterer Registration - OccaServe</title>
-    <link rel="stylesheet" href="{{ url_for('static', path='/css/styles.css') }}">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@700&display=swap"
-        rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        :root {
-            --primary: #99cc66;
-            --primary-hover: #88bb55;
-            --slate-50: #fdfdfb;
-            --slate-100: #cae4c5;
-            --slate-200: #e2e8e0;
-            --slate-600: #5a7a56;
-            --slate-700: #3b5a37;
-            --slate-800: #254222;
-            --slate-900: #1a2e18;
+{% block title %}Caterer Registration - OccaServe{% endblock %}
+
+{% block head %}
+<style>
+    body {
+        margin-top: 20px;
+    }
+
+    :root {
+        --primary: #99cc66;
+        --primary-hover: #88bb55;
+        --slate-50: #fdfdfb;
+        --slate-100: #cae4c5;
+        --slate-200: #e2e8e0;
+        --slate-600: #5a7a56;
+        --slate-700: #3b5a37;
+        --slate-800: #254222;
+        --slate-900: #1a2e18;
+    }
+
+    .main-content-wrap {
+        padding-top: 120px;
+        padding-bottom: 100px;
+        min-height: 85vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: var(--slate-50);
+        background-image: radial-gradient(at 0% 0%, hsla(120, 30%, 15%, 1) 0, transparent 50%),
+            radial-gradient(at 50% 0%, hsla(90, 40%, 40%, 1) 0, transparent 50%),
+            radial-gradient(at 100% 0%, hsla(45, 30%, 80%, 1) 0, transparent 50%);
+        background-attachment: fixed;
+    }
+
+    .auth-container {
+        width: 100%;
+        max-width: 700px;
+        animation: slideIn 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
         }
 
-        body.auth-page {
-            background-color: var(--slate-50);
-            background-image: radial-gradient(at 0% 0%, hsla(120, 30%, 15%, 1) 0, transparent 50%),
-                radial-gradient(at 50% 0%, hsla(90, 40%, 40%, 1) 0, transparent 50%),
-                radial-gradient(at 100% 0%, hsla(45, 30%, 80%, 1) 0, transparent 50%);
-            background-attachment: fixed;
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 2rem 1rem;
-            font-family: 'Inter', sans-serif;
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .professional-card {
+        background: #ffffff;
+        border-radius: 1.5rem;
+        padding: 3rem;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        border: 1px solid var(--slate-200);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .form-header {
+        text-align: center;
+        margin-bottom: 2.5rem;
+    }
+
+    .form-header h2 {
+        font-family: 'Playfair Display', serif;
+        font-size: 2.25rem;
+        color: var(--slate-900);
+        margin-bottom: 0.5rem;
+        letter-spacing: -0.02em;
+    }
+
+    .form-header p {
+        color: var(--slate-600);
+        font-size: 1rem;
+        max-width: 450px;
+        margin: 0 auto;
+        line-height: 1.5;
+    }
+
+    /* Progress Steps */
+    .progress-container {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 3rem;
+        position: relative;
+        z-index: 1;
+    }
+
+    .progress-container::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 0;
+        transform: translateY(-50%);
+        height: 2px;
+        width: 100%;
+        background: var(--slate-100);
+        z-index: -1;
+    }
+
+    .progress-step {
+        width: 40px;
+        height: 40px;
+        background: #fff;
+        border: 2px solid var(--slate-200);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        color: var(--slate-600);
+        transition: all 0.3s ease;
+        position: relative;
+        background: white;
+    }
+
+    .progress-step.active {
+        border-color: var(--primary);
+        color: var(--primary);
+        box-shadow: 0 0 0 4px rgba(153, 204, 102, 0.2);
+    }
+
+    .progress-step.completed {
+        background: var(--primary);
+        border-color: var(--primary);
+        color: white;
+    }
+
+    .step-label {
+        position: absolute;
+        top: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        margin-top: 0.5rem;
+        font-size: 0.75rem;
+        font-weight: 600;
+        white-space: nowrap;
+        color: var(--slate-600);
+    }
+
+    .progress-step.active .step-label {
+        color: var(--primary);
+    }
+
+    /* Form Content */
+    .form-step {
+        display: none;
+        animation: fadeIn 0.4s ease-out;
+    }
+
+    .form-step.active {
+        display: block;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateX(10px);
         }
 
-        .auth-container {
-            width: 100%;
-            max-width: 700px;
-            animation: slideIn 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        to {
+            opacity: 1;
+            transform: translateX(0);
         }
+    }
 
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
+    .form-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+    }
 
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+    .form-group {
+        margin-bottom: 1.25rem;
+    }
+
+    .form-group.full-width {
+        grid-column: 1 / -1;
+    }
+
+    .form-group label {
+        display: block;
+        font-weight: 600;
+        font-size: 0.85rem;
+        color: var(--slate-700);
+        margin-bottom: 0.5rem;
+    }
+
+    .minimal-input {
+        width: 100%;
+        padding: 0.875rem 1rem;
+        border: 2px solid var(--slate-200);
+        border-radius: 0.75rem;
+        font-size: 0.95rem;
+        transition: all 0.2s ease;
+        background: var(--slate-50);
+        color: var(--slate-900);
+        box-sizing: border-box;
+    }
+
+    .minimal-input:focus {
+        outline: none;
+        border-color: var(--primary);
+        background: #fff;
+        box-shadow: 0 0 0 4px rgba(153, 204, 102, 0.1);
+    }
+
+    .checkbox-group {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+        gap: 0.75rem;
+        background: var(--slate-50);
+        padding: 1.5rem;
+        border-radius: 1rem;
+        border: 2px solid var(--slate-200);
+    }
+
+    .checkbox-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.85rem;
+        color: var(--slate-700);
+        cursor: pointer;
+    }
+
+    .file-upload-box {
+        height: 100px;
+        border: 2px dashed var(--slate-200);
+        border-radius: 0.75rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background: var(--slate-50);
+        transition: all 0.2s;
+        cursor: pointer;
+        position: relative;
+        overflow: hidden;
+        padding: 1rem;
+        text-align: center;
+    }
+
+    .file-upload-box:hover {
+        border-color: var(--primary);
+        background: #fff;
+    }
+
+    .file-upload-box i {
+        font-size: 1.5rem;
+        color: var(--slate-600);
+        margin-bottom: 0.25rem;
+    }
+
+    .file-upload-box p {
+        margin: 0;
+        font-size: 0.75rem;
+        color: var(--slate-600);
+    }
+
+    .file-upload-box input {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        opacity: 0;
+        cursor: pointer;
+    }
+
+    .btn-container {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2rem;
+    }
+
+    .btn-nav {
+        padding: 1rem 1.5rem;
+        border-radius: 0.75rem;
+        font-size: 1rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.2s;
+        border: none;
+        flex: 1;
+    }
+
+    .btn-next {
+        background: var(--slate-900);
+        color: white;
+    }
+
+    .btn-next:hover {
+        background: var(--primary);
+        transform: translateY(-2px);
+    }
+
+    .btn-prev {
+        background: var(--slate-100);
+        color: var(--slate-700);
+    }
+
+    .btn-prev:hover {
+        background: var(--slate-200);
+    }
+
+    .logo-preview {
+        width: 60px;
+        height: 60px;
+        border-radius: 0.5rem;
+        object-fit: cover;
+        display: none;
+        margin-bottom: 0.5rem;
+    }
+
+    .error-hint {
+        color: #ef4444;
+        font-size: 0.75rem;
+        margin-top: 0.25rem;
+        display: none;
+    }
+
+    @media (max-width: 600px) {
+        .form-grid {
+            grid-template-columns: 1fr;
         }
 
         .professional-card {
-            background: #ffffff;
-            border-radius: 1.5rem;
-            padding: 3rem;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-            border: 1px solid var(--slate-200);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .form-header {
-            text-align: center;
-            margin-bottom: 2.5rem;
-        }
-
-        .form-header h2 {
-            font-family: 'Playfair Display', serif;
-            font-size: 2.25rem;
-            color: var(--slate-900);
-            margin-bottom: 0.5rem;
-            letter-spacing: -0.02em;
-        }
-
-        .form-header p {
-            color: var(--slate-600);
-            font-size: 1rem;
-            max-width: 450px;
-            margin: 0 auto;
-            line-height: 1.5;
-        }
-
-        /* Progress Steps */
-        .progress-container {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 3rem;
-            position: relative;
-            z-index: 1;
-        }
-
-        .progress-container::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 0;
-            transform: translateY(-50%);
-            height: 2px;
-            width: 100%;
-            background: var(--slate-100);
-            z-index: -1;
-        }
-
-        .progress-step {
-            width: 40px;
-            height: 40px;
-            background: #fff;
-            border: 2px solid var(--slate-200);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 700;
-            color: var(--slate-600);
-            transition: all 0.3s ease;
-            position: relative;
-            background: white;
-        }
-
-        .progress-step.active {
-            border-color: var(--primary);
-            color: var(--primary);
-            box-shadow: 0 0 0 4px rgba(153, 204, 102, 0.2);
-        }
-
-        .progress-step.completed {
-            background: var(--primary);
-            border-color: var(--primary);
-            color: white;
-        }
-
-        .step-label {
-            position: absolute;
-            top: 100%;
-            left: 50%;
-            transform: translateX(-50%);
-            margin-top: 0.5rem;
-            font-size: 0.75rem;
-            font-weight: 600;
-            white-space: nowrap;
-            color: var(--slate-600);
-        }
-
-        .progress-step.active .step-label {
-            color: var(--primary);
-        }
-
-        /* Form Content */
-        .form-step {
-            display: none;
-            animation: fadeIn 0.4s ease-out;
-        }
-
-        .form-step.active {
-            display: block;
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateX(10px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateX(0);
-            }
-        }
-
-        .form-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1.5rem;
-        }
-
-        .form-group {
-            margin-bottom: 1.25rem;
-        }
-
-        .form-group.full-width {
-            grid-column: 1 / -1;
-        }
-
-        .form-group label {
-            display: block;
-            font-weight: 600;
-            font-size: 0.85rem;
-            color: var(--slate-700);
-            margin-bottom: 0.5rem;
-        }
-
-        .minimal-input {
-            width: 100%;
-            padding: 0.875rem 1rem;
-            border: 2px solid var(--slate-200);
-            border-radius: 0.75rem;
-            font-size: 0.95rem;
-            transition: all 0.2s ease;
-            background: var(--slate-50);
-            color: var(--slate-900);
-            box-sizing: border-box;
-        }
-
-        .minimal-input:focus {
-            outline: none;
-            border-color: var(--primary);
-            background: #fff;
-            box-shadow: 0 0 0 4px rgba(153, 204, 102, 0.1);
-        }
-
-        .checkbox-group {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-            gap: 0.75rem;
-            background: var(--slate-50);
             padding: 1.5rem;
-            border-radius: 1rem;
-            border: 2px solid var(--slate-200);
         }
+    }
+</style>
+{% endblock %}
 
-        .checkbox-item {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            font-size: 0.85rem;
-            color: var(--slate-700);
-            cursor: pointer;
-        }
-
-        .file-upload-box {
-            height: 100px;
-            border: 2px dashed var(--slate-200);
-            border-radius: 0.75rem;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            background: var(--slate-50);
-            transition: all 0.2s;
-            cursor: pointer;
-            position: relative;
-            overflow: hidden;
-            padding: 1rem;
-            text-align: center;
-        }
-
-        .file-upload-box:hover {
-            border-color: var(--primary);
-            background: #fff;
-        }
-
-        .file-upload-box i {
-            font-size: 1.5rem;
-            color: var(--slate-600);
-            margin-bottom: 0.25rem;
-        }
-
-        .file-upload-box p {
-            margin: 0;
-            font-size: 0.75rem;
-            color: var(--slate-600);
-        }
-
-        .file-upload-box input {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            opacity: 0;
-            cursor: pointer;
-        }
-
-        .btn-container {
-            display: flex;
-            gap: 1rem;
-            margin-top: 2rem;
-        }
-
-        .btn-nav {
-            padding: 1rem 1.5rem;
-            border-radius: 0.75rem;
-            font-size: 1rem;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.2s;
-            border: none;
-            flex: 1;
-        }
-
-        .btn-next {
-            background: var(--slate-900);
-            color: white;
-        }
-
-        .btn-next:hover {
-            background: var(--primary);
-            transform: translateY(-2px);
-        }
-
-        .btn-prev {
-            background: var(--slate-100);
-            color: var(--slate-700);
-        }
-
-        .btn-prev:hover {
-            background: var(--slate-200);
-        }
-
-        .logo-preview {
-            width: 60px;
-            height: 60px;
-            border-radius: 0.5rem;
-            object-fit: cover;
-            display: none;
-            margin-bottom: 0.5rem;
-        }
-
-        .error-hint {
-            color: #ef4444;
-            font-size: 0.75rem;
-            margin-top: 0.25rem;
-            display: none;
-        }
-
-        @media (max-width: 600px) {
-            .form-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .professional-card {
-                padding: 1.5rem;
-            }
-        }
-    </style>
-</head>
-
-<body class="auth-page">
+{% block content %}
+<div class="main-content-wrap">
     <div class="auth-container">
         <div class="professional-card">
             <div class="form-header">
@@ -387,23 +384,25 @@
                         <div class="form-group">
                             <label for="first_name">First Name (Owner/Manager)</label>
                             <input type="text" id="first_name" name="first_name" class="minimal-input" required
-                                placeholder="Juan">
+                                placeholder="Juan" value="{{ user.first_name if user else '' }}">
                         </div>
                         <div class="form-group">
                             <label for="last_name">Last Name</label>
                             <input type="text" id="last_name" name="last_name" class="minimal-input" required
-                                placeholder="Dela Cruz">
+                                placeholder="Dela Cruz" value="{{ user.last_name if user else '' }}">
                         </div>
                         <div class="form-group">
                             <label for="email">Email Address</label>
                             <input type="email" id="email" name="email" class="minimal-input" required
-                                placeholder="juan@example.com">
+                                placeholder="juan@example.com" value="{{ user.email if user else '' }}" {{ 'readonly' if
+                                user and user.auth_provider !='email' else '' }}>
                         </div>
                         <div class="form-group">
                             <label for="mobile_number">Contact Number</label>
                             <input type="tel" id="mobile_number" name="mobile_number" class="minimal-input" required
-                                placeholder="0917 123 4567">
+                                placeholder="0917 123 4567" value="{{ user.phone_number if user else '' }}">
                         </div>
+                        {% if not user or user.auth_provider == 'email' %}
                         <div class="form-group">
                             <label for="password">Password</label>
                             <input type="password" id="password" name="password" class="minimal-input" required
@@ -416,6 +415,18 @@
                                 required placeholder="••••••••">
                             <div id="confirmHint" class="error-hint">Passwords do not match</div>
                         </div>
+                        {% else %}
+                        <input type="hidden" name="password" value="social_login_auto">
+                        <input type="hidden" name="confirm_password" value="social_login_auto">
+                        <div class="form-group full-width" style="margin-top: 1rem;">
+                            <div
+                                style="background: #f0f9ff; padding: 1rem; border-radius: 0.75rem; border: 1px solid #bae6fd; display: flex; align-items: center; gap: 0.75rem;">
+                                <i class="fas fa-shield-alt" style="color: #0369a1;"></i>
+                                <p style="font-size: 0.85rem; color: #0c4a6e; margin: 0;">Account secured via {{
+                                    user.auth_provider | capitalize }}. Password not required.</p>
+                            </div>
+                        </div>
+                        {% endif %}
                     </div>
                 </div>
 
@@ -565,133 +576,131 @@
 
             <div class="auth-footer">
                 <p>Have an account? <a href="/auth/login">Login here</a></p>
-                <div style="margin-top: 1rem;">
-                    <a href="/"><i class="fas fa-long-arrow-left"></i> Home</a>
-                </div>
             </div>
         </div>
     </div>
+</div>
+{% endblock %}
 
-    <script>
-        let currentStep = 1;
+{% block scripts %}
+<script>
+    let currentStep = 1;
 
-        function changeStep(n) {
-            if (n === 1 && !validateStep()) return;
+    function changeStep(n) {
+        if (n === 1 && !validateStep()) return;
 
-            const steps = document.querySelectorAll('.form-step');
-            const progressSteps = document.querySelectorAll('.progress-step');
+        const steps = document.querySelectorAll('.form-step');
+        const progressSteps = document.querySelectorAll('.progress-step');
 
-            // Hide current step
-            steps[currentStep - 1].classList.remove('active');
-            progressSteps[currentStep - 1].classList.remove('active');
-            if (n === 1) progressSteps[currentStep - 1].classList.add('completed');
+        // Hide current step
+        steps[currentStep - 1].classList.remove('active');
+        progressSteps[currentStep - 1].classList.remove('active');
+        if (n === 1) progressSteps[currentStep - 1].classList.add('completed');
 
-            currentStep += n;
+        currentStep += n;
 
-            // Show new step
-            steps[currentStep - 1].classList.add('active');
-            progressSteps[currentStep - 1].classList.add('active');
-            progressSteps[currentStep - 1].classList.remove('completed');
+        // Show new step
+        steps[currentStep - 1].classList.add('active');
+        progressSteps[currentStep - 1].classList.add('active');
+        progressSteps[currentStep - 1].classList.remove('completed');
 
-            // Update buttons
-            document.getElementById('prevBtn').style.display = currentStep === 1 ? 'none' : 'block';
-            const nextBtn = document.getElementById('nextBtn');
-            if (currentStep === 4) {
-                nextBtn.innerText = 'Create Business Account';
-                nextBtn.type = 'submit';
-                nextBtn.onclick = handleFinalSubmit;
-            } else {
-                nextBtn.innerText = 'Next Step';
-                nextBtn.type = 'button';
-                nextBtn.onclick = () => changeStep(1);
-            }
+        // Update buttons
+        document.getElementById('prevBtn').style.display = currentStep === 1 ? 'none' : 'block';
+        const nextBtn = document.getElementById('nextBtn');
+        if (currentStep === 4) {
+            nextBtn.innerText = 'Create Business Account';
+            nextBtn.type = 'submit';
+            nextBtn.onclick = handleFinalSubmit;
+        } else {
+            nextBtn.innerText = 'Next Step';
+            nextBtn.type = 'button';
+            nextBtn.onclick = () => changeStep(1);
         }
+    }
 
-        function validateStep() {
-            const currentStepEl = document.getElementById(`step-${currentStep}`);
-            const inputs = currentStepEl.querySelectorAll('input[required], select[required]');
-            let valid = true;
+    function validateStep() {
+        const currentStepEl = document.getElementById(`step-${currentStep}`);
+        const inputs = currentStepEl.querySelectorAll('input[required], select[required]');
+        let valid = true;
 
-            inputs.forEach(input => {
-                if (!input.value) {
-                    input.style.borderColor = '#ef4444';
-                    valid = false;
-                } else {
-                    input.style.borderColor = 'var(--slate-200)';
-                }
-            });
-
-            if (currentStep === 1) {
-                if (!validatePassword()) valid = false;
-            }
-
-            return valid;
-        }
-
-        function validatePassword() {
-            const passInput = document.getElementById('password');
-            const confirmInput = document.getElementById('confirm_password');
-            const passHint = document.getElementById('passwordHint');
-            const confirmHint = document.getElementById('confirmHint');
-            let valid = true;
-
-            if (passInput.value.length < 8) {
-                passInput.style.borderColor = '#ef4444';
-                passHint.style.display = 'block';
+        inputs.forEach(input => {
+            if (!input.value) {
+                input.style.borderColor = '#ef4444';
                 valid = false;
             } else {
-                passInput.style.borderColor = 'var(--slate-200)';
-                passHint.style.display = 'none';
+                input.style.borderColor = 'var(--slate-200)';
             }
+        });
 
-            if (passInput.value !== confirmInput.value) {
-                confirmInput.style.borderColor = '#ef4444';
-                confirmHint.style.display = 'block';
-                valid = false;
-            } else {
-                confirmInput.style.borderColor = 'var(--slate-200)';
-                confirmHint.style.display = 'none';
-            }
-            return valid;
+        if (currentStep === 1) {
+            if (!validatePassword()) valid = false;
         }
 
-        function handleFinalSubmit(e) {
-            if (!validateStep()) {
-                e.preventDefault();
-                return false;
+        return valid;
+    }
+
+    function validatePassword() {
+        const passInput = document.getElementById('password');
+        const confirmInput = document.getElementById('confirm_password');
+        const passHint = document.getElementById('passwordHint');
+        const confirmHint = document.getElementById('confirmHint');
+        let valid = true;
+
+        if (passInput.value.length < 8) {
+            passInput.style.borderColor = '#ef4444';
+            passHint.style.display = 'block';
+            valid = false;
+        } else {
+            passInput.style.borderColor = 'var(--slate-200)';
+            passHint.style.display = 'none';
+        }
+
+        if (passInput.value !== confirmInput.value) {
+            confirmInput.style.borderColor = '#ef4444';
+            confirmHint.style.display = 'block';
+            valid = false;
+        } else {
+            confirmInput.style.borderColor = 'var(--slate-200)';
+            confirmHint.style.display = 'none';
+        }
+        return valid;
+    }
+
+    function handleFinalSubmit(e) {
+        if (!validateStep()) {
+            e.preventDefault();
+            return false;
+        }
+
+        // Collect event types
+        const checkboxes = document.querySelectorAll('input[name="event_type_choice"]:checked');
+        const eventTypes = Array.from(checkboxes).map(cb => cb.value).join(',');
+        document.getElementById('eventTypesInput').value = eventTypes;
+
+        document.getElementById('catererForm').submit();
+    }
+
+    function previewLogo(input) {
+        const preview = document.getElementById('logoPreview');
+        const icon = document.getElementById('uploadIcon');
+        const text = document.getElementById('uploadText');
+
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                preview.src = e.target.result;
+                preview.style.display = 'block';
+                icon.style.display = 'none';
+                text.innerText = 'Logo Selected';
             }
-
-            // Collect event types
-            const checkboxes = document.querySelectorAll('input[name="event_type_choice"]:checked');
-            const eventTypes = Array.from(checkboxes).map(cb => cb.value).join(',');
-            document.getElementById('eventTypesInput').value = eventTypes;
-
-            document.getElementById('catererForm').submit();
+            reader.readAsDataURL(input.files[0]);
         }
+    }
 
-        function previewLogo(input) {
-            const preview = document.getElementById('logoPreview');
-            const icon = document.getElementById('uploadIcon');
-            const text = document.getElementById('uploadText');
-
-            if (input.files && input.files[0]) {
-                const reader = new FileReader();
-                reader.onload = function (e) {
-                    preview.src = e.target.result;
-                    preview.style.display = 'block';
-                    icon.style.display = 'none';
-                    text.innerText = 'Logo Selected';
-                }
-                reader.readAsDataURL(input.files[0]);
-            }
-        }
-
-        function updateFileName(input, targetId) {
-            const fileName = input.files[0] ? input.files[0].name : "Click to upload";
-            document.getElementById(targetId).textContent = fileName;
-            document.getElementById(targetId).parentElement.style.borderColor = 'var(--primary)';
-        }
-    </script>
-</body>
-
-</html>
+    function updateFileName(input, targetId) {
+        const fileName = input.files[0] ? input.files[0].name : "Click to upload";
+        document.getElementById(targetId).textContent = fileName;
+        document.getElementById(targetId).parentElement.style.borderColor = 'var(--primary)';
+    }
+</script>
+{% endblock %}

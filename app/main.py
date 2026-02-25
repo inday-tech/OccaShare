@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from .db.database import engine, Base
-from .routers import website, auth, admin, bookings, oauth, caterers, packages, caterer_dashboard, customer_dashboard, verification, kyc, quotations, payments, contact
+from .routers import website, auth, admin, bookings, social_auth, caterers, packages, caterer_dashboard, customer_dashboard, verification, kyc, quotations, payments, contact
 from .db import models
 
 # Create tables
@@ -9,10 +9,12 @@ Base.metadata.create_all(bind=engine)
 
 from starlette.middleware.sessions import SessionMiddleware
 
+from .core.config import settings
+
 app = FastAPI()
 
 # Add SessionMiddleware
-app.add_middleware(SessionMiddleware, secret_key="your-secret-key") # Replace with env var in prod
+app.add_middleware(SessionMiddleware, secret_key=settings.SECRET_KEY)
 
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
 
@@ -20,7 +22,7 @@ app.include_router(website.router)
 app.include_router(auth.router)
 app.include_router(admin.router)
 app.include_router(bookings.router)
-app.include_router(oauth.router)
+app.include_router(social_auth.router)
 app.include_router(caterers.router)
 app.include_router(packages.router)
 

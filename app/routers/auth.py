@@ -20,12 +20,32 @@ UPLOAD_DIR = "app/static/uploads/verification"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 @router.get("/register", response_class=HTMLResponse)
-def register_page(request: Request, next: Optional[str] = None):
-    return templates.TemplateResponse("auth/register.html", {"request": request, "next_url": next})
+def register_page(request: Request, next: Optional[str] = None, db: Session = Depends(database.get_db)):
+    user = None
+    token = request.cookies.get("access_token")
+    if token and token.startswith("Bearer "):
+        token = token.split(" ")[1]
+        user = auth.verify_token(token, db)
+        
+    return templates.TemplateResponse("auth/register.html", {
+        "request": request, 
+        "next_url": next,
+        "user": user
+    })
 
 @router.get("/register/caterer", response_class=HTMLResponse)
-def register_caterer_page(request: Request, next: Optional[str] = None):
-    return templates.TemplateResponse("auth/register_caterer.html", {"request": request, "next_url": next})
+def register_caterer_page(request: Request, next: Optional[str] = None, db: Session = Depends(database.get_db)):
+    user = None
+    token = request.cookies.get("access_token")
+    if token and token.startswith("Bearer "):
+        token = token.split(" ")[1]
+        user = auth.verify_token(token, db)
+    
+    return templates.TemplateResponse("auth/register_caterer.html", {
+        "request": request, 
+        "next_url": next,
+        "user": user
+    })
 
 @router.post("/register")
 async def register(
@@ -89,7 +109,12 @@ async def register(
         return templates.TemplateResponse(template, context)
 
     user = db.query(models.User).filter(models.User.email == email).first()
-    if user:
+    
+    # Check if this is a social user upgrading to caterer
+    is_upgrade = False
+    if user and user.auth_provider != 'email' and user.role == "pending":
+        is_upgrade = True
+    elif user:
         template = "auth/register_caterer.html" if role == "caterer" else "auth/register.html"
         return templates.TemplateResponse(template, {
             "request": request,
@@ -98,29 +123,37 @@ async def register(
             "role": role
         })
     
-    hashed_password = auth.get_password_hash(password)
-    
-    # Names are already provided separately
-
-    otp = utils.get_random_digits(6)
-    # Set expiration to 1 minute from now
-    otp_expires_at = func.now() + timedelta(minutes=1)
-    
-    new_user = models.User(
-        email=email, 
-        password_hash=hashed_password,
-        role=role, 
-        first_name=first_name,
-        last_name=last_name,
-        phone_number=mobile_number,
-        status="pending_approval" if role == "caterer" else "active",
-        is_verified=False,
-        is_email_verified=False,
-        verification_code=otp,
-        otp_expires_at=otp_expires_at
-    )
-    db.add(new_user)
-    db.flush() # Get user ID without committing
+    if is_upgrade:
+        # Update existing social user
+        user.first_name = first_name
+        user.last_name = last_name
+        user.phone_number = mobile_number
+        user.address = address
+        user.role = role
+        user.status = "pending_approval" if role == "caterer" else "active"
+        new_user = user # For later use in profile creation
+    else:
+        # Create new email/password user
+        hashed_password = auth.get_password_hash(password)
+        otp = utils.get_random_digits(6)
+        otp_expires_at = func.now() + timedelta(minutes=1)
+        
+        new_user = models.User(
+            email=email, 
+            password_hash=hashed_password,
+            role=role, 
+            first_name=first_name,
+            last_name=last_name,
+            phone_number=mobile_number,
+            address=address,
+            status="pending_approval" if role == "caterer" else "active",
+            is_verified=False,
+            is_email_verified=False,
+            verification_code=otp,
+            otp_expires_at=otp_expires_at
+        )
+        db.add(new_user)
+        db.flush() 
     
     # Save files and create verification record if caterer
     if role == "caterer":
@@ -513,3 +546,47 @@ def logout(request: Request, db: Session = Depends(database.get_db)):
     response.delete_cookie("access_token")
     response.delete_cookie("refresh_token")
     return response
+
+# --- Onboarding / Profile Completion ---
+
+@router.get("/onboarding", response_class=HTMLResponse)
+def onboarding_page(request: Request, db: Session = Depends(database.get_db)):
+    token = request.cookies.get("access_token")
+    if not token or not token.startswith("Bearer "):
+        return RedirectResponse(url="/auth/login")
+    
+    token = token.split(" ")[1]
+    user = auth.verify_token(token, db)
+    if not user:
+        return RedirectResponse(url="/auth/login")
+        
+    return templates.TemplateResponse("auth/onboarding.html", {"request": request, "user": user})
+
+@router.post("/onboarding")
+async def onboarding_submit(
+    request: Request,
+    role: str = Form(...),
+    mobile_number: str = Form(None),
+    address: str = Form(None),
+    db: Session = Depends(database.get_db)
+):
+    token = request.cookies.get("access_token")
+    if not token:
+        raise HTTPException(status_code=401)
+        
+    token = token.split(" ")[1]
+    user = auth.verify_token(token, db)
+    if not user:
+        raise HTTPException(status_code=401)
+
+    if role == "customer":
+        user.role = "customer"
+        user.phone_number = mobile_number
+        user.address = address
+        db.commit()
+        return RedirectResponse(url="/customer/dashboard", status_code=status.HTTP_303_SEE_OTHER)
+    elif role == "caterer":
+        # Role will be updated in the full caterer registration
+        return RedirectResponse(url="/auth/register/caterer", status_code=status.HTTP_303_SEE_OTHER)
+    
+    return RedirectResponse(url="/", status_code=303)

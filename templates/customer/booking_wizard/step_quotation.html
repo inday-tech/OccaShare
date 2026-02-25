@@ -7,190 +7,452 @@
     <h2 class="wizard-title">Review Your Quotation</h2>
     <p class="wizard-subtitle">Please review the costs and sign the service contract to proceed.</p>
 
-    <div class="quote-card">
+    <div class="quote-card animate-fade-in">
         <div class="quote-header">
-            <div>
-                <h3>{{ quotation.package_details.name }}</h3>
-                <p>{{ quotation.package_details.description }}</p>
+            <div class="brand-info">
+                <i class="fas fa-file-invoice-dollar quote-icon"></i>
+                <div>
+                    <h3>{{ quotation.package_details.name }}</h3>
+                    <p class="text-muted">{{ quotation.package_details.description[:100] }}...</p>
+                </div>
             </div>
-            <div class="quote-id">Quote #{{ quotation.id }}</div>
+            <div class="quote-meta">
+                <span class="quote-id">Quote #{{ quotation.id }}</span>
+                <span class="quote-date">{{ quotation.created_at.strftime('%b %d, %Y') if quotation.created_at else ''
+                    }}</span>
+            </div>
         </div>
 
         <div class="quote-body">
-            <div class="quote-row">
-                <span>Base Price ({{ quotation.package_details.unit_price }} x {{ quotation.package_details.guest_count
-                    }} guests)</span>
-                <span class="price">₱{{ "{:,.2f}".format(quotation.total_amount) }}</span>
-            </div>
-            {% for addon in quotation.addons %}
-            <div class="quote-row">
-                <span>{{ addon.name }}</span>
-                <span class="price">₱{{ "{:,.2f}".format(addon.price) }}</span>
-            </div>
-            {% endfor %}
-            <div class="quote-row total">
-                <span>Total Project Cost</span>
-                <span class="price">₱{{ "{:,.2f}".format(quotation.total_amount) }}</span>
-            </div>
-            <div class="quote-row deposit">
-                <span>Reservation Fee ({{ quotation.downpayment_percent }}% Downpayment)</span>
-                <span class="price">₱{{ "{:,.2f}".format(quotation.total_amount * quotation.downpayment_percent / 100)
-                    }}</span>
+            <table class="quote-table">
+                <thead>
+                    <tr>
+                        <th>Description</th>
+                        <th class="text-right">Quantity</th>
+                        <th class="text-right">Unit Price</th>
+                        <th class="text-right">Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>
+                            <strong>Base Package - {{ quotation.package_details.name }}</strong>
+                            <div class="small text-muted">Service for <span id="pax-count-display">{{
+                                    quotation.package_details.guest_count }}</span> guests
+                            </div>
+                        </td>
+                        <td class="text-right">
+                            <input type="number" id="pax-input" value="{{ quotation.package_details.guest_count }}"
+                                min="{{ package.min_guests or 10 }}" class="pax-adjust-input" oninput="recalculate()">
+                            <span class="small-label">pax</span>
+                        </td>
+                        <td class="text-right">₱{{ "{:,.2f}".format(quotation.package_details.unit_price) }}</td>
+                        <td class="text-right" id="base-total-display">₱{{
+                            "{:,.2f}".format(quotation.package_details.base_amount or
+                            (quotation.package_details.unit_price * quotation.package_details.guest_count)) }}</td>
+                    </tr>
+
+                    {% for addon in quotation.addons %}
+                    <tr class="addon-row">
+                        <td>
+                            <i class="fas fa-plus-circle text-primary"></i> {{ addon.name }}
+                        </td>
+                        <td class="text-right">1</td>
+                        <td class="text-right">₱{{ "{:,.2f}".format(addon.price) }}</td>
+                        <td class="text-right">₱{{ "{:,.2f}".format(addon.price) }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <div class="quote-summary">
+                <div class="summary-line">
+                    <span>Subtotal</span>
+                    <span id="subtotal-val">₱{{ "{:,.2f}".format(quotation.total_amount) }}</span>
+                </div>
+                <div class="summary-line highlight">
+                    <span>Grand Total Project Cost</span>
+                    <span class="total-price" id="total-val">₱{{ "{:,.2f}".format(quotation.total_amount) }}</span>
+                </div>
+                <div class="summary-line deposit">
+                    <span>Required Downpayment ({{ quotation.downpayment_percent }}%)</span>
+                    <span class="deposit-price" id="deposit-val">₱{{ "{:,.2f}".format(quotation.total_amount *
+                        quotation.downpayment_percent / 100) }}</span>
+                </div>
             </div>
         </div>
     </div>
 
-    <div class="contract-section">
-        <h3>Service Contract</h3>
-        <div class="contract-viewer">
-            <p><strong>RESERVATION AND CANCELLATION POLICY</strong></p>
-            <p>1. A non-refundable reservation fee of {{ quotation.downpayment_percent }}% is required to secure the
-                date.</p>
-            <p>2. Full payment must be settled at least 7 days before the event.</p>
-            <p>3. Cancellations made within 48 hours of booking are eligible for a partial refund...</p>
-            <!-- Add more mock contract text -->
+    <div class="contract-section card-premium">
+        <div class="section-header">
+            <h3><i class="fas fa-file-contract"></i> Service Agreement</h3>
+            <span class="badge badge-outline">Legal Document</span>
         </div>
 
-        <div class="signature-zone">
-            <p>Type your full name to sign digitally:</p>
-            <input type="text" id="signature_name" class="form-control" placeholder="Type name here"
-                oninput="toggleSignButton()">
+        <div class="contract-viewer">
+            <div class="contract-inner">
+                <h4>1. SCOPE OF SERVICES</h4>
+                <p>The Caterer agrees to provide catering services as specified in the quotation above for the event
+                    date and location previously confirmed.</p>
 
-            <label class="checkbox-container">
+                <h4>2. PRICING AND PAYMENT</h4>
+                <p>The total contract amount is <span class="contract-total-text">₱{{
+                        "{:,.2f}".format(quotation.total_amount) }}</span>. A non-refundable
+                    reservation fee of <span class="contract-deposit-text">₱{{ "{:,.2f}".format(quotation.total_amount *
+                        quotation.downpayment_percent /
+                        100) }}</span> ({{ quotation.downpayment_percent }}%) is required to lock the date.</p>
+
+                <h4>3. GUEST COUNT POLICY</h4>
+                <p>Final guest count must be confirmed at least 14 days before the event. Any increase in guest count
+                    will be billed accordingly. Decreases in count after confirmation will not result in a refund.</p>
+
+                <h4>4. CANCELLATION</h4>
+                <p>Cancellations made 30 days or more before the event will forfeit only the reservation fee.
+                    Cancellations made within 14 days will be billed 50% of the total amount.</p>
+            </div>
+        </div>
+
+        <div class="signature-box">
+            <div class="form-group mb-4">
+                <label class="form-label">Digital Signature</label>
+                <div class="signature-input-wrap">
+                    <input type="text" id="signature_name" class="signature-input"
+                        placeholder="Type your full legal name to sign" oninput="toggleSignButton()">
+                    <i class="fas fa-pen-nib"></i>
+                </div>
+            </div>
+
+            <label class="modern-checkbox">
                 <input type="checkbox" id="agree_terms" onchange="toggleSignButton()">
-                <span class="checkmark"></span>
-                I agree to the terms and conditions outlined in the service contract.
+                <span class="box"></span>
+                <span class="text">I, the undersigned, have read and agree to the terms and conditions outlined
+                    above.</span>
             </label>
         </div>
     </div>
 
     <div class="wizard-actions">
         <button type="button" class="btn-prev" onclick="history.back()">
-            <i class="fas fa-arrow-left"></i> Back
+            <i class="fas fa-chevron-left"></i> Back to KYC
         </button>
-        <button type="button" id="btn-sign" class="btn btn-primary" disabled onclick="submitSignature()">
-            Sign & Proceed to Payment <i class="fas fa-file-signature"></i>
+        <button type="button" id="btn-sign" class="btn-sign-proceed" disabled onclick="submitSignature()">
+            Confirm Order & Pay Downpayment <i class="fas fa-arrow-right"></i>
         </button>
     </div>
 </div>
 
 <style>
+    :root {
+        --primary-soft: rgba(153, 204, 102, 0.1);
+        --slate-800: #1e293b;
+        --slate-600: #475569;
+        --slate-100: #f1f5f9;
+        --border-color: #e2e8f0;
+    }
+
+    .quotation-step {
+        max-width: 850px;
+        margin: 0 auto;
+    }
+
     .quote-card {
-        background: #f1f5f9;
-        border-radius: 1.5rem;
-        padding: 2.5rem;
-        margin-bottom: 3rem;
+        background: white;
+        border-radius: 2rem;
+        border: 1px solid var(--border-color);
+        box-shadow: 0 15px 35px -10px rgba(0, 0, 0, 0.05);
+        overflow: hidden;
+        margin-bottom: 2.5rem;
     }
 
     .quote-header {
+        background: #f8fafc;
+        padding: 2.5rem;
         display: flex;
         justify-content: space-between;
-        border-bottom: 1px solid #cbd5e1;
-        padding-bottom: 1.5rem;
-        margin-bottom: 1.5rem;
+        align-items: flex-start;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .brand-info {
+        display: flex;
+        gap: 1.5rem;
+        align-items: center;
+    }
+
+    .quote-icon {
+        font-size: 2.5rem;
+        color: var(--primary-color);
+        background: var(--primary-soft);
+        padding: 1rem;
+        border-radius: 1.25rem;
     }
 
     .quote-id {
-        font-weight: 700;
-        color: var(--primary-color);
+        font-family: 'Outfit', sans-serif;
+        font-weight: 800;
+        color: var(--slate-800);
+        display: block;
+        font-size: 1.25rem;
+        text-align: right;
     }
 
-    .quote-row {
+    .quote-date {
+        font-size: 0.9rem;
+        color: var(--slate-600);
+        display: block;
+        text-align: right;
+    }
+
+    .quote-body {
+        padding: 2.5rem;
+    }
+
+    .quote-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 2rem;
+    }
+
+    .quote-table th {
+        text-align: left;
+        padding: 1rem;
+        border-bottom: 2px solid var(--slate-100);
+        color: var(--slate-600);
+        font-weight: 700;
+        text-transform: uppercase;
+        font-size: 0.8rem;
+        letter-spacing: 0.05em;
+    }
+
+    .quote-table td {
+        padding: 1.5rem 1rem;
+        border-bottom: 1px solid var(--slate-100);
+        font-size: 1rem;
+    }
+
+    .text-right {
+        text-align: right !important;
+    }
+
+    .quote-summary {
+        margin-left: auto;
+        max-width: 400px;
+        background: #f8fafc;
+        padding: 2rem;
+        border-radius: 1.5rem;
+    }
+
+    .summary-line {
         display: flex;
         justify-content: space-between;
-        margin-bottom: 0.75rem;
+        margin-bottom: 1rem;
+        font-weight: 600;
+        color: var(--slate-600);
+    }
+
+    .summary-line.highlight {
+        margin-top: 1.5rem;
+        padding-top: 1.5rem;
+        border-top: 2px dashed #cbd5e1;
+        font-size: 1.25rem;
+        color: var(--slate-800);
+        font-weight: 800;
+    }
+
+    .summary-line.deposit {
+        color: var(--primary-color);
         font-size: 1.1rem;
     }
 
-    .quote-row.total {
-        margin-top: 1.5rem;
-        padding-top: 1.5rem;
-        border-top: 2px solid #cbd5e1;
-        font-weight: 700;
-        font-size: 1.4rem;
+    .card-premium {
+        background: white;
+        border-radius: 2rem;
+        border: 1px solid var(--border-color);
+        padding: 2.5rem;
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.03);
     }
 
-    .quote-row.deposit {
-        color: var(--secondary-color);
-        font-weight: 600;
+    .section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
     }
 
     .contract-viewer {
-        height: 200px;
-        overflow-y: scroll;
-        background: #fff;
+        height: 250px;
+        overflow-y: auto;
+        background: #f8fafc;
+        border-radius: 1.25rem;
+        padding: 2rem;
         border: 1px solid var(--border-color);
-        border-radius: 0.5rem;
-        padding: 1.5rem;
         margin-bottom: 2rem;
+    }
+
+    .contract-inner h4 {
+        font-family: 'Outfit', sans-serif;
+        font-size: 1rem;
+        margin: 1.5rem 0 0.5rem;
+        color: var(--slate-800);
+    }
+
+    .contract-inner p {
         font-size: 0.9rem;
+        color: var(--slate-600);
         line-height: 1.6;
     }
 
-    .signature-zone {
-        margin-bottom: 2rem;
-    }
-
-    .checkbox-container {
-        display: block;
+    .signature-input-wrap {
         position: relative;
-        padding-left: 35px;
-        margin-top: 1.5rem;
+    }
+
+    .signature-input {
+        width: 100%;
+        padding: 1.25rem 3rem;
+        border: 2.5px solid var(--slate-100);
+        border-radius: 1.25rem;
+        font-family: 'Playfair Display', serif;
+        font-size: 1.5rem;
+        font-style: italic;
+        background: #fff;
+        transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .signature-input-wrap i {
+        position: absolute;
+        left: 1.25rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #94a3b8;
+        font-size: 1.25rem;
+    }
+
+    .signature-input:focus {
+        border-color: var(--primary-color);
+        outline: none;
+        box-shadow: 0 8px 30px rgba(153, 204, 102, 0.1);
+    }
+
+    .modern-checkbox {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
         cursor: pointer;
-        font-size: 1rem;
-        user-select: none;
+        padding: 0.5rem;
     }
 
-    .checkbox-container input {
-        position: absolute;
-        opacity: 0;
-        cursor: pointer;
-        height: 0;
-        width: 0;
-    }
-
-    .checkmark {
-        position: absolute;
-        top: 0;
-        left: 0;
-        height: 25px;
-        width: 25px;
-        background-color: #eee;
-        border-radius: 4px;
-    }
-
-    .checkbox-container:hover input~.checkmark {
-        background-color: #ccc;
-    }
-
-    .checkbox-container input:checked~.checkmark {
-        background-color: var(--primary-color);
-    }
-
-    .checkmark:after {
-        content: "";
-        position: absolute;
+    .modern-checkbox input {
         display: none;
     }
 
-    .checkbox-container input:checked~.checkmark:after {
-        display: block;
+    .modern-checkbox .box {
+        width: 24px;
+        height: 24px;
+        border: 2px solid #cbd5e1;
+        border-radius: 6px;
+        position: relative;
+        transition: all 0.2s;
     }
 
-    .checkbox-container .checkmark:after {
-        left: 9px;
-        top: 5px;
-        width: 5px;
-        height: 10px;
-        border: solid white;
-        border-width: 0 3px 3px 0;
-        transform: rotate(45deg);
+    .modern-checkbox input:checked+.box {
+        background: var(--primary-color);
+        border-color: var(--primary-color);
+    }
+
+    .modern-checkbox input:checked+.box::after {
+        content: '\f00c';
+        font-family: 'Font Awesome 5 Free';
+        font-weight: 900;
+        color: white;
+        font-size: 0.8rem;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+    }
+
+    .btn-sign-proceed {
+        background: var(--slate-900);
+        color: white;
+        padding: 1.25rem 2.5rem;
+        border-radius: 1.5rem;
+        font-weight: 800;
+        border: none;
+        cursor: pointer;
+        transition: all 0.3s;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        font-size: 1.1rem;
+    }
+
+    .btn-sign-proceed:not(:disabled):hover {
+        background: var(--primary-color);
+        transform: translateY(-3px);
+        box-shadow: 0 15px 30px rgba(153, 204, 102, 0.3);
+    }
+
+    .btn-sign-proceed:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    .pax-adjust-input {
+        width: 70px;
+        padding: 0.5rem;
+        border: 2px solid var(--slate-100);
+        border-radius: 0.75rem;
+        font-weight: 700;
+        text-align: center;
+        font-family: 'Outfit', sans-serif;
+    }
+
+    .pax-adjust-input:focus {
+        border-color: var(--primary-color);
+        outline: none;
+    }
+
+    .small-label {
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: var(--slate-600);
+        margin-left: 0.5rem;
     }
 </style>
 {% endblock %}
 
 {% block step_js %}
 <script>
+    const unitPrice = parseFloat("{{ quotation.package_details.unit_price }}");
+    const downpaymentPercent = parseFloat("{{ quotation.downpayment_percent }}") / 100;
+    const addonTotal = parseFloat("{% set at = 0 %}{% for a in quotation.addons %}{% set at = at + a.price %}{% endfor %}{{ at }}");
+
+    function formatCurrency(num) {
+        return '₱' + num.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+    function recalculate() {
+        const pax = parseInt(document.getElementById('pax-input').value) || 0;
+        document.getElementById('pax-count-display').innerText = pax;
+
+        const baseTotal = pax * unitPrice;
+        document.getElementById('base-total-display').innerText = formatCurrency(baseTotal);
+
+        const total = baseTotal + addonTotal;
+        document.getElementById('subtotal-val').innerText = formatCurrency(total);
+        document.getElementById('total-val').innerText = formatCurrency(total);
+
+        const deposit = total * downpaymentPercent;
+        document.getElementById('deposit-val').innerText = formatCurrency(deposit);
+
+        // Update contract text too for consistency
+        const contractTotalTexts = document.querySelectorAll('.contract-total-text');
+        contractTotalTexts.forEach(el => el.innerText = formatCurrency(total));
+
+        const contractDepositTexts = document.querySelectorAll('.contract-deposit-text');
+        contractDepositTexts.forEach(el => el.innerText = formatCurrency(deposit));
+    }
+
     function toggleSignButton() {
         const name = document.getElementById('signature_name').value;
         const agree = document.getElementById('agree_terms').checked;
@@ -200,12 +462,14 @@
     async function submitSignature() {
         const bookingId = "{{ quotation.booking_id }}";
         const signature = document.getElementById('signature_name').value;
+        const paxCount = document.getElementById('pax-input').value;
 
         const formData = new FormData();
         formData.append('signature_data', signature);
+        formData.append('guest_count', paxCount);
 
         try {
-            const res = await fetch(`/api/bookings/${bookingId}/contract/sign`, {
+            const res = await fetch(`/bookings/${bookingId}/contract/sign`, {
                 method: 'POST',
                 body: formData
             });
@@ -217,5 +481,8 @@
             alert('Error signing contract: ' + err);
         }
     }
+
+    // Initial sync of contract text
+    recalculate();
 </script>
 {% endblock %}

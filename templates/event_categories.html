@@ -1,0 +1,148 @@
+{% set nav_page = 'categories' %}
+{% extends "landing_base.html" %}
+
+{% block title %}Event Categories - OccaServe{% endblock %}
+
+{% block content %}
+
+<!-- Page Hero -->
+<div class="page-hero" style="background: linear-gradient(135deg, #1a2e18 0%, #2d5a1b 60%, #4a9e2e 100%);">
+    <div class="container">
+        <h1>Event Categories</h1>
+        <p>Whatever the occasion, OccaServe has the perfect catering professionals to make it unforgettable. Explore our
+            event types below.</p>
+    </div>
+</div>
+
+<!-- Categories -->
+<section class="section">
+    <div class="container">
+        <div class="section-header">
+            <h2>Catering for Every Occasion</h2>
+            <p>We specialize in all types of events — from intimate gatherings to grand celebrations.</p>
+        </div>
+
+        {% set static_categories = [
+        ("Wedding", "fas fa-ring", "#e83e8c", "#f8d7da", "wedding",
+        "Make your love story legendary. Our wedding caterers craft exquisite multi-course menus, elegant setups, and
+        personalized service that matches the grandeur of your special day.",
+        ["Custom menu curation", "Elegant table styling", "Professional service staff", "Dietary accommodation"]),
+        ("Birthday", "fas fa-birthday-cake", "#ffc107", "#fff3cd", "birthday",
+        "From children's parties to milestone celebrations, our birthday caterers deliver fun, delicious, and memorable
+        food experiences for guests of all ages.",
+        ["Interactive food stations", "Custom cakes coordination", "Package deals for all sizes", "Kids-friendly
+        menus"]),
+        ("Corporate", "fas fa-building", "#198754", "#d1e7dd", "corporate",
+        "Impress clients and motivate teams with impeccable corporate catering. Professional presentation, on-time
+        delivery, and diverse menu options for boardroom lunches to gala dinners.",
+        ["Executive lunch packages", "Cocktail & networking setups", "Conference meal planning", "Large-scale event
+        capability"]),
+        ("School Event", "fas fa-school", "#0d6efd", "#cfe2ff", "school",
+        "Fuel the next generation with nutritious, exciting food. Our school caterers offer balanced menus that keep
+        students energized and engaged throughout the event.",
+        ["Nutritionist-approved menus", "Budget-friendly packages", "Bulk catering capacity", "Allergy-conscious
+        options"]),
+        ("Religious Event", "fas fa-church", "#6f42c1", "#e2d5f1", "religious",
+        "Honor faith and community with reverent, communal dining. Our caterers understand the importance of dietary
+        laws and religious customs in crafting respectful meal experiences.",
+        ["Halal & kosher options", "Traditional Filipino fare", "Community-style serving", "Respectful setup &
+        service"]),
+        ("Debut", "fas fa-crown", "#e91e8c", "#fce4ec", "debut",
+        "Celebrate the grand debut at 18 with elegance and flair. Our debut caterers create luxurious dining experiences
+        worthy of this once-in-a-lifetime milestone.",
+        ["Grand buffet setups", "Premium tableware", "Cocktail hour packages", "Custom floral coordination"]),
+        ("Concert / Festival", "fas fa-music", "#ff5722", "#fbe9e7", "concert",
+        "Keep the crowd energized with high-volume catering for concerts, festivals, and large outdoor events. Fast
+        service, diverse options, and robust logistics.",
+        ["Multiple food stations", "Fast-service formats", "Outdoor setup capability", "Crowd-scale quantities"]),
+        ("Intimate Gathering", "fas fa-home", "#20c997", "#d1fae5", "intimate",
+        "Small doesn't mean simple. Our intimate gathering caterers bring restaurant-quality cuisine and warm service
+        right to your home or private venue.",
+        ["Chef-prepared fresh cuisine", "10–50 pax packages", "Private dining ambiance", "Personalized menu planning"]),
+        ] %}
+
+        <div
+            style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 2rem; margin-top: 2rem;">
+            {% set cats = categories if categories else [] %}
+            {% if cats %}
+            {% for category in cats %}
+            <div style="background: white; border-radius: 1.25rem; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.06); border: 1px solid var(--border-color, #e5e7eb); transition: transform 0.2s, box-shadow 0.2s;"
+                onmouseover="this.style.transform='translateY(-6px)'; this.style.boxShadow='0 12px 30px rgba(0,0,0,0.12)';"
+                onmouseout="this.style.transform=''; this.style.boxShadow='0 4px 20px rgba(0,0,0,0.06)';">
+                <div
+                    style="height: 160px; background: var(--primary-light, #e8f5d0); display: flex; align-items: center; justify-content: center;">
+                    {% if category.image_url %}
+                    <img src="{{ category.image_url }}" alt="{{ category.name }}"
+                        style="width:100%; height:100%; object-fit:cover;">
+                    {% else %}
+                    <i class="{{ category.icon_class }}"
+                        style="font-size: 4rem; color: var(--primary-color, #99cc66); opacity: 0.6;"></i>
+                    {% endif %}
+                </div>
+                <div style="padding: 1.75rem;">
+                    <h3 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 0.75rem;">{{ category.name }}</h3>
+                    <p
+                        style="color: var(--text-light, #6b7280); font-size: 0.9rem; line-height: 1.7; margin-bottom: 1.25rem;">
+                        {{ category.description }}</p>
+                    <a href="/#caterers"
+                        style="display: inline-flex; align-items: center; gap: 0.5rem; color: var(--primary-color, #99cc66); font-weight: 600; text-decoration: none; font-size: 0.9rem;">Browse
+                        Caterers <i class="fas fa-arrow-right" style="font-size: 0.75rem;"></i></a>
+                </div>
+            </div>
+            {% endfor %}
+            {% else %}
+            {% for name, icon, color, bg, slug, desc, features in static_categories %}
+            <div style="background: white; border-radius: 1.25rem; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.06); border: 1px solid #f0f0f0; transition: transform 0.2s, box-shadow 0.2s;"
+                onmouseover="this.style.transform='translateY(-6px)'; this.style.boxShadow='0 12px 30px rgba(0,0,0,0.12)';"
+                onmouseout="this.style.transform=''; this.style.boxShadow='0 4px 20px rgba(0,0,0,0.06)';">
+                <div
+                    style="height: 140px; background: {{ bg }}; display: flex; align-items: center; justify-content: center; position: relative;">
+                    <i class="{{ icon }}" style="font-size: 4rem; color: {{ color }};"></i>
+                </div>
+                <div style="padding: 1.75rem;">
+                    <h3 style="font-size: 1.2rem; font-weight: 700; margin-bottom: 0.5rem; color: #1a2e18;">{{ name }}
+                    </h3>
+                    <p style="color: #6b7280; font-size: 0.88rem; line-height: 1.7; margin-bottom: 1rem;">{{ desc }}</p>
+                    <ul
+                        style="list-style: none; padding: 0; margin: 0 0 1.25rem; display: flex; flex-direction: column; gap: 0.4rem;">
+                        {% for f in features %}
+                        <li
+                            style="font-size: 0.82rem; color: #4b5563; display: flex; align-items: center; gap: 0.5rem;">
+                            <i class="fas fa-check" style="color: {{ color }}; font-size: 0.7rem;"></i> {{ f }}
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    <a href="/#caterers"
+                        style="display: inline-flex; align-items: center; gap: 0.5rem; color: {{ color }}; font-weight: 600; text-decoration: none; font-size: 0.88rem;">Find
+                        {{ name }} Caterers <i class="fas fa-arrow-right" style="font-size: 0.7rem;"></i></a>
+                </div>
+            </div>
+            {% endfor %}
+            {% endif %}
+        </div>
+
+        <div style="text-align:center; margin-top: 3rem;">
+            <p style="color: var(--text-light, #6b7280); margin-bottom: 1.5rem;">Don't see your event type? We can still
+                help!</p>
+            <a href="/contact" class="btn-primary" style="display: inline-flex; align-items: center; gap: 0.5rem;">
+                <i class="fas fa-envelope"></i> Contact Us for Custom Events
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section">
+    <div class="container">
+        <div class="cta-content">
+            <h2>Find a Caterer for Your Event</h2>
+            <p>Browse our full marketplace and filter by your specific event type to find the perfect match.</p>
+            <div class="cta-buttons">
+                <a href="/#caterers" class="btn-primary">Browse All Caterers</a>
+                <a href="/auth/register" class="btn-outline-white">Sign Up Free</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock %}

@@ -12,13 +12,29 @@ class QuotationService:
         if not package:
             raise ValueError("Booking must have a package to generate a quotation.")
 
-        # Basic calculation: price * guest_count
-        # Note: price is Float in models, we'll convert to Decimal for accuracy if needed, 
-        # but here we'll follow the model types.
-        total_amount = Decimal(str(package.price)) * Decimal(str(booking.guest_count))
+        # Base calculation: price * guest_count
+        base_amount = Decimal(str(package.price)) * Decimal(str(booking.guest_count))
         
-        # In a real app, you'd add add-ons here.
-        addons = [] 
+        # Calculate add-ons from BookingMenuItem
+        addons = []
+        addon_total = Decimal("0.0")
+        
+        from ..db.models import BookingMenuItem, MenuItem
+        booking_items = db.query(BookingMenuItem).join(MenuItem).filter(
+            BookingMenuItem.booking_id == booking.id,
+            BookingMenuItem.is_add_on == True
+        ).all()
+
+        for item in booking_items:
+            price = Decimal(str(item.price))
+            addons.append({
+                "id": item.menu_item_id,
+                "name": item.menu_item.name,
+                "price": float(price)
+            })
+            addon_total += price
+
+        total_amount = base_amount + addon_total
         
         # Ensure downpayment is within 30-50%
         if not (30 <= downpayment_percent <= 50):
@@ -29,11 +45,12 @@ class QuotationService:
             package_details={
                 "name": package.name,
                 "description": package.description,
-                "unit_price": package.price,
-                "guest_count": booking.guest_count
+                "unit_price": float(package.price),
+                "guest_count": booking.guest_count,
+                "base_amount": float(base_amount)
             },
             addons=addons,
-            total_amount=total_amount,
+            total_amount=float(total_amount),
             downpayment_percent=downpayment_percent,
             status="draft"
         )
@@ -43,7 +60,9 @@ class QuotationService:
         
         # Update booking expiration (24h)
         booking.expires_at = datetime.now() + timedelta(hours=24)
+        # Store high precision Decimal in reservation_fee
         booking.reservation_fee = total_amount * Decimal(str(downpayment_percent / 100))
+        booking.total_amount = float(total_amount)
         
         db.commit()
         db.refresh(quotation)

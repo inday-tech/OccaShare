@@ -1,125 +1,249 @@
-<!DOCTYPE html>
-<html lang="en">
+{% set nav_page = 'caterers' %}
+{% extends "landing_base.html" %}
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Browse Caterers - OccaServe</title>
-    <link rel="stylesheet" href="{{ url_for('static', path='/css/styles.css') }}">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@700&display=swap"
-        rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        .page-header {
-            background-color: var(--primary-bg);
-            padding: 4rem 0 2rem;
-            text-align: center;
+{% block title %}Browse Caterers - OccaServe{% endblock %}
+
+{% block head %}
+<style>
+    :root {
+        --list-primary: #10b981;
+        --list-secondary: #1a2e18;
+    }
+
+    /* Fixed Navbar Offset */
+    .content-wrapper {
+        padding-top: 90px;
+        /* Adjust based on navbar height */
+        background-color: #f8fafc;
+        min-height: 100vh;
+    }
+
+    .list-hero {
+        background: linear-gradient(135deg, var(--list-secondary) 0%, #72ac6b 100%);
+        color: white;
+        padding: 4rem 0;
+        text-align: center;
+        margin-bottom: 3rem;
+    }
+
+    .list-hero h1 {
+        font-family: 'Playfair Display', serif;
+        font-size: 3rem;
+        margin-bottom: 1rem;
+    }
+
+    .list-hero p {
+        font-size: 1.1rem;
+        opacity: 0.9;
+        max-width: 600px;
+        margin: 0 auto;
+    }
+
+    .caterers-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        gap: 2.5rem;
+        padding-bottom: 5rem;
+    }
+
+    .caterer-card {
+        background: #fff;
+        border-radius: 1.5rem;
+        overflow: hidden;
+        border: 1px solid #eef2f6;
+        transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+    }
+
+    .caterer-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
+        border-color: rgba(16, 185, 129, 0.2);
+    }
+
+    .card-top {
+        position: relative;
+        height: 180px;
+        background: #f1f5f9;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+    }
+
+    .card-top img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.5s ease;
+    }
+
+    .caterer-card:hover .card-top img {
+        transform: scale(1.05);
+    }
+
+    .verified-badge-float {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        background: rgba(255, 255, 255, 0.9);
+        backdrop-filter: blur(4px);
+        color: var(--list-primary);
+        padding: 0.4rem 0.75rem;
+        border-radius: 2rem;
+        font-size: 0.75rem;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    }
+
+    .card-body {
+        padding: 1.75rem;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .card-body h3 {
+        font-family: 'Playfair Display', serif;
+        font-size: 1.4rem;
+        color: var(--list-secondary);
+        margin-bottom: 0.75rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .card-tagline {
+        color: #64748b;
+        font-size: 0.95rem;
+        line-height: 1.6;
+        margin-bottom: 1.5rem;
+        flex: 1;
+    }
+
+    .card-footer {
+        padding-top: 1.5rem;
+        border-top: 1px solid #f1f5f9;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .rating-wrap {
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+        font-weight: 600;
+        color: #334155;
+    }
+
+    .rating-wrap i {
+        color: #f59e0b;
+    }
+
+    .location-text {
+        color: #94a3b8;
+        font-size: 0.85rem;
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+    }
+
+    .view-btn {
+        background: var(--list-primary);
+        color: white;
+        text-decoration: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: 0.75rem;
+        font-weight: 600;
+        font-size: 0.9rem;
+        transition: all 0.2s;
+        text-align: center;
+    }
+
+    .view-btn:hover {
+        background: #0ea872;
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+    }
+
+    @media (max-width: 640px) {
+        .list-hero h1 {
+            font-size: 2.25rem;
         }
 
-        .page-header h1 {
-            font-family: 'Playfair Display', serif;
-            font-size: 2.5rem;
-            margin-bottom: 1rem;
+        .caterers-grid {
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
         }
-    </style>
-</head>
+    }
+</style>
+{% endblock %}
 
-<body>
-
-    <!-- Navigation -->
-    <nav class="navbar">
-        <div class="container nav-container">
-            <a href="/" class="logo">OccaServe</a>
-            <div class="nav-menu">
-                <ul class="nav-links">
-                    <li><a href="/">Home</a></li>
-                    <li><a href="/caterers" class="active">Caterers</a></li>
-                    <li><a href="/bookings/my">My Bookings</a></li>
-                </ul>
-                <div class="nav-auth">
-                    <a href="#" class="lang-selector"><i class="fas fa-globe"></i> EN</a>
-                    <!-- Simplified auth check for demo -->
-                    <a href="/auth/login" class="btn-text">Log In</a>
-                </div>
-            </div>
-            <div class="hamburger">
-                <span class="bar"></span>
-                <span class="bar"></span>
-                <span class="bar"></span>
-            </div>
-        </div>
-    </nav>
-
-    <!-- Page Header -->
-    <header class="page-header">
+{% block content %}
+<div class="content-wrapper">
+    <header class="list-hero">
         <div class="container">
-            <h1>Find Your Perfect Caterer</h1>
-            <p>Browse our curated selection of verified catering professionals.</p>
+            <h1>Discover Elite Flavors</h1>
+            <p>Browse our curated selection of verified catering professionals for your next unforgettable event.</p>
         </div>
     </header>
 
-    <!-- Caterers Grid -->
-    <section class="section">
-        <div class="container">
-            <div class="caterers-grid">
-                {% for caterer in caterers %}
-                <div class="caterer-card">
-                    <div class="caterer-logo">
-                        {% if caterer.logo_url %}
-                        <img src="{{ caterer.logo_url }}" alt="{{ caterer.business_name }}">
-                        {% else %}
-                        <img src="https://ui-avatars.com/api/?name={{ caterer.business_name }}&background=random"
-                            alt="{{ caterer.business_name }}">
-                        {% endif %}
+    <div class="container">
+        <div class="caterers-grid">
+            {% for caterer in caterers %}
+            <article class="caterer-card">
+                <div class="card-top">
+                    {% if caterer.logo_url %}
+                    <img src="{{ caterer.logo_url }}" alt="{{ caterer.business_name }}">
+                    {% else %}
+                    <img src="https://ui-avatars.com/api/?name={{ caterer.business_name }}&background=random"
+                        alt="{{ caterer.business_name }}">
+                    {% endif %}
+
+                    {% if caterer.is_verified %}
+                    <div class="verified-badge-float">
+                        <i class="fas fa-check-circle"></i> VERIFIED
                     </div>
-                    <div class="caterer-info">
-                        <h3>{{ caterer.business_name }} {% if caterer.is_verified %}<i
-                                class="fas fa-check-circle verified-badge" title="Verified Caterer"></i>{% endif %}
-                        </h3>
-                        <p class="tagline">{{ (caterer.description or '')[:60] }}...</p>
-                        <div class="rating">
-                            <i class="fas fa-star"></i> {{ "%.1f"|format(caterer.rating) }} ({{ caterer.review_count }}
-                            Reviews)
+                    {% endif %}
+                </div>
+
+                <div class="card-body">
+                    <h3>{{ caterer.business_name }}</h3>
+                    <p class="card-tagline">{{ (caterer.description or 'Exquisite catering services for all types of
+                        events in the Philippines.')|truncate(90) }}</p>
+
+                    <div style="margin-bottom: 1.5rem;">
+                        <div class="location-text">
+                            <i class="fas fa-map-marker-alt"></i> {{ caterer.city or 'Metro Manila' }}
                         </div>
-                        <p style="font-size: 0.9rem; color: var(--text-light); margin-bottom: 1rem;">
-                            <i class="fas fa-map-marker-alt"></i> {{ caterer.city }}
-                        </p>
-                        <a href="/caterers/{{ caterer.id }}" class="btn-outline">View Profile</a>
+                    </div>
+
+                    <div class="card-footer">
+                        <div class="rating-wrap">
+                            <i class="fas fa-star"></i> {{ "%.1f"|format(caterer.rating or 0.0) }}
+                            <span style="color: #94a3b8; font-weight: 400; font-size: 0.85rem;">({{ caterer.review_count
+                                or 0 }})</span>
+                        </div>
+                        <a href="/caterers/{{ caterer.id }}" class="view-btn">View Profile</a>
                     </div>
                 </div>
-                {% else %}
-                <div class="col-span-full text-center">
-                    <p>No caterers found at the moment. Please check back later.</p>
+            </article>
+            {% else %}
+            <div style="grid-column: 1/-1; text-align: center; padding: 5rem 2rem;">
+                <div style="font-size: 4rem; color: #e2e8f0; margin-bottom: 1.5rem;">
+                    <i class="fas fa-utensils"></i>
                 </div>
-                {% endfor %}
+                <h3 style="color: var(--list-secondary); margin-bottom: 1rem;">No Caterers Found</h3>
+                <p style="color: #64748b;">We're currently expanding our network. Please check back later!</p>
+                <a href="/" class="view-btn" style="display: inline-block; margin-top: 2rem;">Back to Home</a>
             </div>
+            {% endfor %}
         </div>
-    </section>
-
-    <!-- Footer -->
-    <footer class="footer">
-        <div class="container">
-            <div class="footer-grid">
-                <div class="footer-col">
-                    <h3>OccaServe</h3>
-                    <p>Your trusted partner for finding the best catering services.</p>
-                </div>
-                <div class="footer-col">
-                    <h4>Quick Links</h4>
-                    <ul>
-                        <li><a href="/">Home</a></li>
-                        <li><a href="/caterers">Caterers</a></li>
-                    </ul>
-                </div>
-            </div>
-            <div class="footer-bottom">
-                <p>&copy; 2026 OccaServe. All rights reserved.</p>
-            </div>
-        </div>
-    </footer>
-
-</body>
-
-</html>
+    </div>
+</div>
+{% endblock %}

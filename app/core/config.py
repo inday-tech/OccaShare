@@ -1,21 +1,29 @@
 import os
+from dotenv import load_dotenv
 
-# Ideally, these should be environment variables for security.
-# For simplicity in this dev environment, we define them here.
+load_dotenv()
 
 class Settings:
-    # EMAIL CONFIGURATION
-    MAIL_USERNAME = "dadaycaragay@gmail.com" 
-    MAIL_PASSWORD = "ypgn kdud mvzs jhbo" 
-    MAIL_FROM = "dadaycaragay@gmail.com" 
-    MAIL_PORT = 587
-    MAIL_SERVER = "smtp.gmail.com"
-    MAIL_TLS = True
-    MAIL_SSL = False
-
-    # SOCIAL LOGIN CONFIGURATION (Real)
-    FACEBOOK_CLIENT_ID = "796095886083019"
-    FACEBOOK_CLIENT_SECRET = "999b6616e229760dc1a254fb097dfa36" 
+    # CORE CONFIG
+    SECRET_KEY = os.getenv("SECRET_KEY", "your-super-secret-key-change-me")
     
+    # EMAIL CONFIGURATION
+    MAIL_USERNAME = os.getenv("MAIL_USERNAME", "dadaycaragay@gmail.com")
+    MAIL_PASSWORD = os.getenv("MAIL_PASSWORD", "ypgn kdud mvzs jhbo")
+    MAIL_FROM = os.getenv("MAIL_FROM", "dadaycaragay@gmail.com")
+    MAIL_PORT = int(os.getenv("MAIL_PORT", 587))
+    MAIL_SERVER = os.getenv("MAIL_SERVER", "smtp.gmail.com")
+    MAIL_TLS = os.getenv("MAIL_TLS", "True") == "True"
+    MAIL_SSL = os.getenv("MAIL_SSL", "False") == "True"
+
+    # SOCIAL LOGIN CONFIGURATION
+    FACEBOOK_CLIENT_ID = os.getenv("FACEBOOK_CLIENT_ID", "")
+    FACEBOOK_CLIENT_SECRET = os.getenv("FACEBOOK_CLIENT_SECRET", "")
+    
+    GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID", "")
+    GOOGLE_CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET", "")
+    
+    INSTAGRAM_CLIENT_ID = os.getenv("INSTAGRAM_CLIENT_ID", "")
+    INSTAGRAM_CLIENT_SECRET = os.getenv("INSTAGRAM_CLIENT_SECRET", "")
 
 settings = Settings()

@@ -1,0 +1,113 @@
+{% extends "landing_base.html" %}
+
+{% block title %}Privacy Policy - OccaServe{% endblock %}
+
+{% block content %}
+
+<div class="page-hero" style="background: linear-gradient(135deg, #1a2e18 0%, #2d5a1b 60%, #4a9e2e 100%);">
+    <div class="container">
+        <h1>Privacy Policy</h1>
+        <p>Last updated: February 2026. We are committed to protecting your personal information and your right to
+            privacy.</p>
+    </div>
+</div>
+
+<section class="section">
+    <div class="container">
+        <div style="max-width: 820px; margin: 0 auto;">
+
+            <!-- Intro -->
+            <div
+                style="background: #f0fae8; border-left: 4px solid var(--primary-color, #99cc66); border-radius: 0.5rem; padding: 1.5rem 2rem; margin-bottom: 3rem;">
+                <p style="color: #2d5a1b; line-height: 1.7; font-size: 0.95rem;">OccaServe ("we," "our," or "us")
+                    operates the OccaServe platform. This Privacy Policy explains how we collect, use, disclose, and
+                    safeguard your information when you use our platform. By using OccaServe, you agree to the
+                    collection and use of information in accordance with this policy.</p>
+            </div>
+
+            {% set sections = [
+            ("1. Information We Collect", [
+            ("Personal Identification Information", "When you register, we collect your name, email address, mobile
+            number, and address. Caterers additionally provide business information, certifications, government-issued
+            IDs, and bank account details for payouts."),
+            ("Usage Data", "We automatically collect information your browser sends when you visit our platform,
+            including your IP address, browser type, pages visited, and timestamps."),
+            ("Payment Information", "Payment details are collected and processed by our third-party provider, PayMongo.
+            OccaServe does not store credit card numbers or sensitive financial data."),
+            ("Communications", "We store messages sent between customers and caterers on our platform to provide
+            customer support and resolve disputes."),
+            ]),
+            ("2. How We Use Your Information", [
+            ("Service Delivery", "To facilitate bookings, process payments, send confirmations, and provide customer
+            support."),
+            ("Account Management", "To verify your identity, manage your account, and process caterer applications and
+            KYC verification."),
+            ("Communications", "To send booking updates, promotional offers (if opted in), and important service
+            announcements."),
+            ("Improvement & Analytics", "To analyze usage patterns, improve our platform features, and detect fraud or
+            security issues."),
+            ]),
+            ("3. Sharing Your Information", [
+            ("With Caterers", "When you book a caterer, your name, contact details, and event information are shared
+            with that caterer to fulfill your booking."),
+            ("With Service Providers", "We share data with PayMongo (payments), email service providers, and analytics
+            tools, all bound by confidentiality agreements."),
+            ("Legal Requirements", "We may disclose information if required by Philippine law or in response to valid
+            legal process."),
+            ("We Do Not Sell Your Data", "OccaServe does not sell, trade, or rent your personal information to third
+            parties for marketing purposes."),
+            ]),
+            ("4. Data Security", [
+            ("Security Measures", "We use industry-standard encryption (TLS/HTTPS), secure password hashing, and access
+            controls to protect your data."),
+            ("Data Retention", "We retain your data for as long as your account is active or as needed to provide
+            services and comply with legal obligations."),
+            ("Breach Notification", "In the event of a data breach affecting your information, we will notify you within
+            72 hours as required by the Data Privacy Act of 2012."),
+            ]),
+            ("5. Your Rights (Data Privacy Act of 2012)", [
+            ("Right to Access", "You may request a copy of your personal data held by us at any time."),
+            ("Right to Correction", "You may update or correct your personal information through your account settings
+            or by contacting us."),
+            ("Right to Erasure", "You may request deletion of your account and associated data. Note that some data may
+            be retained for legal compliance."),
+            ("Right to Object", "You may opt out of marketing communications at any time by clicking 'Unsubscribe' in
+            any email or updating your notification preferences."),
+            ]),
+            ] %}
+
+            {% for section_title, items in sections %}
+            <div style="margin-bottom: 2.5rem;">
+                <h2
+                    style="font-family: 'Playfair Display', serif; font-size: 1.5rem; color: #1a2e18; margin-bottom: 1.25rem; padding-bottom: 0.5rem; border-bottom: 2px solid var(--primary-light, #e8f5d0);">
+                    {{ section_title }}</h2>
+                {% for sub_title, sub_text in items %}
+                <div style="margin-bottom: 1.25rem;">
+                    <h4 style="font-weight: 700; color: #1a2e18; margin-bottom: 0.5rem; font-size: 1rem;">{{ sub_title
+                        }}</h4>
+                    <p style="color: #6b7280; line-height: 1.8; font-size: 0.92rem;">{{ sub_text }}</p>
+                </div>
+                {% endfor %}
+            </div>
+            {% endfor %}
+
+            <!-- Contact -->
+            <div
+                style="background: white; border: 1px solid #e5e7eb; border-radius: 1rem; padding: 2rem; margin-top: 2rem;">
+                <h3 style="font-weight: 700; margin-bottom: 0.75rem; color: #1a2e18;">Contact Our Data Protection
+                    Officer</h3>
+                <p style="color: #6b7280; line-height: 1.7; font-size: 0.92rem;">For questions or concerns about this
+                    Privacy Policy or your personal data, please contact:</p>
+                <div style="margin-top: 1rem; display: flex; flex-direction: column; gap: 0.5rem;">
+                    <span style="font-size: 0.9rem; color: #374151;"><i class="fas fa-envelope"
+                            style="color: var(--primary-color, #99cc66); margin-right: 8px;"></i>
+                        privacy@occaserve.com</span>
+                    <span style="font-size: 0.9rem; color: #374151;"><i class="fas fa-map-marker-alt"
+                            style="color: var(--primary-color, #99cc66); margin-right: 8px;"></i> Philippines</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock %}

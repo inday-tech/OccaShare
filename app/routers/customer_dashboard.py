@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status, Request, Form, UploadFile, File
+from fastapi import APIRouter, Depends, HTTPException, status, Request, Form, UploadFile, File, BackgroundTasks, WebSocket, WebSocketDisconnect
 from typing import Optional
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
@@ -7,8 +7,11 @@ from datetime import date
 import os
 import shutil
 import uuid
+import time
 from ..db import database, models
 from ..core import security as auth
+from ..services.verification import verification_service
+from ..services.realtime import manager
 
 router = APIRouter(prefix="/customer", tags=["customer"])
 templates = Jinja2Templates(directory="templates")
@@ -285,3 +288,135 @@ async def update_profile_photo(
     db.commit()
     
     return RedirectResponse(url="/customer/profile?success=photo_updated", status_code=303)
+
+@router.get("/verification", response_class=HTMLResponse)
+async def customer_verification(
+    request: Request,
+    user: models.User = Depends(customer_only)
+):
+    return templates.TemplateResponse("customer/verification.html", {
+        "request": request,
+        "user": user,
+        "client_id": f"verify_{user.id}"
+    })
+
+@router.post("/verification/process")
+async def process_verification(
+    background_tasks: BackgroundTasks,
+    client_id: str = Form(...),
+    id_document: UploadFile = File(...),
+    selfie: UploadFile = File(...),
+    db: Session = Depends(database.get_db),
+    user: models.User = Depends(customer_only)
+):
+    # Setup upload directory
+    UPLOAD_DIR = "app/static/uploads/verification"
+    os.makedirs(UPLOAD_DIR, exist_ok=True)
+    
+    # Save ID Document
+    id_ext = os.path.splitext(id_document.filename)[1]
+    id_filename = f"user_{user.id}_id_{uuid.uuid4()}{id_ext}"
+    id_path = os.path.join(UPLOAD_DIR, id_filename)
+    with open(id_path, "wb") as buffer:
+        shutil.copyfileobj(id_document.file, buffer)
+        
+    # Save Selfie
+    selfie_ext = os.path.splitext(selfie.filename)[1]
+    selfie_filename = f"user_{user.id}_selfie_{uuid.uuid4()}{selfie_ext}"
+    selfie_path = os.path.join(UPLOAD_DIR, selfie_filename)
+    with open(selfie_path, "wb") as buffer:
+        shutil.copyfileobj(selfie.file, buffer)
+        
+    # Create Verification Record
+    kyc_record = db.query(models.IdentityVerification).filter(models.IdentityVerification.user_id == user.id).first()
+    if not kyc_record:
+        kyc_record = models.IdentityVerification(user_id=user.id)
+        db.add(kyc_record)
+    
+    kyc_record.document_url = f"/static/uploads/verification/{id_filename}"
+    kyc_record.selfie_url = f"/static/uploads/verification/{selfie_filename}"
+    kyc_record.verification_status = "processing"
+    db.commit()
+    
+    # Run verification in background
+    background_tasks.add_task(
+        run_customer_verification_bg,
+        user.id,
+        client_id,
+        id_path,
+        [selfie_path]
+    )
+    
+    return RedirectResponse(url="/customer/dashboard?info=verification_started", status_code=303)
+
+async def run_customer_verification_bg(user_id: int, client_id: str, id_path: str, selfie_paths: list):
+    """Background task for proof of concept identity verification."""
+    db = next(database.get_db())
+    try:
+        user = db.query(models.User).get(user_id)
+        
+        # 1. Update UI via WS
+        await manager.broadcast_to_client(client_id, {
+            "type": "verification_update",
+            "status": "processing",
+            "message": "Analyzing document clarity..."
+        })
+        time.sleep(2)
+        
+        # 2. OCR and Matching
+        await manager.broadcast_to_client(client_id, {
+            "type": "verification_update",
+            "status": "processing",
+            "message": "Matching face with ID photo..."
+        })
+        time.sleep(2)
+        
+        # Call verification service
+        result = verification_service.verify_identity_v2(
+            id_path, 
+            selfie_paths, 
+            f"{user.first_name} {user.last_name}", 
+            "MOCK-ID-123", 
+            "Passport"
+        )
+        
+        # 3. Update DB
+        kyc_record = db.query(models.IdentityVerification).filter(models.IdentityVerification.user_id == user_id).first()
+        kyc_record.verification_status = result["status"]
+        kyc_record.fraud_score = result["fraud_score"]
+        
+        if result["status"] == "approved":
+            user.is_verified = True
+            user.is_kyc_complete = True
+            msg = "Verification Successful! Redirecting..."
+        else:
+            msg = "Verification Failed: Low clarity or fraud detected."
+            
+        db.commit()
+        
+        # 4. Final UI Update
+        await manager.broadcast_to_client(client_id, {
+            "type": "verification_update",
+            "status": "success" if result["status"] == "approved" else "error",
+            "message": msg
+        })
+        
+    except Exception as e:
+        print(f"Error in background verification: {e}")
+        await manager.broadcast_to_client(client_id, {
+            "type": "verification_update",
+            "status": "error",
+            "message": "A technical error occurred during verification."
+        })
+    finally:
+        db.close()
+
+@router.websocket("/verification/ws/{client_id}")
+async def verification_ws(websocket: WebSocket, client_id: str):
+    await manager.connect(client_id, websocket)
+    try:
+        while True:
+            # Keep connection alive
+            await websocket.receive_text()
+    except WebSocketDisconnect:
+        manager.disconnect(client_id)

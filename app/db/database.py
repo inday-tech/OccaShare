@@ -1,13 +1,17 @@
+import os
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
+from dotenv import load_dotenv
 
-# Database credentials
-hostname = "localhost"
-database = "occashare"
-username = "postgres"
-pwd = "1425"
-port_id = 5432
+load_dotenv()
+
+# Database credentials (from env)
+hostname = os.getenv("DB_HOST", "localhost")
+database = os.getenv("DB_NAME", "occashare")
+username = os.getenv("DB_USER", "postgres")
+pwd = os.getenv("DB_PASSWORD", "2004")
+port_id = os.getenv("DB_PORT", "5432")
 
 SQLALCHEMY_DATABASE_URL = f"postgresql://{username}:{pwd}@{hostname}:{port_id}/{database}"
 

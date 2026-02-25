@@ -14,6 +14,7 @@ class User(Base):
     first_name = Column(String, nullable=True)
     last_name = Column(String, nullable=True)
     phone_number = Column(String, nullable=True)
+    address = Column(Text, nullable=True)
     profile_image_url = Column(String, nullable=True)
     status = Column(String, default="active")
     is_verified = Column(Boolean, default=False)
@@ -21,8 +22,9 @@ class User(Base):
     
     # Social Login Fields
     facebook_id = Column(String, unique=True, nullable=True)
+    google_id = Column(String, unique=True, nullable=True)
     instagram_id = Column(String, unique=True, nullable=True)
-    auth_provider = Column(String, default='email') # 'email', 'facebook', 'instagram'
+    auth_provider = Column(String, default='email') # 'email', 'facebook', 'google', 'instagram'
     
     # Email Verification
     is_email_verified = Column(Boolean, default=False)

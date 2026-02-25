@@ -32,4 +32,22 @@ async def read_root(request: Request, db: Session = Depends(database.get_db)):
         "user": user
     })
 
+@router.get("/about", response_class=HTMLResponse)
+async def about_page(request: Request):
+    return templates.TemplateResponse("about.html", {"request": request})
 
+@router.get("/support/privacy-policy", response_class=HTMLResponse)
+async def privacy_policy_page(request: Request):
+    return templates.TemplateResponse("support/privacy_policy.html", {"request": request})
+
+@router.get("/support/terms-of-service", response_class=HTMLResponse)
+async def terms_of_service_page(request: Request):
+    return templates.TemplateResponse("support/terms_of_service.html", {"request": request})
+
+@router.get("/how-it-works", response_class=HTMLResponse)
+async def how_it_works_page(request: Request):
+    return templates.TemplateResponse("how_it_works.html", {"request": request})
+
+@router.get("/event-categories", response_class=HTMLResponse)
+async def event_categories_page(request: Request):
+    return templates.TemplateResponse("event_categories.html", {"request": request})

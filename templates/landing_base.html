@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}OccaServe - Book the Best Catering Services Near You{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='/css/styles.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* ===== BASE NAV ACTIVE STYLES ===== */
+        .nav-links a.active,
+        .nav-links a:focus-visible {
+            color: var(--primary-color, #99cc66) !important;
+            font-weight: 700;
+        }
+
+        .nav-links a.active::after {
+            content: '';
+            display: block;
+            height: 2px;
+            background: var(--primary-color, #99cc66);
+            border-radius: 2px;
+            margin-top: 2px;
+            animation: underlineIn 0.25s ease;
+        }
+
+        @keyframes underlineIn {
+            from {
+                width: 0;
+            }
+
+            to {
+                width: 100%;
+            }
+        }
+
+        /* Auth button highlights when on login/register page */
+        .nav-auth .btn-text.active-page {
+            color: var(--primary-color, #99cc66) !important;
+            font-weight: 700;
+            border-bottom: 2px solid var(--primary-color, #99cc66);
+        }
+
+        .nav-auth .btn-primary.active-page {
+            background: var(--primary-dark, #77aa44) !important;
+            box-shadow: 0 0 0 3px rgba(153, 204, 102, 0.3);
+        }
+
+        /* ===== FOOTER ===== */
+        .footer {
+            background: var(--text-dark, #1a2e18);
+            color: rgba(255, 255, 255, 0.75);
+            padding: 4rem 0 1.5rem;
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            gap: 3rem;
+        }
+
+        .footer-col h4 {
+            color: #ffffff;
+            font-size: 1rem;
+            font-weight: 700;
+            margin-bottom: 1.25rem;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+
+        .footer-col p {
+            font-size: 0.9rem;
+            line-height: 1.8;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .footer-col ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .footer-col ul li {
+            margin-bottom: 0.65rem;
+        }
+
+        .footer-col ul li a {
+            color: rgba(255, 255, 255, 0.65);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: color 0.2s, padding-left 0.2s;
+        }
+
+        .footer-col ul li a:hover {
+            color: #ffffff;
+            padding-left: 4px;
+        }
+
+        .social-links {
+            display: flex;
+            gap: 0.75rem;
+            margin-top: 1.5rem;
+        }
+
+        .social-links a {
+            width: 38px;
+            height: 38px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.85rem;
+            text-decoration: none;
+            transition: background 0.2s, color 0.2s, transform 0.2s;
+        }
+
+        .social-links a:hover {
+            background: var(--primary-color, #99cc66);
+            color: #fff;
+            transform: translateY(-3px);
+        }
+
+        .footer-bottom {
+            margin-top: 3rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center;
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        /* ===== LANDING PAGE HERO FOR SUB-PAGES ===== */
+        .page-hero {
+            background: linear-gradient(135deg, var(--primary-dark, #2d5a1b) 0%, var(--primary-color, #3d8b2b) 100%);
+            color: white;
+            padding: 5rem 0 4rem;
+            text-align: center;
+        }
+
+        .page-hero h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            margin-bottom: 1rem;
+        }
+
+        .page-hero p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* ===== RESPONSIVE FOOTER ===== */
+        @media (max-width: 900px) {
+            .footer-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 2rem;
+            }
+        }
+
+        @media (max-width: 560px) {
+            .footer-grid {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+        }
+
+        /* ===== AUTH PAGE LAYOUT WITHIN BASE (for login/register/forgot) ===== */
+        body.auth-page .main-content-wrap {
+            min-height: calc(100vh - 70px - 300px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 4rem 1rem;
+            background-color: var(--bg-light, #fdfdfb);
+            background-image: radial-gradient(at 0% 0%, hsla(120, 30%, 15%, 1) 0, transparent 50%),
+                radial-gradient(at 50% 0%, hsla(90, 40%, 40%, 1) 0, transparent 50%),
+                radial-gradient(at 100% 0%, hsla(45, 30%, 80%, 1) 0, transparent 50%);
+            background-attachment: fixed;
+        }
+    </style>
+    {% block head %}{% endblock %}
+</head>
+
+<body data-nav-page="{{ nav_page | default('') }}">
+
+    <!-- Navigation -->
+    <nav class="navbar" id="mainNavbar">
+        <div class="container nav-container">
+            <a href="/" class="logo">OccaServe</a>
+            <div class="nav-menu">
+                <ul class="nav-links">
+                    <li><a href="/" data-nav="home">Home</a></li>
+                    <li><a href="/#caterers" data-nav="caterers">Browse Caterers</a></li>
+                    <li><a href="/how-it-works" data-nav="how-it-works">How It Works</a></li>
+                    <li><a href="/event-categories" data-nav="categories">Event Categories</a></li>
+                    <li><a href="/contact" data-nav="contact">Contact Us</a></li>
+                </ul>
+                <div class="nav-auth">
+                    <a href="#" class="lang-selector"><i class="fas fa-globe"></i> EN</a>
+                    {% if user %}
+                    {% if user.role == 'admin' %}
+                    <a href="/admin/dashboard" class="btn-text">Admin Panel</a>
+                    {% elif user.role == 'caterer' %}
+                    <a href="/caterer/dashboard" class="btn-text">Caterer Dashboard</a>
+                    {% else %}
+                    <a href="/customer/dashboard" class="btn-text">My Dashboard</a>
+                    {% endif %}
+                    <a href="/auth/logout" class="btn-primary">Logout</a>
+                    {% else %}
+                    <a href="/auth/login" class="btn-text" id="navLoginBtn">Log In</a>
+                    <a href="/auth/register" class="btn-primary" id="navSignupBtn">Sign Up</a>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="hamburger">
+                <span class="bar"></span>
+                <span class="bar"></span>
+                <span class="bar"></span>
+            </div>
+        </div>
+    </nav>
+
+    {% block content %}{% endblock %}
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <!-- Brand Col -->
+                <div class="footer-col">
+                    <a href="/" class="logo" style="color:#fff; margin-bottom:1.25rem; display:block;">OccaServe</a>
+                    <p>Your trusted partner for discovering the Philippines' finest catering services. We bring elite
+                        flavors and seamless booking to your most meaningful moments.</p>
+                    <div class="social-links">
+                        <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                        <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+                        <a href="#" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+                    </div>
+                </div>
+                <!-- Quick Links Col -->
+                <div class="footer-col">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="/"><i class="fas fa-chevron-right"
+                                    style="font-size:0.65rem; margin-right:6px;"></i>Home</a></li>
+                        <li><a href="/#caterers"><i class="fas fa-chevron-right"
+                                    style="font-size:0.65rem; margin-right:6px;"></i>Partner Caterers</a></li>
+                        <li><a href="/how-it-works"><i class="fas fa-chevron-right"
+                                    style="font-size:0.65rem; margin-right:6px;"></i>How It Works</a></li>
+                        <li><a href="/event-categories"><i class="fas fa-chevron-right"
+                                    style="font-size:0.65rem; margin-right:6px;"></i>Event Categories</a></li>
+                        <li><a href="/about"><i class="fas fa-chevron-right"
+                                    style="font-size:0.65rem; margin-right:6px;"></i>About Us</a></li>
+                    </ul>
+                </div>
+                <!-- Support Col -->
+                <div class="footer-col">
+                    <h4>Support</h4>
+                    <ul>
+                        <li><a href="/support/help-center"><i class="fas fa-chevron-right"
+                                    style="font-size:0.65rem; margin-right:6px;"></i>Help Center</a></li>
+                        <li><a href="/contact"><i class="fas fa-chevron-right"
+                                    style="font-size:0.65rem; margin-right:6px;"></i>Contact Support</a></li>
+                        <li><a href="/support/privacy-policy"><i class="fas fa-chevron-right"
+                                    style="font-size:0.65rem; margin-right:6px;"></i>Privacy Policy</a></li>
+                        <li><a href="/support/terms-of-service"><i class="fas fa-chevron-right"
+                                    style="font-size:0.65rem; margin-right:6px;"></i>Terms of Service</a></li>
+                    </ul>
+                </div>
+                <!-- Professionals Col -->
+                <div class="footer-col">
+                    <h4>Professionals</h4>
+                    <ul>
+                        <li><a href="/auth/register?role=caterer"><i class="fas fa-chevron-right"
+                                    style="font-size:0.65rem; margin-right:6px;"></i>Join as Caterer</a></li>
+                        <li><a href="/auth/login"><i class="fas fa-chevron-right"
+                                    style="font-size:0.65rem; margin-right:6px;"></i>Caterer Login</a></li>
+                        <li><a href="/admin/login"><i class="fas fa-chevron-right"
+                                    style="font-size:0.65rem; margin-right:6px;"></i>Admin Login</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 OccaServe. All rights reserved. Crafted with passion for fine events.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="{{ url_for('static', path='/js/main.js') }}"></script>
+    <script>
+        (function () {
+            /* ============================================================
+               NAV ACTIVE-LINK HIGHLIGHTING
+               Strategy:
+                 - On the home page (data-nav-page="home"): use IntersectionObserver
+                   to watch sections and highlight matching nav links.
+                 - On every other page: match body[data-nav-page] to nav links
+                   with matching [data-nav] attribute.
+                 - On login page ("login"): highlight #navLoginBtn with active-page class.
+                 - On register page ("register"): highlight #navSignupBtn with active-page class.
+            ============================================================ */
+
+            const NAV_PAGE = document.body.dataset.navPage || '';
+            const navLinks = document.querySelectorAll('.nav-links a');
+            const loginBtn = document.getElementById('navLoginBtn');
+            const signupBtn = document.getElementById('navSignupBtn');
+
+            function clearActive() {
+                navLinks.forEach(a => a.classList.remove('active'));
+                if (loginBtn) loginBtn.classList.remove('active-page');
+                if (signupBtn) signupBtn.classList.remove('active-page');
+            }
+
+            function setActive(navValue) {
+                clearActive();
+                navLinks.forEach(a => {
+                    if (a.dataset.nav === navValue) a.classList.add('active');
+                });
+            }
+
+            /* ---- HOME PAGE: IntersectionObserver ---- */
+            if (NAV_PAGE === 'home' || NAV_PAGE === '') {
+                const sections = document.querySelectorAll('section[id], header[id]');
+                if (sections.length > 0) {
+                    const observer = new IntersectionObserver((entries) => {
+                        entries.forEach(entry => {
+                            if (entry.isIntersecting) {
+                                const id = entry.target.id;
+                                // Map section IDs to data-nav values
+                                const map = {
+                                    'home': 'home',
+                                    'caterers': 'caterers',
+                                    'how-it-works': 'how-it-works',
+                                    'categories': 'categories',
+                                    'testimonials': 'home',
+                                };
+                                const navVal = map[id] || 'home';
+                                setActive(navVal);
+                            }
+                        });
+                    }, { threshold: 0.35 });
+
+                    sections.forEach(sec => observer.observe(sec));
+                }
+                // Default: highlight Home
+                setActive('home');
+            }
+
+            /* ---- AUTH BUTTON HIGHLIGHT: Login page ---- */
+            else if (NAV_PAGE === 'login') {
+                clearActive();
+                if (loginBtn) loginBtn.classList.add('active-page');
+            }
+
+            /* ---- AUTH BUTTON HIGHLIGHT: Register page ---- */
+            else if (NAV_PAGE === 'register') {
+                clearActive();
+                if (signupBtn) signupBtn.classList.add('active-page');
+            }
+
+            /* ---- ALL OTHER PAGES: match data-nav attribute ---- */
+            else {
+                setActive(NAV_PAGE);
+            }
+
+            /* ---- MOBILE HAMBURGER ---- */
+            const hamburger = document.querySelector('.hamburger');
+            const navMenu = document.querySelector('.nav-menu');
+            if (hamburger && navMenu) {
+                hamburger.addEventListener('click', () => {
+                    hamburger.classList.toggle('active');
+                    navMenu.classList.toggle('active');
+                });
+                document.querySelectorAll('.nav-links a').forEach(link => {
+                    link.addEventListener('click', () => {
+                        hamburger.classList.remove('active');
+                        navMenu.classList.remove('active');
+                    });
+                });
+            }
+
+            /* ---- NAVBAR SCROLL SHRINK ---- */
+            const navbar = document.getElementById('mainNavbar');
+            if (navbar) {
+                window.addEventListener('scroll', () => {
+                    navbar.style.boxShadow = window.scrollY > 40
+                        ? '0 2px 20px rgba(0,0,0,0.12)'
+                        : '';
+                }, { passive: true });
+            }
+        })();
+    </script>
+    {% block scripts %}{% endblock %}
+</body>
+
+</html>

@@ -45,6 +45,10 @@ def save_upload_file(upload_file: UploadFile) -> str:
         
     return f"/static/uploads/verification/{unique_filename}"
 
+@router.get("/my")
+async def my_bookings_redirect():
+    return RedirectResponse(url="/customer/bookings", status_code=303)
+
 # --- Wizard Steps ---
 
 # Step 1: Initialize/Select Caterer (from Profile Page)
@@ -325,13 +329,45 @@ async def submit_review(
     return RedirectResponse(url="/customer/dashboard?success=review_submitted")
 
 @router.post("/{booking_id}/contract/sign")
-async def sign_contract(booking_id: int, signature_data: str = Form(...), db: Session = Depends(database.get_db)):
+async def sign_contract(
+    booking_id: int, 
+    signature_data: str = Form(...), 
+    guest_count: Optional[int] = Form(None),
+    db: Session = Depends(database.get_db)
+):
     quotation = db.query(models.Quotation).filter(models.Quotation.booking_id == booking_id).first()
-    if not quotation:
-        return {"success": False, "error": "Quotation not found"}
-        
-    quotation.status = "signed"
-    # In a real app, we'd save signature_data as an image or a hash
-    db.commit()
+    booking = db.query(models.Booking).get(booking_id)
     
+    if not quotation or not booking:
+        return {"success": False, "error": "Quotation or Booking not found"}
+        
+    # If guest count was adjusted in the UI, update the quotation and booking
+    if guest_count and guest_count != quotation.package_details.get("guest_count"):
+        from decimal import Decimal
+        unit_price = Decimal(str(quotation.package_details.get("unit_price", 0)))
+        new_guest_count = int(guest_count)
+        
+        # Calculate new base amount
+        new_base_amount = unit_price * new_guest_count
+        
+        # Calculate new total (base + existing addons total)
+        addon_total = sum(Decimal(str(a.get("price", 0))) for a in quotation.addons)
+        new_total = new_base_amount + addon_total
+        
+        # Update Quotation JSON details
+        details = quotation.package_details.copy()
+        details["guest_count"] = new_guest_count
+        details["base_amount"] = float(new_base_amount)
+        quotation.package_details = details
+        quotation.total_amount = float(new_total)
+        
+        # Update Booking
+        booking.guest_count = new_guest_count
+        booking.total_amount = float(new_total)
+        booking.reservation_fee = new_total * Decimal(str(quotation.downpayment_percent / 100))
+
+    quotation.status = "signed"
+    # signature_data could be saved here if needed
+    
+    db.commit()
     return {"success": True}
