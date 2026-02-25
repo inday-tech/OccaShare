@@ -87,9 +87,18 @@ async def auth_callback(request: Request, provider: str, db: Session = Depends(d
     Handles the callback from the provider, exchanges code for token,
     and logs in/registers the user.
     """
+    # Construct exactly the same redirect_uri as social_login
+    site_url = settings.SITE_URL.rstrip('/')
+    redirect_uri = f"{site_url}/auth/callback/{provider}"
+    
+    # Fallback for localhost development if SITE_URL is default
+    if "127.0.0.1" in redirect_uri and "ngrok-free.dev" in str(request.base_url):
+        redirect_uri = str(request.url_for('auth_callback', provider=provider)).replace("http://", "https://")
+
     try:
-        token = await oauth.create_client(provider).authorize_access_token(request)
+        token = await oauth.create_client(provider).authorize_access_token(request, redirect_uri=redirect_uri)
     except OAuthError as error:
+        print(f"OAUTH ERROR: {error}")
         return RedirectResponse(url="/auth/login?error=oauth_failed")
 
     user_info = None
