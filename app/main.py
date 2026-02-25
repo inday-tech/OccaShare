@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+import os
 from fastapi.staticfiles import StaticFiles
 from .db.database import engine, Base
 from .routers import website, auth, admin, bookings, social_auth, caterers, packages, caterer_dashboard, customer_dashboard, verification, kyc, quotations, payments, contact
@@ -10,8 +11,12 @@ Base.metadata.create_all(bind=engine)
 from starlette.middleware.sessions import SessionMiddleware
 
 from .core.config import settings
+from uvicorn.middleware.proxy_headers import ProxyHeadersMiddleware
 
 app = FastAPI()
+
+# Add ProxyHeadersMiddleware to handle Ngrok/Proxy headers (X-Forwarded-Proto)
+app.add_middleware(ProxyHeadersMiddleware, trusted_hosts="*")
 
 # Add SessionMiddleware
 app.add_middleware(SessionMiddleware, secret_key=settings.SECRET_KEY)

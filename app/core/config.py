@@ -5,12 +5,13 @@ load_dotenv()
 
 class Settings:
     # CORE CONFIG
-    SECRET_KEY = os.getenv("SECRET_KEY", "your-super-secret-key-change-me")
+    SECRET_KEY = os.getenv("SECRET_KEY", "")
+    SITE_URL = os.getenv("SITE_URL", "http://127.0.0.1:8000")
     
     # EMAIL CONFIGURATION
-    MAIL_USERNAME = os.getenv("MAIL_USERNAME", "dadaycaragay@gmail.com")
-    MAIL_PASSWORD = os.getenv("MAIL_PASSWORD", "ypgn kdud mvzs jhbo")
-    MAIL_FROM = os.getenv("MAIL_FROM", "dadaycaragay@gmail.com")
+    MAIL_USERNAME = os.getenv("MAIL_USERNAME", "")
+    MAIL_PASSWORD = os.getenv("MAIL_PASSWORD", "")
+    MAIL_FROM = os.getenv("MAIL_FROM", "")
     MAIL_PORT = int(os.getenv("MAIL_PORT", 587))
     MAIL_SERVER = os.getenv("MAIL_SERVER", "smtp.gmail.com")
     MAIL_TLS = os.getenv("MAIL_TLS", "True") == "True"

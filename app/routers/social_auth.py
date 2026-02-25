@@ -56,10 +56,29 @@ async def social_login(request: Request, provider: str):
     Real OAuth flow using Authlib.
     """
     client = oauth.create_client(provider)
-    if not client or not client.client_id:
+    
+    # Simple and robust config check
+    configs = {
+        'facebook': settings.FACEBOOK_CLIENT_ID,
+        'google': settings.GOOGLE_CLIENT_ID,
+        'instagram': settings.INSTAGRAM_CLIENT_ID
+    }
+    config_id = configs.get(provider)
+
+    if not client or not config_id:
+        print(f"DEBUG ERROR: Missing config for {provider}. Config ID: '{config_id}'")
         return RedirectResponse(url=f"/auth/login?error=config_missing&provider={provider}")
         
-    redirect_uri = request.url_for('auth_callback', provider=provider)
+    # Construct redirect_uri using SITE_URL from config
+    site_url = settings.SITE_URL.rstrip('/')
+    redirect_uri = f"{site_url}/auth/callback/{provider}"
+    
+    # Fallback for localhost development if SITE_URL is default
+    if "127.0.0.1" in redirect_uri and "ngrok-free.dev" in str(request.base_url):
+        redirect_uri = str(request.url_for('auth_callback', provider=provider)).replace("http://", "https://")
+    
+    print(f"DEBUG FINAL REDIRECT URI: {redirect_uri}")
+        
     return await client.authorize_redirect(request, redirect_uri)
 
 @router.get("/callback/{provider}", name="auth_callback")
