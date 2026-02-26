@@ -15,11 +15,18 @@ from uvicorn.middleware.proxy_headers import ProxyHeadersMiddleware
 
 app = FastAPI()
 
-# Add ProxyHeadersMiddleware to handle Ngrok/Proxy headers (X-Forwarded-Proto)
-app.add_middleware(ProxyHeadersMiddleware, trusted_hosts="*")
+# Add SessionMiddleware - Using lax and secure if behind HTTPS proxy
+app.add_middleware(
+    SessionMiddleware, 
+    secret_key=settings.SECRET_KEY,
+    same_site="lax",
+    https_only=False, # Better for local development and Ngrok-as-a-Proxy
+    max_age=3600 * 24 * 7 # 1 week
+)
 
-# Add SessionMiddleware
-app.add_middleware(SessionMiddleware, secret_key=settings.SECRET_KEY)
+# Add ProxyHeadersMiddleware to handle Ngrok/Proxy headers (X-Forwarded-Proto)
+# Adding this AFTER SessionMiddleware ensures it's at the TOP of the stack (runs first on request)
+app.add_middleware(ProxyHeadersMiddleware, trusted_hosts="*")
 
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
 

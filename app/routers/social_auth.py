@@ -55,6 +55,21 @@ async def social_login(request: Request, provider: str):
     Redirects the user to the social provider's login page.
     Real OAuth flow using Authlib.
     """
+    # Fix for Mismatching State (CSRF): Domain Consistency Check
+    # If user is on localhost but SITE_URL is set to ngrok, redirect them to ngrok first.
+    # Browsers cannot share session cookies between localhost and ngrok.
+    current_host = request.base_url.hostname
+    target_host = settings.SITE_URL.split("//")[-1].split("/")[0].split(":")[0]
+    
+    if (current_host == "127.0.0.1" or current_host == "localhost") and "ngrok-free.dev" in target_host:
+        # Construct the target URL on the ngrok domain
+        new_url = f"{settings.SITE_URL.rstrip('/')}{request.url.path}"
+        query_params = str(request.query_params)
+        if query_params:
+            new_url += f"?{query_params}"
+        print(f"DEBUG DOMAIN FIX: Redirecting from {current_host} to {new_url}")
+        return RedirectResponse(url=new_url)
+
     client = oauth.create_client(provider)
     
     # Simple and robust config check
@@ -77,8 +92,6 @@ async def social_login(request: Request, provider: str):
     if "127.0.0.1" in redirect_uri and "ngrok-free.dev" in str(request.base_url):
         redirect_uri = str(request.url_for('auth_callback', provider=provider)).replace("http://", "https://")
     
-    print(f"DEBUG FINAL REDIRECT URI: {redirect_uri}")
-        
     return await client.authorize_redirect(request, redirect_uri)
 
 @router.get("/callback/{provider}", name="auth_callback")
@@ -87,20 +100,16 @@ async def auth_callback(request: Request, provider: str, db: Session = Depends(d
     Handles the callback from the provider, exchanges code for token,
     and logs in/registers the user.
     """
-    # Construct exactly the same redirect_uri as social_login
-    site_url = settings.SITE_URL.rstrip('/')
-    redirect_uri = f"{site_url}/auth/callback/{provider}"
-    
-    # Fallback for localhost development if SITE_URL is default
-    if "127.0.0.1" in redirect_uri and "ngrok-free.dev" in str(request.base_url):
-        redirect_uri = str(request.url_for('auth_callback', provider=provider)).replace("http://", "https://")
-
     try:
-        token = await oauth.create_client(provider).authorize_access_token(request, redirect_uri=redirect_uri)
+        # Authlib automatically retrieves state and redirect_uri from the session
+        token = await oauth.create_client(provider).authorize_access_token(request)
     except OAuthError as error:
         print(f"OAUTH ERROR: {error}")
-        return RedirectResponse(url="/auth/login?error=oauth_failed")
+        # Pass the error description to help debug
+        error_msg = str(error)
+        return RedirectResponse(url=f"/auth/login?error=oauth_failed&details={error_msg}")
 
+    # --- 1. HANDLE EXTERNAL INFO ---
     user_info = None
     email = None
     social_id = None
@@ -108,10 +117,11 @@ async def auth_callback(request: Request, provider: str, db: Session = Depends(d
     picture = None
     
     if provider == 'facebook':
+        # Request specific fields from Facebook
         resp = await oauth.facebook.get('me?fields=id,name,email,picture', token=token)
         user_info = resp.json()
         social_id = user_info.get('id')
-        email = user_info.get('email')
+        email = user_info.get('email') # Might be None if user didn't grant email permission
         name = user_info.get('name')
         picture = user_info.get('picture', {}).get('data', {}).get('url')
         
@@ -130,35 +140,39 @@ async def auth_callback(request: Request, provider: str, db: Session = Depends(d
         user_info = resp.json()
         social_id = user_info.get('id')
         name = user_info.get('username')
+        # Instagram API doesn't always provide email; use a placeholder
         email = f"{social_id}@instagram.user" 
         picture = None
 
-    # DB Synchronization
+    # --- 2. DATABASE SYNCHRONIZATION ---
     user = None
-    if email:
+    
+    # Priority A: Check by Social ID (Most reliable for social login)
+    if provider == 'facebook':
+        user = db.query(models.User).filter(models.User.facebook_id == social_id).first()
+    elif provider == 'google':
+        user = db.query(models.User).filter(models.User.google_id == social_id).first()
+    elif provider == 'instagram':
+        user = db.query(models.User).filter(models.User.instagram_id == social_id).first()
+
+    # Priority B: Check by Email if Social ID check failed
+    if not user and email:
         user = db.query(models.User).filter(models.User.email == email).first()
     
-    is_new_user = False
+    # --- 3. AUTO-CREATE OR UPDATE ACCOUNT ---
     if not user:
-        # Check by Social ID
-        if provider == 'facebook':
-            user = db.query(models.User).filter(models.User.facebook_id == social_id).first()
-        elif provider == 'google':
-            user = db.query(models.User).filter(models.User.google_id == social_id).first()
-        elif provider == 'instagram':
-            user = db.query(models.User).filter(models.User.instagram_id == social_id).first()
-            
-    if not user:
-        is_new_user = True
-        # Create New User (Initial state: missing role and profile info)
+        # Create New User
+        # If email is missing, we use a placeholder that the user must update in onboarding
+        final_email = email if email else f"fb_{social_id}@no-email.com"
+        
         user = models.User(
-            email=email,
+            email=final_email,
             password_hash=auth.get_password_hash(os.urandom(16).hex()), # Unusable random password
             first_name=name.split(" ")[0] if name else "User",
             last_name=name.split(" ")[-1] if name and " " in name else "",
-            role="pending", # Temporary role until onboarding complete
+            role="customer", # Default role as requested
             status="active",
-            is_email_verified=True, 
+            is_email_verified=True if email else False, # Verified if we got it from provider
             auth_provider=provider,
             profile_image_url=picture
         )
@@ -170,7 +184,7 @@ async def auth_callback(request: Request, provider: str, db: Session = Depends(d
         db.commit()
         db.refresh(user)
     else:
-        # Link social account if not already linked
+        # Handle existing account: Link social ID if missing
         updated = False
         if provider == 'facebook' and not user.facebook_id:
             user.facebook_id = social_id
@@ -192,9 +206,17 @@ async def auth_callback(request: Request, provider: str, db: Session = Depends(d
         expires_delta=access_token_expires
     )
     
-    # Check if profile is complete (needs role != 'pending', phone, address)
-    if user.role == "pending" or (user.role == "customer" and (not user.phone_number or not user.address)):
+    # Check if profile is complete
+    # Force onboarding if:
+    # 1. Role is pending (from old logic)
+    # 2. Email is a placeholder (missing from provider)
+    # 3. Customer is missing phone or address
+    is_placeholder_email = user.email.endswith("@no-email.com")
+    
+    if user.role == "pending" or is_placeholder_email or (user.role == "customer" and (not user.phone_number or not user.address)):
         redirect_url = "/auth/onboarding"
+        if is_placeholder_email:
+            redirect_url += "?reason=missing_email"
     else:
         redirect_url = utils.get_dashboard_url(user.role)
 

@@ -356,6 +356,10 @@ def login_page(request: Request, next: Optional[str] = None, db: Session = Depen
         if user:
             return RedirectResponse(url=next if next else utils.get_dashboard_url(user.role))
             
+    # Initialize session to ensure cookie is set before OAuth redirect (fixes mismatching_state)
+    if not request.session.get("session_init"):
+        request.session["session_init"] = True
+
     return templates.TemplateResponse("auth/login.html", {"request": request, "next_url": next})
 
 @router.post("/login")
