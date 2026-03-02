@@ -1,0 +1,338 @@
+/* Hero Section */
+.dashboard-hero {
+    background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+    border-radius: 2.5rem;
+    padding: 4rem 3rem;
+    margin-bottom: 3rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.dashboard-hero h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 3rem;
+    color: var(--secondary-color);
+    margin-bottom: 0.5rem;
+}
+
+.dashboard-hero p {
+    color: var(--text-light);
+    font-size: 1.15rem;
+}
+
+/* Stats Cards */
+.stats-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 2rem;
+    margin-bottom: 3.5rem;
+}
+
+.stat-card {
+    background: var(--white);
+    padding: 2.5rem 2rem;
+    border-radius: 2rem;
+    border: 1px solid var(--border-color);
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+    border-color: var(--primary-color);
+}
+
+.stat-icon {
+    position: absolute;
+    top: 1.5rem;
+    right: 1.5rem;
+    font-size: 2.5rem;
+    opacity: 0.15;
+    color: var(--primary-color);
+    transition: transform 0.3s ease;
+}
+
+.stat-card:hover .stat-icon {
+    transform: scale(1.2) rotate(-10deg);
+    opacity: 0.3;
+}
+
+.stat-label {
+    color: var(--text-light);
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 0.5rem;
+}
+
+.stat-value {
+    font-size: 3rem;
+    font-weight: 800;
+    color: var(--secondary-color);
+    line-height: 1;
+}
+
+/* Verification Alert */
+.verification-alert {
+    background: #fffbeb;
+    border: 1px solid #fef3c7;
+    border-radius: 2rem;
+    padding: 1.5rem 2rem;
+    margin-bottom: 3rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+.verification-alert-content {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.verification-icon-box {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: #fef3c7;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #d97706;
+    font-size: 1.5rem;
+}
+
+.verification-text h4 {
+    margin: 0;
+    color: #92400e;
+    font-size: 1.1rem;
+}
+
+.verification-text p {
+    margin: 0;
+    font-size: 0.95rem;
+    color: #b45309;
+}
+
+.btn-verify-now {
+    white-space: nowrap;
+    padding: 1rem 2rem;
+    background: #d97706;
+    border-color: #d97706;
+    border-radius: 1.25rem;
+}
+
+/* Recent Activity Card */
+.activity-card {
+    background: var(--white);
+    border-radius: 2rem;
+    padding: 2.5rem;
+    box-shadow: var(--shadow-md);
+    border: 1px solid var(--border-color);
+}
+
+.activity-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.activity-header h3 {
+    font-size: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.activity-table-wrapper {
+    overflow-x: auto;
+}
+
+.activity-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 1rem;
+}
+
+.activity-table thead tr {
+    text-align: left;
+    color: var(--text-light);
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.activity-table th {
+    padding: 0 1.5rem;
+}
+
+.activity-row {
+    background: var(--background-light);
+    border-radius: 1rem;
+    transition: all 0.3s ease;
+}
+
+.activity-row:hover {
+    background: var(--background-soft);
+}
+
+.activity-cell {
+    padding: 1.5rem;
+}
+
+.activity-caterer-info {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+}
+
+.activity-caterer-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    background: var(--background-soft);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--primary-color);
+}
+
+.activity-event-name {
+    margin: 0;
+    font-size: 1.05rem;
+    color: var(--secondary-color);
+}
+
+.activity-caterer-name {
+    font-size: 0.8rem;
+    color: var(--text-light);
+}
+
+.activity-date-primary {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--secondary-color);
+}
+
+.activity-time-secondary {
+    font-size: 0.8rem;
+    opacity: 0.7;
+}
+
+.activity-amount {
+    font-weight: 700;
+    color: var(--secondary-color);
+}
+
+.activity-payment-method {
+    font-size: 0.75rem;
+    color: var(--text-light);
+}
+
+/* Badges */
+.status-badge {
+    padding: 0.4rem 0.8rem;
+    border-radius: 2rem;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    display: inline-block;
+    margin-bottom: 0.4rem;
+}
+
+.payment-status-badge {
+    font-size: 0.7rem;
+    font-weight: 600;
+}
+
+.payment-status-badge i {
+    font-size: 0.5rem;
+    margin-right: 0.25rem;
+}
+
+.activity-actions {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: flex-end;
+}
+
+.btn-status-action {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.75rem;
+    border-radius: 0.5rem;
+    white-space: nowrap;
+}
+
+.btn-icon-action {
+    width: 35px;
+    height: 35px;
+    border-radius: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: white;
+    border: 1px solid var(--border-color);
+    color: var(--text-light);
+    transition: all 0.2s;
+}
+
+/* Status Badges */
+.status-badge.status-pending {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.status-badge.status-confirmed {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.status-badge.status-completed {
+    background: #dbeafe;
+    color: #1e40af;
+}
+
+.status-badge.status-cancelled {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.payment-status-badge.pay-pending {
+    color: #f59e0b;
+}
+
+.payment-status-badge.pay-paid {
+    color: #10b981;
+}
+
+.payment-status-badge.pay-deposit-paid {
+    color: #3b82f6;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 4rem;
+}
+
+.empty-state img {
+    width: 180px;
+    margin-bottom: 2rem;
+    opacity: 0.5;
+}
+
+.empty-state h3 {
+    color: var(--text-light);
+    margin-bottom: 0.5rem;
+}
+
+.empty-state p {
+    color: var(--text-light);
+    margin-bottom: 2rem;
+}

@@ -1,0 +1,310 @@
+.upload-zone {
+    border: 2px dashed var(--border-color);
+    border-radius: 1.5rem;
+    padding: 4rem 2rem;
+    text-align: center;
+    cursor: pointer;
+    background: #f8fafc;
+    transition: all 0.2s;
+}
+
+.upload-zone:hover:not(.disabled) {
+    border-color: var(--primary-color);
+    background: #f1f5f9;
+}
+
+.upload-zone.disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    background: #f1f5f9;
+}
+
+.minimal-input {
+    width: 100%;
+    padding: 0.875rem 1rem;
+    border: 2px solid #e2e8f0;
+    border-radius: 0.75rem;
+    font-size: 0.95rem;
+    transition: all 0.2s ease;
+    background: #fff;
+    color: #1a2e18;
+}
+
+.minimal-input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 4px rgba(var(--primary-rgb), 0.1);
+}
+
+.upload-zone i {
+    color: var(--primary-color);
+    margin-bottom: 1.5rem;
+}
+
+.image-preview {
+    text-align: center;
+    margin-top: 2rem;
+}
+
+.image-preview img {
+    max-width: 100%;
+    max-height: 300px;
+    border-radius: 1rem;
+    box-shadow: var(--shadow-lg);
+}
+
+.preview-actions {
+    margin-top: 1.5rem;
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+}
+
+.scanner-viewport {
+    position: relative;
+    width: 300px;
+    height: 300px;
+    background: #000;
+    margin: 0 auto 1.5rem;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 4px solid var(--primary-color);
+    box-shadow: 0 0 20px rgba(var(--primary-rgb), 0.3);
+}
+
+#webcam {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.scanner-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+    z-index: 10;
+}
+
+.face-guide {
+    width: 70%;
+    height: 80%;
+    border: 2px solid rgba(255, 255, 255, 0.4);
+    border-radius: 50% / 60% 60% 40% 40%;
+    box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.4);
+    position: relative;
+}
+
+/* Scanning Line Animation */
+.scanning-line {
+    position: absolute;
+    width: 100%;
+    height: 4px;
+    background: var(--primary-color);
+    box-shadow: 0 0 15px var(--primary-color);
+    top: 0;
+    left: 0;
+    animation: scanMove 2.5s infinite ease-in-out;
+    z-index: 20;
+    display: none;
+}
+
+@keyframes scanMove {
+    0% {
+        top: 0%;
+        opacity: 0;
+    }
+
+    10% {
+        opacity: 1;
+    }
+
+    90% {
+        opacity: 1;
+    }
+
+    100% {
+        top: 100%;
+        opacity: 0;
+    }
+}
+
+.scanner-header h3 {
+    color: var(--slate-900);
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.scanner-header p {
+    color: var(--slate-500);
+    font-size: 0.95rem;
+}
+
+.comparison-preview {
+    display: flex;
+    gap: 1.5rem;
+    justify-content: center;
+    margin-top: 2rem;
+    animation: slideUp 0.4s ease-out;
+}
+
+.prev-box {
+    text-align: center;
+    padding: 0.5rem;
+    background: #fff;
+    border-radius: 1rem;
+    box-shadow: var(--shadow-sm);
+}
+
+.prev-box img {
+    width: 140px;
+    height: 140px;
+    object-fit: cover;
+    border-radius: 0.8rem;
+    border: 2px solid #e2e8f0;
+}
+
+.prev-box label {
+    display: block;
+    font-size: 0.75rem;
+    margin-top: 0.5rem;
+    color: #64748b;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.scan-feedback {
+    position: absolute;
+    bottom: 2rem;
+    color: #fff;
+    background: rgba(15, 23, 42, 0.8);
+    backdrop-filter: blur(4px);
+    padding: 0.6rem 1.2rem;
+    border-radius: 2rem;
+    font-size: 0.85rem;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.liveliness-prompt {
+    text-align: center;
+    margin-bottom: 1.5rem;
+    background: #ecfdf5;
+    padding: 1rem;
+    border-radius: 1rem;
+    border: 2px solid #10b981;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.02);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+.scanner-controls {
+    text-align: center;
+}
+
+.spinner {
+    width: 60px;
+    height: 60px;
+    border: 5px solid #f3f3f3;
+    border-top: 5px solid var(--primary-color);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 2rem;
+}
+
+.frame-indicators {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: center;
+    margin-top: 0.5rem;
+}
+
+.dot {
+    width: 12px;
+    height: 12px;
+    background: #e2e8f0;
+    border-radius: 50%;
+    transition: all 0.3s;
+}
+
+.dot.active {
+    background: var(--primary-color);
+    transform: scale(1.2);
+    box-shadow: 0 0 10px rgba(var(--primary-rgb), 0.4);
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+/* Step Specific & Layout Polishing */
+.kyc-controls-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.kyc-label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.kyc-label-slate {
+    color: var(--slate-700);
+}
+
+.kyc-label-small {
+    font-size: 0.8rem;
+    color: var(--slate-500);
+}
+
+.kyc-preview-badge {
+    margin-bottom: 1rem;
+}
+
+.fraud-meter-container {
+    margin: 2rem 0;
+}
+
+.fraud-progress-wrapper {
+    height: 8px;
+    border-radius: 4px;
+    background: #e2e8f0;
+}
+
+.fraud-progress-bar {
+    width: 0%;
+    background: var(--primary-color);
+    transition: width 1s ease-in-out;
+}
+
+.retry-wrapper {
+    margin-top: 2rem;
+}

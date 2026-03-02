@@ -2,18 +2,20 @@
 
 {% block title %}All Bookings - Admin Dashboard{% endblock %}
 
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', path='/css/admin/bookings.css') }}">
+{% endblock %}
+
 {% block content %}
 <div class="page-header">
     <h1>All Platform Bookings</h1>
     <p>Monitor all reservations and event activity across the platform.</p>
 </div>
 
-<div
-    style="background: var(--white); border-radius: 2rem; padding: 2.5rem; border: 1px solid var(--border-color); box-shadow: var(--shadow-md);">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2.5rem;">
-        <h3 style="font-size: 1.5rem;"><i class="fas fa-calendar-check"></i> Booking Registry</h3>
-        <select
-            style="padding: 0.75rem 1.25rem; border: 1px solid var(--border-color); border-radius: 2rem; font-size: 0.9rem; background: white;">
+<div class="bookings-management-wrapper">
+    <div class="management-header-flex">
+        <h3 class="management-title"><i class="fas fa-calendar-check"></i> Booking Registry</h3>
+        <select class="status-filter-dropdown">
             <option>All Statuses</option>
             <option>Pending</option>
             <option>Confirmed</option>
@@ -24,47 +26,43 @@
 
     {% if bookings %}
     <div style="overflow-x: auto;">
-        <table style="width: 100%; border-collapse: separate; border-spacing: 0 1rem;">
+        <table class="bookings-list-table">
             <thead>
-                <tr style="text-align: left; color: var(--text-light); font-size: 0.9rem; text-transform: uppercase;">
-                    <th style="padding: 0 1.5rem;">Booking Details</th>
-                    <th style="padding: 0 1.5rem;">Customer</th>
-                    <th style="padding: 0 1.5rem;">Caterer</th>
-                    <th style="padding: 0 1.5rem;">Amount</th>
-                    <th style="padding: 0 1.5rem;">Status</th>
+                <tr>
+                    <th>Booking Details</th>
+                    <th>Customer</th>
+                    <th>Caterer</th>
+                    <th>Amount</th>
+                    <th>Status</th>
                 </tr>
             </thead>
             <tbody>
                 {% for booking in bookings %}
-                <tr style="background: #f8fafc; border-radius: 1rem;">
-                    <td style="padding: 1.5rem; border-radius: 1rem 0 0 1rem;">
-                        <a href="/admin/bookings/{{ booking.id }}/kyc"
-                            style="font-weight: 700; color: var(--primary-color); text-decoration: none;">#BK-{{
-                            booking.id }}</a>
-                        <div style="font-size: 0.8rem; color: var(--text-light);">{{ booking.event_date.strftime('%b %d,
-                            %Y') }}</div>
+                <tr class="booking-row">
+                    <td>
+                        <a href="/admin/bookings/{{ booking.id }}/kyc" class="booking-id-link">#BK-{{ booking.id }}</a>
+                        <div class="booking-date-text">{{ booking.event_date.strftime('%b %d, %Y') }}</div>
                     </td>
-                    <td style="padding: 1.5rem;">{{ booking.user.first_name }} {{ booking.user.last_name }}</td>
-                    <td style="padding: 1.5rem;">{{ booking.caterer.business_name if booking.caterer else 'Unknown' }}
-                    </td>
-                    <td style="padding: 1.5rem; font-weight: 700; color: var(--secondary-color);">₱{{
-                        "{:,.2f}".format(booking.total_amount) if booking.total_amount else 'TBD' }}</td>
-                    <td style="padding: 1.5rem; border-radius: 0 1rem 1rem 0;">
-                        {% set status_colors = {
-                        'draft': 'color: #64748b; background: #f1f5f9;',
-                        'pending': 'color: #92400e; background: #fef3c7;',
-                        'verified': 'color: #10b981; background: #ecfdf5;',
-                        'confirmed': 'color: #166534; background: #dcfce7;',
-                        'completed': 'color: #1e40af; background: #dbeafe;',
-                        'cancelled': 'color: #991b1b; background: #fee2e2;',
-                        'expired': 'color: #71717a; background: #f4f4f5;',
-                        'flagged': 'color: #ef4444; background: #fef2f2;'
-                        } %}
-                        {% set style = status_colors.get(booking.status, 'color: #374151; background: #f1f5f9;') %}
-                        <span
-                            style="padding: 0.5rem 1rem; border-radius: 2rem; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; {{ style }}">
-                            {{ booking.status }}
-                        </span>
+                    <td>{{ booking.user.first_name }} {{ booking.user.last_name }}</td>
+                    <td>{{ booking.caterer.business_name if booking.caterer else 'Unknown' }}</td>
+                    <td class="booking-amount-value">₱{{ "{:,.2f}".format(booking.total_amount) if booking.total_amount
+                        else 'TBD' }}</td>
+                    <td>
+                        <div class="status-badge-container">
+                            <span
+                                class="status-badge-pill status-{{ booking.status if booking.status in ['draft', 'pending_payment', 'pending', 'verified', 'confirmed', 'completed', 'cancelled', 'expired', 'flagged'] else 'default' }}">
+                                {{ booking.status }}
+                            </span>
+
+                            {% if booking.status == 'pending_payment' or booking.status == 'pending' %}
+                            <form action="/admin/bookings/{{ booking.id }}/manual_confirm" method="POST"
+                                onsubmit="return confirm('Are you sure you want to manually mark this booking as paid?');">
+                                <button type="submit" class="btn-outline btn-manual-confirm">
+                                    <i class="fas fa-check-circle"></i> Mark Paid
+                                </button>
+                            </form>
+                            {% endif %}
+                        </div>
                     </td>
                 </tr>
                 {% endfor %}

@@ -1,8 +1,12 @@
+from .config import settings
 from cryptography.fernet import Fernet
 import os
 
-# In a real app, this should be in environment variables
-ENCRYPTION_KEY = os.getenv("KYC_ENCRYPTION_KEY", Fernet.generate_key().decode())
+# prioritize environment-based keys for persistence
+ENCRYPTION_KEY = settings.KYC_ENCRYPTION_KEY
+if not ENCRYPTION_KEY:
+    # Fallback only for local development/first run
+    ENCRYPTION_KEY = Fernet.generate_key().decode()
 
 cipher_suite = Fernet(ENCRYPTION_KEY.encode())
 

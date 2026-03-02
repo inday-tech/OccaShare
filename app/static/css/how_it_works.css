@@ -1,0 +1,505 @@
+/* ========================================
+   How It Works - Premium Design System
+   ======================================== */
+
+:root {
+    --hiw-primary: #355E38;
+    --hiw-primary-light: #4A9E2E;
+    --hiw-secondary: #013220;
+    --hiw-text: #1a202c;
+    --hiw-text-muted: #64748b;
+    --hiw-bg: #f8fafc;
+    --hiw-white: #ffffff;
+    --hiw-accent: #BCB88A;
+
+    /* Animation Tokens */
+    --hiw-transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* --- Hero Section --- */
+.hiw-hero {
+    position: relative;
+    padding: 10rem 0 8rem;
+    background: linear-gradient(135deg, var(--hiw-secondary) 0%, #014421 100%);
+    color: var(--hiw-white);
+    text-align: center;
+    overflow: hidden;
+}
+
+.hiw-hero::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -20%;
+    width: 140%;
+    height: 200%;
+    background: radial-gradient(circle at center, rgba(153, 204, 102, 0.1) 0%, transparent 70%);
+    pointer-events: none;
+}
+
+.hiw-hero h1 {
+    font-size: clamp(2.5rem, 5vw, 4.5rem);
+    font-weight: 800;
+    margin-bottom: 1.5rem;
+    line-height: 1.1;
+    letter-spacing: -0.03em;
+    color: #ffffff;
+    text-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+.hiw-hero p {
+    font-size: clamp(1.1rem, 2vw, 1.4rem);
+    max-width: 800px;
+    margin: 0 auto;
+    color: rgba(255, 255, 255, 0.95);
+    font-weight: 400;
+}
+
+/* --- Navigation Tabs --- */
+.hiw-tabs-container {
+    margin-top: -3rem;
+    position: relative;
+    z-index: 10;
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+}
+
+.hiw-tab {
+    background: var(--hiw-white);
+    padding: 1rem 2.5rem;
+    border-radius: 2rem;
+    font-weight: 700;
+    color: var(--hiw-text-muted);
+    cursor: pointer;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+    transition: var(--hiw-transition);
+    border: 2px solid transparent;
+    position: relative;
+    overflow: hidden;
+}
+
+.hiw-tab.active {
+    background: var(--hiw-primary);
+    color: var(--hiw-white);
+    box-shadow: 0 20px 25px -5px rgba(53, 94, 56, 0.2);
+}
+
+.hiw-tab:hover:not(.active) {
+    border-color: var(--hiw-primary);
+    color: var(--hiw-primary);
+}
+
+.hiw-tab::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 0%;
+    background: rgba(255, 255, 255, 0.1);
+    transition: height 0.3s ease;
+}
+
+.hiw-tab:hover::after {
+    height: 100%;
+}
+
+/* --- Content Sections --- */
+.hiw-content-wrap {
+    padding: 6rem 0;
+    background-color: var(--hiw-bg);
+}
+
+.hiw-flow-section {
+    display: none;
+    animation: fadeIn 0.6s ease-out;
+    transition: opacity 0.4s ease, transform 0.4s ease;
+}
+
+.hiw-flow-section.active {
+    display: block;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* --- Step Cards --- */
+.hiw-steps-grid {
+    display: grid;
+    gap: 4rem;
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+.hiw-step-card {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4rem;
+    align-items: center;
+}
+
+.hiw-step-card:nth-child(even) .hiw-step-content {
+    order: 2;
+}
+
+.hiw-step-card:nth-child(even) .hiw-step-visual {
+    order: 1;
+}
+
+.hiw-step-visual {
+    position: relative;
+    height: 400px;
+    background: var(--hiw-white);
+    border-radius: 2.5rem;
+    overflow: hidden;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.05);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.hiw-step-icon-blob {
+    width: 200px;
+    height: 200px;
+    background: var(--hiw-bg);
+    border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 5rem;
+    color: var(--hiw-primary);
+    transition: var(--hiw-transition);
+    z-index: 1;
+}
+
+.hiw-step-card:hover .hiw-step-icon-blob {
+    border-radius: 50%;
+    background: var(--hiw-primary);
+    color: var(--hiw-white);
+    transform: scale(1.1) rotate(5deg);
+}
+
+.hiw-step-number {
+    position: absolute;
+    top: 2rem;
+    left: 2rem;
+    font-size: 8rem;
+    font-weight: 900;
+    color: var(--hiw-bg);
+    line-height: 1;
+    z-index: 0;
+}
+
+.hiw-step-content {
+    z-index: 1;
+}
+
+.hiw-step-label {
+    display: inline-block;
+    padding: 0.5rem 1.5rem;
+    background: rgba(53, 94, 56, 0.1);
+    color: var(--hiw-primary);
+    border-radius: 2rem;
+    font-weight: 700;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    margin-bottom: 1.5rem;
+}
+
+.hiw-step-title {
+    font-size: 2.5rem;
+    margin-bottom: 1.5rem;
+    color: var(--hiw-secondary);
+}
+
+.hiw-step-desc {
+    font-size: 1.15rem;
+    color: var(--hiw-text-muted);
+    margin-bottom: 2rem;
+    line-height: 1.8;
+}
+
+.hiw-step-features {
+    list-style: none;
+    padding: 0;
+}
+
+.hiw-step-features li {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    font-weight: 600;
+    color: var(--hiw-secondary);
+}
+
+.hiw-step-features i {
+    color: var(--hiw-primary-light);
+    font-size: 1.25rem;
+}
+
+/* --- Real-Time Tracker Component --- */
+.hiw-tracker-wrap {
+    background: var(--hiw-white);
+    border-radius: 2rem;
+    padding: 3rem;
+    margin-top: 4rem;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
+    border: 1px solid #edf2f7;
+    overflow: hidden;
+}
+
+.hiw-tracker-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 3rem;
+    border-bottom: 2px solid var(--hiw-bg);
+    padding-bottom: 1.5rem;
+}
+
+.hiw-tracker-title {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--hiw-secondary);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.hiw-tracker-title i {
+    color: #48bb78;
+    /* Live green */
+    animation: pulse-green 2s infinite;
+}
+
+.hiw-tracker-status-badge {
+    padding: 0.5rem 1rem;
+    background: #ebf8ff;
+    color: #3182ce;
+    border-radius: 2rem;
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.hiw-tracker-steps {
+    display: flex;
+    justify-content: space-between;
+    position: relative;
+    margin: 2rem 0;
+}
+
+.hiw-tracker-steps::before {
+    content: '';
+    position: absolute;
+    top: 25px;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: #edf2f7;
+    z-index: 1;
+}
+
+.hiw-tracker-progress-bar {
+    position: absolute;
+    top: 25px;
+    left: 0;
+    width: 0%;
+    height: 4px;
+    background: var(--hiw-primary);
+    z-index: 2;
+    transition: width 0.8s ease-in-out;
+}
+
+.hiw-tracker-step {
+    position: relative;
+    z-index: 3;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    width: 20%;
+}
+
+.hiw-tracker-dot {
+    width: 50px;
+    height: 50px;
+    background: var(--hiw-white);
+    border: 4px solid #edf2f7;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    color: #cbd5e0;
+    transition: var(--hiw-transition);
+}
+
+.hiw-tracker-step.active .hiw-tracker-dot {
+    border-color: var(--hiw-primary);
+    color: var(--hiw-primary);
+    background: var(--hiw-white);
+    box-shadow: 0 0 15px rgba(53, 94, 56, 0.3);
+}
+
+.hiw-tracker-step.completed .hiw-tracker-dot {
+    background: var(--hiw-primary);
+    border-color: var(--hiw-primary);
+    color: var(--hiw-white);
+}
+
+.hiw-tracker-label {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--hiw-text-muted);
+    text-align: center;
+}
+
+.hiw-tracker-step.active .hiw-tracker-label,
+.hiw-tracker-step.completed .hiw-tracker-label {
+    color: var(--hiw-secondary);
+}
+
+/* --- FAQ Section --- */
+.hiw-faq {
+    padding: 8rem 0;
+    background: var(--hiw-white);
+}
+
+.hiw-faq-grid {
+    max-width: 800px;
+    margin: 4rem auto 0;
+    display: grid;
+    gap: 1.5rem;
+}
+
+.hiw-faq-item {
+    border: 1px solid #e2e8f0;
+    border-radius: 1.25rem;
+    overflow: hidden;
+    transition: var(--hiw-transition);
+}
+
+.hiw-faq-item:hover {
+    border-color: var(--hiw-primary);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+}
+
+.hiw-faq-summary {
+    padding: 1.5rem 2rem;
+    font-weight: 700;
+    font-size: 1.1rem;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    list-style: none;
+    color: var(--hiw-secondary);
+}
+
+.hiw-faq-summary::-webkit-details-marker {
+    display: none;
+}
+
+.hiw-faq-summary i {
+    transition: var(--hiw-transition);
+    color: var(--hiw-primary);
+}
+
+details[open] .hiw-faq-summary i {
+    transform: rotate(45deg);
+}
+
+.hiw-faq-answer {
+    padding: 0 2rem 2rem;
+    color: var(--hiw-text-muted);
+    line-height: 1.7;
+}
+
+/* --- CTA Section --- */
+.hiw-cta {
+    padding: 8rem 0;
+    background: linear-gradient(135deg, var(--hiw-primary) 0%, var(--hiw-secondary) 100%);
+    color: var(--hiw-white);
+    text-align: center;
+    border-radius: 4rem 4rem 0 0;
+}
+
+.hiw-cta h2 {
+    font-size: 3.5rem;
+    margin-bottom: 2rem;
+    color: var(--hiw-white);
+}
+
+.hiw-cta-btns {
+    display: flex;
+    justify-content: center;
+    gap: 1.5rem;
+    margin-top: 3rem;
+}
+
+/* --- Mobile Responsiveness --- */
+@media (max-width: 992px) {
+    .hiw-step-card {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+        text-align: center;
+    }
+
+    .hiw-step-card:nth-child(even) .hiw-step-content {
+        order: 1;
+    }
+
+    .hiw-step-card:nth-child(even) .hiw-step-visual {
+        order: 2;
+    }
+
+    .hiw-step-features li {
+        justify-content: center;
+    }
+
+    .hiw-step-number {
+        font-size: 5rem;
+    }
+
+    .hiw-tracker-steps {
+        flex-direction: column;
+        gap: 2rem;
+        align-items: center;
+    }
+
+    .hiw-tracker-steps::before,
+    .hiw-tracker-progress-bar {
+        display: none;
+    }
+
+    .hiw-tracker-step {
+        width: 100%;
+    }
+}
+
+@media (max-width: 640px) {
+    .hiw-tabs-container {
+        flex-direction: column;
+        padding: 0 1rem;
+    }
+
+    .hiw-cta-btns {
+        flex-direction: column;
+    }
+
+    .hiw-hero {
+        padding: 8rem 0 6rem;
+    }
+}

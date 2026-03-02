@@ -3,193 +3,422 @@
 
 {% block title %}How It Works - OccaServe{% endblock %}
 
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', path='/css/how_it_works.css') }}">
+{% endblock %}
+
 {% block content %}
 
-<!-- Page Hero -->
-<div class="page-hero" style="background: linear-gradient(135deg, #1a3a0f 0%, #2d6a1b 50%, #4a9e2e 100%);">
+<!-- Hero Section -->
+<header class="hiw-hero">
     <div class="container">
-        <h1>How OccaServe Works</h1>
-        <p>Booking world-class catering for your event has never been simpler. We connect you with vetted professionals
-            in three easy steps.</p>
+        <h1 class="animate-on-scroll">Your Journey to a Perfect Event</h1>
+        <p class="animate-on-scroll">OccaServe bridges the gap between premium catering talent and those who host
+            unforgettable moments. Here's exactly how we make it happen.</p>
+    </div>
+</header>
+
+<!-- Feature Selection Tabs -->
+<div class="container">
+    <div class="hiw-tabs-container">
+        <div class="hiw-tab active" data-tab="customer">I'm a Customer</div>
+        <div class="hiw-tab" data-tab="caterer">I'm a Caterer</div>
     </div>
 </div>
 
-<!-- Steps Section -->
-<section class="section">
+<main class="hiw-content-wrap">
     <div class="container">
-        <div class="section-header">
-            <h2>Your Journey to a Perfect Event</h2>
-            <p>From discovery to celebration — here's exactly how OccaServe builds unforgettable experiences.</p>
-        </div>
 
-        <div style="display: grid; gap: 4rem; margin-top: 3rem;">
-            <!-- Step 1 -->
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; align-items: center;">
-                <div
-                    style="background: linear-gradient(135deg, var(--primary-light, #e8f5d0), #fff); border-radius: 1.5rem; padding: 4rem; text-align: center;">
-                    <div
-                        style="width: 100px; height: 100px; background: var(--primary-color, #99cc66); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem; font-size: 2.5rem; color: white;">
-                        <i class="fas fa-search"></i>
+        <!-- CUSTOMER FLOW -->
+        <section id="customer-flow" class="hiw-flow-section active">
+            <div class="hiw-steps-grid">
+
+                <!-- Step 1 -->
+                <div class="hiw-step-card animate-on-scroll">
+                    <div class="hiw-step-content">
+                        <span class="hiw-step-label">Step One</span>
+                        <h2 class="hiw-step-title">Discover Elite Talent</h2>
+                        <p class="hiw-step-desc">Browse our curated marketplace of vetted professional caterers. Filter
+                            by event type, cuisine, or specific dietary requirements to find your perfect match.</p>
+                        <ul class="hiw-step-features">
+                            <li><i class="fas fa-check-circle"></i> Filter by budget & event scale</li>
+                            <li><i class="fas fa-check-circle"></i> Browse real event portfolios</li>
+                            <li><i class="fas fa-check-circle"></i> Vetted & Verified professionals</li>
+                        </ul>
                     </div>
-                    <div
-                        style="font-family: 'Playfair Display', serif; font-size: 5rem; font-weight: 700; color: rgba(153,204,102,0.2); line-height: 1;">
-                        01</div>
+                    <div class="hiw-step-visual">
+                        <span class="hiw-step-number">01</span>
+                        <div class="hiw-step-icon-blob">
+                            <i class="fas fa-search"></i>
+                        </div>
+                    </div>
                 </div>
-                <div>
-                    <div
-                        style="text-transform: uppercase; letter-spacing: 0.1em; font-size: 0.8rem; font-weight: 700; color: var(--primary-color, #99cc66); margin-bottom: 0.75rem;">
-                        Step One</div>
-                    <h2 style="font-family: 'Playfair Display', serif; font-size: 2.25rem; margin-bottom: 1.25rem;">
-                        Discover the Perfect Caterer</h2>
-                    <p style="color: var(--text-light, #666); line-height: 1.8; margin-bottom: 1.5rem;">Browse our
-                        curated marketplace of verified professional caterers. Filter by event type — whether it's a
-                        grand wedding, intimate birthday, or large corporate gala. Read reviews, explore menus, and
-                        compare packages side by side.</p>
-                    <ul style="list-style: none; padding: 0; display: flex; flex-direction: column; gap: 0.75rem;">
-                        <li style="display: flex; align-items: center; gap: 0.75rem; color: var(--text-light, #666);"><i
-                                class="fas fa-check-circle" style="color: var(--primary-color, #99cc66);"></i> Filter by
-                            event type, location & budget</li>
-                        <li style="display: flex; align-items: center; gap: 0.75rem; color: var(--text-light, #666);"><i
-                                class="fas fa-check-circle" style="color: var(--primary-color, #99cc66);"></i> Read
-                            verified customer reviews</li>
-                        <li style="display: flex; align-items: center; gap: 0.75rem; color: var(--text-light, #666);"><i
-                                class="fas fa-check-circle" style="color: var(--primary-color, #99cc66);"></i> View
-                            detailed caterer profiles & menus</li>
-                    </ul>
-                </div>
-            </div>
 
-            <!-- Step 2 -->
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; align-items: center;">
-                <div style="order: 2;">
-                    <div
-                        style="background: linear-gradient(135deg, #fff7e0, #fff); border-radius: 1.5rem; padding: 4rem; text-align: center;">
-                        <div
-                            style="width: 100px; height: 100px; background: #f59e0b; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem; font-size: 2.5rem; color: white;">
+                <!-- Step 2 -->
+                <div class="hiw-step-card animate-on-scroll">
+                    <div class="hiw-step-content">
+                        <span class="hiw-step-label">Step Two</span>
+                        <h2 class="hiw-step-title">Instant Quotes & Customization</h2>
+                        <p class="hiw-step-desc">Select from pre-defined master packages or request a custom quotation
+                            tailored to your guest count, venue constraints, and cultural preferences.</p>
+                        <ul class="hiw-step-features">
+                            <li><i class="fas fa-check-circle"></i> Real-time cost estimation</li>
+                            <li><i class="fas fa-check-circle"></i> Dietary & Allergy tailoring</li>
+                            <li><i class="fas fa-check-circle"></i> Direct chat with chefs</li>
+                        </ul>
+                    </div>
+                    <div class="hiw-step-visual">
+                        <span class="hiw-step-number">02</span>
+                        <div class="hiw-step-icon-blob">
+                            <i class="fas fa-sliders-h"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 3 -->
+                <div class="hiw-step-card animate-on-scroll">
+                    <div class="hiw-step-content">
+                        <span class="hiw-step-label">Step Three</span>
+                        <h2 class="hiw-step-title">Secure Booking & Payment</h2>
+                        <p class="hiw-step-desc">Confirm your date with a secure downpayment processed via PayMongo. We
+                            support GCash, Credit Cards, and Maya for your convenience and safety.</p>
+                        <ul class="hiw-step-features">
+                            <li><i class="fas fa-check-circle"></i> PayMongo Secure Gateway</li>
+                            <li><i class="fas fa-check-circle"></i> Instant digital receipts</li>
+                            <li><i class="fas fa-check-circle"></i> Transparent refund policies</li>
+                        </ul>
+                    </div>
+                    <div class="hiw-step-visual">
+                        <span class="hiw-step-number">03</span>
+                        <div class="hiw-step-icon-blob">
+                            <i class="fas fa-credit-card"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 4 -->
+                <div class="hiw-step-card animate-on-scroll">
+                    <div class="hiw-step-content">
+                        <span class="hiw-step-label">Step Four</span>
+                        <h2 class="hiw-step-title">The Event Day Experience</h2>
+                        <p class="hiw-step-desc">Sit back and enjoy your moment. Our platform monitors your booking to
+                            ensure timely arrival and professional execution of every detail.</p>
+                        <ul class="hiw-step-features">
+                            <li><i class="fas fa-check-circle"></i> Automated arrival reminders</li>
+                            <li><i class="fas fa-check-circle"></i> Professional on-site service</li>
+                            <li><i class="fas fa-check-circle"></i> Vetted & rated after-event</li>
+                        </ul>
+                    </div>
+                    <div class="hiw-step-visual">
+                        <span class="hiw-step-number">04</span>
+                        <div class="hiw-step-icon-blob">
+                            <i class="fas fa-glass-cheers"></i>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- CATERER FLOW -->
+        <section id="caterer-flow" class="hiw-flow-section">
+            <div class="hiw-steps-grid">
+
+                <!-- Step 1 -->
+                <div class="hiw-step-card animate-on-scroll">
+                    <div class="hiw-step-content">
+                        <span class="hiw-step-label">Step One</span>
+                        <h2 class="hiw-step-title">Apply & Get Verified</h2>
+                        <p class="hiw-step-desc">Join our elite network by submitting your business credentials. We
+                            verify every partner to ensure the highest standards for our clients.</p>
+                        <ul class="hiw-step-features">
+                            <li><i class="fas fa-check-circle"></i> Business permit verification</li>
+                            <li><i class="fas fa-check-circle"></i> Sanitary permit checks</li>
+                            <li><i class="fas fa-check-circle"></i> Portfolio review</li>
+                        </ul>
+                    </div>
+                    <div class="hiw-step-visual">
+                        <span class="hiw-step-number">01</span>
+                        <div class="hiw-step-icon-blob">
+                            <i class="fas fa-user-shield"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 2 -->
+                <div class="hiw-step-card animate-on-scroll">
+                    <div class="hiw-step-content">
+                        <span class="hiw-step-label">Step Two</span>
+                        <h2 class="hiw-step-title">Master Your Operations</h2>
+                        <p class="hiw-step-desc">List your menus, set dynamic pricing, and manage your calendar with our
+                            powerful dashboard. No more messy spreadsheets or manual tracking.</p>
+                        <ul class="hiw-step-features">
+                            <li><i class="fas fa-check-circle"></i> Inventory & Menu management</li>
+                            <li><i class="fas fa-check-circle"></i> Smart booking calendar</li>
+                            <li><i class="fas fa-check-circle"></i> Dynamic quotation engine</li>
+                        </ul>
+                    </div>
+                    <div class="hiw-step-visual">
+                        <span class="hiw-step-number">02</span>
+                        <div class="hiw-step-icon-blob">
                             <i class="fas fa-utensils"></i>
                         </div>
-                        <div
-                            style="font-family: 'Playfair Display', serif; font-size: 5rem; font-weight: 700; color: rgba(245,158,11,0.15); line-height: 1;">
-                            02</div>
                     </div>
                 </div>
-                <div style="order: 1;">
-                    <div
-                        style="text-transform: uppercase; letter-spacing: 0.1em; font-size: 0.8rem; font-weight: 700; color: #f59e0b; margin-bottom: 0.75rem;">
-                        Step Two</div>
-                    <h2 style="font-family: 'Playfair Display', serif; font-size: 2.25rem; margin-bottom: 1.25rem;">
-                        Customize Your Experience</h2>
-                    <p style="color: var(--text-light, #666); line-height: 1.8; margin-bottom: 1.5rem;">Choose from a
-                        variety of curated packages or request a fully custom quote. Tailor the menu to your guests'
-                        dietary preferences, cultural traditions, and taste. Discuss your vision directly with the
-                        caterer through our messaging platform.</p>
-                    <ul style="list-style: none; padding: 0; display: flex; flex-direction: column; gap: 0.75rem;">
-                        <li style="display: flex; align-items: center; gap: 0.75rem; color: var(--text-light, #666);"><i
-                                class="fas fa-check-circle" style="color: #f59e0b;"></i> Choose from pre-built packages
-                        </li>
-                        <li style="display: flex; align-items: center; gap: 0.75rem; color: var(--text-light, #666);"><i
-                                class="fas fa-check-circle" style="color: #f59e0b;"></i> Request custom menus & quotes
-                        </li>
-                        <li style="display: flex; align-items: center; gap: 0.75rem; color: var(--text-light, #666);"><i
-                                class="fas fa-check-circle" style="color: #f59e0b;"></i> Communicate directly with
-                            caterers</li>
-                    </ul>
-                </div>
-            </div>
 
-            <!-- Step 3 -->
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; align-items: center;">
-                <div
-                    style="background: linear-gradient(135deg, #e0f2fe, #fff); border-radius: 1.5rem; padding: 4rem; text-align: center;">
-                    <div
-                        style="width: 100px; height: 100px; background: #0ea5e9; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem; font-size: 2.5rem; color: white;">
-                        <i class="fas fa-calendar-check"></i>
+                <!-- Step 3 -->
+                <div class="hiw-step-card animate-on-scroll">
+                    <div class="hiw-step-content">
+                        <span class="hiw-step-label">Step Three</span>
+                        <h2 class="hiw-step-title">Accept & Manage Bookings</h2>
+                        <p class="hiw-step-desc">Receive real-time lead notifications. Chat directly with clients,
+                            finalize details, and confirm bookings with guaranteed digital payments.</p>
+                        <ul class="hiw-step-features">
+                            <li><i class="fas fa-check-circle"></i> Real-time push notifications</li>
+                            <li><i class="fas fa-check-circle"></i> Integrated CRM & Chat</li>
+                            <li><i class="fas fa-check-circle"></i> Digital contract signing</li>
+                        </ul>
                     </div>
-                    <div
-                        style="font-family: 'Playfair Display', serif; font-size: 5rem; font-weight: 700; color: rgba(14,165,233,0.15); line-height: 1;">
-                        03</div>
+                    <div class="hiw-step-visual">
+                        <span class="hiw-step-number">03</span>
+                        <div class="hiw-step-icon-blob">
+                            <i class="fas fa-clipboard-list"></i>
+                        </div>
+                    </div>
                 </div>
-                <div>
-                    <div
-                        style="text-transform: uppercase; letter-spacing: 0.1em; font-size: 0.8rem; font-weight: 700; color: #0ea5e9; margin-bottom: 0.75rem;">
-                        Step Three</div>
-                    <h2 style="font-family: 'Playfair Display', serif; font-size: 2.25rem; margin-bottom: 1.25rem;">Book
-                        & Relax</h2>
-                    <p style="color: var(--text-light, #666); line-height: 1.8; margin-bottom: 1.5rem;">Secure your
-                        booking with our safe and seamless payment process. Once confirmed, sit back and let our
-                        professional caterers handle everything — from setup to service to cleanup. Your only job is to
-                        enjoy the moment.</p>
-                    <ul style="list-style: none; padding: 0; display: flex; flex-direction: column; gap: 0.75rem;">
-                        <li style="display: flex; align-items: center; gap: 0.75rem; color: var(--text-light, #666);"><i
-                                class="fas fa-check-circle" style="color: #0ea5e9;"></i> Secure online payment via
-                            PayMongo</li>
-                        <li style="display: flex; align-items: center; gap: 0.75rem; color: var(--text-light, #666);"><i
-                                class="fas fa-check-circle" style="color: #0ea5e9;"></i> Booking confirmation &
-                            reminders</li>
-                        <li style="display: flex; align-items: center; gap: 0.75rem; color: var(--text-light, #666);"><i
-                                class="fas fa-check-circle" style="color: #0ea5e9;"></i> Full professional setup &
-                            service</li>
-                    </ul>
+
+                <!-- Step 4 -->
+                <div class="hiw-step-card animate-on-scroll">
+                    <div class="hiw-step-content">
+                        <span class="hiw-step-label">Step Four</span>
+                        <h2 class="hiw-step-title">Guaranteed Payouts</h2>
+                        <p class="hiw-step-desc">Focus on the cooking. We handle the financial overhead. Payouts are
+                            automated and deposited directly into your linked bank account after event completion.</p>
+                        <ul class="hiw-step-features">
+                            <li><i class="fas fa-check-circle"></i> Automated payment processing</li>
+                            <li><i class="fas fa-check-circle"></i> No more chasing clients</li>
+                            <li><i class="fas fa-check-circle"></i> Detailed financial reporting</li>
+                        </ul>
+                    </div>
+                    <div class="hiw-step-visual">
+                        <span class="hiw-step-number">04</span>
+                        <div class="hiw-step-icon-blob">
+                            <i class="fas fa-wallet"></i>
+                        </div>
+                    </div>
                 </div>
+
+                <!-- Real-Time Booking Simulation -->
+                <section class="hiw-tracker-section animate-on-scroll" style="margin-top: 8rem;">
+                    <div style="text-align: center; margin-bottom: 3rem;">
+                        <h2 style="font-size: 2.5rem; color: var(--hiw-secondary);">Experience the Real-Time Flow</h2>
+                        <p style="color: var(--hiw-text-muted);">Watch how OccaServe handles your event from first click
+                            to final service.</p>
+                    </div>
+
+                    <div class="hiw-tracker-wrap">
+                        <div class="hiw-tracker-header">
+                            <div class="hiw-tracker-title">
+                                <i class="fas fa-circle"></i> Live Booking Simulation
+                            </div>
+                            <div class="hiw-tracker-status-badge" id="tracker-status">Initializing...</div>
+                        </div>
+
+                        <div class="hiw-tracker-steps">
+                            <div class="hiw-tracker-progress-bar" id="tracker-progress"></div>
+
+                            <div class="hiw-tracker-step active" id="ts-1">
+                                <div class="hiw-tracker-dot"><i class="fas fa-search"></i></div>
+                                <div class="hiw-tracker-label">Discovery</div>
+                            </div>
+
+                            <div class="hiw-tracker-step" id="ts-2">
+                                <div class="hiw-tracker-dot"><i class="fas fa-id-card"></i></div>
+                                <div class="hiw-tracker-label">Verification</div>
+                            </div>
+
+                            <div class="hiw-tracker-step" id="ts-3">
+                                <div class="hiw-tracker-dot"><i class="fas fa-file-signature"></i></div>
+                                <div class="hiw-tracker-label">Contract</div>
+                            </div>
+
+                            <div class="hiw-tracker-step" id="ts-4">
+                                <div class="hiw-tracker-dot"><i class="fas fa-credit-card"></i></div>
+                                <div class="hiw-tracker-label">Payment</div>
+                            </div>
+
+                            <div class="hiw-tracker-step" id="ts-5">
+                                <div class="hiw-tracker-dot"><i class="fas fa-calendar-check"></i></div>
+                                <div class="hiw-tracker-label">Confirmed</div>
+                            </div>
+                        </div>
+
+                        <div id="tracker-message"
+                            style="margin-top: 3rem; text-align: center; font-weight: 600; color: var(--hiw-primary); height: 2rem;">
+                            Step 1: Browsing elite caterers in Manila...
+                        </div>
+                    </div>
+                </section>
+
             </div>
-        </div>
-    </div>
-</section>
+</main>
 
 <!-- FAQ Section -->
-<section class="section section-alt">
+<section class="hiw-faq">
     <div class="container">
-        <div class="section-header">
-            <h2>Frequently Asked Questions</h2>
-            <p>Everything you need to know about booking with OccaServe.</p>
+        <div style="text-align: center; margin-bottom: 4rem;" class="animate-on-scroll">
+            <h2 style="font-size: 3rem; color: var(--hiw-secondary);">Common Questions</h2>
+            <p style="color: var(--hiw-text-muted);">Everything you need to know about the OccaServe ecosystem.</p>
         </div>
 
-        <div style="max-width: 750px; margin: 0 auto; display: flex; flex-direction: column; gap: 1rem;">
-            {% set faqs = [
-            ("How long does booking take?", "Most bookings are confirmed within 24 hours. After submitting your request
-            and completing payment, the caterer reviews and confirms your event details."),
-            ("Can I cancel or modify my booking?", "Yes. You can request modifications or cancellations through your
-            dashboard. Cancellation policies vary by caterer and are clearly stated on each profile."),
-            ("Are caterers verified?", "All caterers on OccaServe go through a verification process including document
-            review and background checks before they can accept bookings."),
-            ("What payment methods are accepted?", "We support credit/debit cards, GCash, and other digital wallets
-            through our secure PayMongo integration."),
-            ("Can I book for large events?", "Absolutely! Many of our caterers specialize in large-scale events. Simply
-            filter by guest count or reach out to discuss your specific needs."),
-            ] %}
-            {% for q, a in faqs %}
-            <div
-                style="background: white; border-radius: 1rem; border: 1px solid var(--border-color, #e5e7eb); overflow: hidden;">
-                <details style="padding: 1.5rem; cursor: pointer;">
-                    <summary
-                        style="font-weight: 600; font-size: 1rem; color: var(--text-dark, #1a2e18); list-style: none; display: flex; justify-content: space-between; align-items: center;">
-                        {{ q }}
-                        <i class="fas fa-chevron-down"
-                            style="color: var(--primary-color, #99cc66); font-size: 0.85rem; transition: transform 0.3s;"></i>
-                    </summary>
-                    <p
-                        style="margin-top: 1rem; color: var(--text-light, #6b7280); line-height: 1.7; border-top: 1px solid var(--border-color, #e5e7eb); padding-top: 1rem;">
-                        {{ a }}</p>
+        <div class="hiw-faq-grid">
+            <div class="hiw-faq-item animate-on-scroll">
+                <details>
+                    <summary class="hiw-faq-summary">How long does verification take for a caterer? <i
+                            class="fas fa-plus"></i></summary>
+                    <div class="hiw-faq-answer">Once all documents are submitted, our team usually completes
+                        verification within 3-5 business days. This includes a review of your permits and culinary
+                        portfolio.</div>
                 </details>
             </div>
-            {% endfor %}
-        </div>
-    </div>
-</section>
-
-<!-- CTA -->
-<section class="cta-section">
-    <div class="container">
-        <div class="cta-content">
-            <h2>Ready to Get Started?</h2>
-            <p>Join thousands of events already powered by OccaServe. Your perfect caterer is just a few clicks away.
-            </p>
-            <div class="cta-buttons">
-                <a href="/#caterers" class="btn-primary">Browse Caterers</a>
-                <a href="/auth/register" class="btn-outline-white">Create an Account</a>
+            <div class="hiw-faq-item animate-on-scroll">
+                <details>
+                    <summary class="hiw-faq-summary">Is my payment secure? <i class="fas fa-plus"></i></summary>
+                    <div class="hiw-faq-answer">Yes, we use PayMongo, a bank-grade payment gateway. Your sensitive
+                        information is never stored on our servers, and every transaction is encrypted.</div>
+                </details>
+            </div>
+            <div class="hiw-faq-item animate-on-scroll">
+                <details>
+                    <summary class="hiw-faq-summary">Can I cancel a booking after paying the downpayment? <i
+                            class="fas fa-plus"></i></summary>
+                    <div class="hiw-faq-answer">Cancellations are subject to each caterer's specific policy. You can
+                        find these details in the "Terms & Conditions" section of your individual booking.</div>
+                </details>
+            </div>
+            <div class="hiw-faq-item animate-on-scroll">
+                <details>
+                    <summary class="hiw-faq-summary">How do I request a custom quote? <i class="fas fa-plus"></i>
+                    </summary>
+                    <div class="hiw-faq-answer">Simply visit a caterer's profile and click "Request Quote." You'll be
+                        able to specify guest count, dietary preferences, and special requests that don't fit into
+                        standard packages.</div>
+                </details>
             </div>
         </div>
     </div>
 </section>
 
+<!-- CTA Section -->
+<section class="hiw-cta">
+    <div class="container animate-on-scroll">
+        <h2>Ready to Experience OccaServe?</h2>
+        <p>Join thousands of hosts and caterers who have simplified their event planning.</p>
+        <div class="hiw-cta-btns">
+            <a href="/customer/marketplace" class="btn-primary" style="padding: 1.25rem 3rem;">Start Browsing</a>
+            <a href="/auth/register" class="btn-outline-white" style="padding: 1.25rem 3rem; border-radius: 1rem;">Join
+                as a Caterer</a>
+        </div>
+    </div>
+</section>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // Tab Switching
+        const tabs = document.querySelectorAll('.hiw-tab');
+        const sections = document.querySelectorAll('.hiw-flow-section');
+
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                const target = tab.getAttribute('data-tab');
+
+                tabs.forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+
+                sections.forEach(sec => {
+                    const isActive = sec.id === target + '-flow';
+                    sec.style.display = isActive ? 'block' : 'none';
+                    if (isActive) {
+                        sec.style.opacity = '0';
+                        sec.style.transform = 'translateY(20px)';
+                        setTimeout(() => {
+                            sec.style.opacity = '1';
+                            sec.style.transform = 'translateY(0)';
+                        }, 50);
+                    }
+                });
+            });
+        });
+
+        // Real-Time Simulation logic
+        const trackerStatus = document.getElementById('tracker-status');
+        const trackerProgress = document.getElementById('tracker-progress');
+        const trackerMsg = document.getElementById('tracker-message');
+        const trackerSteps = [
+            { id: 'ts-1', status: 'In Progress', msg: 'Browsing elite caterers in Manila...', progress: '0%' },
+            { id: 'ts-2', status: 'Verifying', msg: 'Uploading ID & Capturing 3-frame selfie...', progress: '25%' },
+            { id: 'ts-3', status: 'Generating', msg: 'Auto-computing quotation and signing contract...', progress: '50%' },
+            { id: 'ts-4', status: 'Paying', msg: 'Processing secure payment via PayMongo (GCash, Maya, Cards)...', progress: '75%' },
+            { id: 'ts-5', status: 'Confirmed', msg: 'Booking confirmed! Caterer notified.', progress: '100%' }
+        ];
+
+        let currentSimStep = 0;
+
+        function runSimulation() {
+            const step = trackerSteps[currentSimStep];
+
+            // Update UI
+            document.querySelectorAll('.hiw-tracker-step').forEach(s => s.classList.remove('active'));
+            document.getElementById(step.id).classList.add('active');
+            if (currentSimStep > 0) {
+                for (let i = 0; i < currentSimStep; i++) {
+                    document.getElementById(trackerSteps[i].id).classList.add('completed');
+                }
+            }
+
+            trackerStatus.innerText = step.status;
+            trackerProgress.style.width = step.progress;
+            trackerMsg.innerText = step.msg;
+
+            currentSimStep = (currentSimStep + 1) % trackerSteps.length;
+
+            if (currentSimStep === 0) {
+                setTimeout(() => {
+                    document.querySelectorAll('.hiw-tracker-step').forEach(s => s.classList.remove('completed'));
+                    runSimulation();
+                }, 3000);
+            } else {
+                setTimeout(runSimulation, 2500);
+            }
+        }
+
+        runSimulation();
+
+        // Intersection Observer for Animations
+        const observerOptions = {
+            threshold: 0.15,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.animate-on-scroll').forEach(el => {
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(30px)';
+            el.style.transition = 'all 0.8s cubic-bezier(0.16, 1, 0.3, 1)';
+            observer.observe(el);
+        });
+    });
+</script>
 {% endblock %}

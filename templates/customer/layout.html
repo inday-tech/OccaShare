@@ -12,237 +12,8 @@
         href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@700&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        :root {
-            --sidebar-width: 280px;
-            --dashboard-bg: #fdfdfb;
-            --booking-accent: #16a34a;
-            --wizard-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.08);
-        }
+    <link rel="stylesheet" href="{{ url_for('static', path='/css/customer/layout.css') }}">
 
-        body {
-            background-color: var(--dashboard-bg);
-            color: var(--secondary-color);
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
-
-        /* Dashboard Layout */
-        .dashboard-wrapper {
-            display: flex;
-            flex: 1;
-        }
-
-        /* Sidebar Styles */
-        .sidebar {
-            width: var(--sidebar-width);
-            background: var(--white);
-            border-right: 1px solid var(--border-color);
-            position: fixed;
-            top: 0;
-            bottom: 0;
-            left: 0;
-            padding: 2.5rem 1.5rem;
-            z-index: 100;
-            overflow-y: auto;
-        }
-
-        .sidebar-menu {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-
-        .sidebar-menu li {
-            margin-bottom: 0.5rem;
-        }
-
-        .sidebar-menu a {
-            display: flex;
-            align-items: center;
-            padding: 0.9rem 1.25rem;
-            color: var(--text-light);
-            text-decoration: none;
-            border-radius: 0.75rem;
-            transition: all 0.2s ease;
-            font-weight: 500;
-            gap: 1rem;
-        }
-
-        .sidebar-menu a i {
-            font-size: 1.1rem;
-            width: 20px;
-            text-align: center;
-        }
-
-        .sidebar-menu a:hover {
-            background: var(--background-soft);
-            color: var(--secondary-color);
-        }
-
-        .sidebar-menu a.active {
-            background: var(--primary-color);
-            color: var(--white);
-            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2);
-        }
-
-        .menu-divider {
-            height: 1px;
-            background: var(--border-color);
-            margin: 1.5rem 0;
-        }
-
-        .logout-link {
-            color: #ef4444 !important;
-        }
-
-        .logout-link:hover {
-            background: #fef2f2 !important;
-        }
-
-        /* Main Content Styles */
-        .main-content {
-            flex: 1;
-            margin-left: var(--sidebar-width);
-            padding: 3rem;
-            max-width: 1400px;
-        }
-
-        /* Dashboard Components */
-        .page-header {
-            margin-bottom: 2.5rem;
-        }
-
-        .page-header h1 {
-            font-size: 2.25rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .page-header p {
-            color: var(--text-light);
-            font-size: 1.1rem;
-        }
-
-        /* Responsive */
-        @media (max-width: 1024px) {
-            .sidebar {
-                width: 80px;
-                padding: 2rem 1rem;
-                text-align: center;
-            }
-
-            .sidebar-menu a span {
-                display: none;
-            }
-
-            .main-content {
-                margin-left: 80px;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .dashboard-wrapper {
-                flex-direction: column;
-            }
-
-            .sidebar {
-                position: relative;
-                top: 0;
-                width: 100%;
-                height: auto;
-                border-right: none;
-                border-bottom: 1px solid var(--border-color);
-                padding: 1rem;
-            }
-
-            .sidebar-menu {
-                display: flex;
-                overflow-x: auto;
-                gap: 0.5rem;
-                padding-bottom: 0.5rem;
-            }
-
-            .sidebar-menu li {
-                margin-bottom: 0;
-                flex-shrink: 0;
-            }
-
-            .main-content {
-                margin-left: 0;
-                padding: 1.5rem;
-            }
-
-            .menu-divider {
-                display: none;
-            }
-        }
-
-        /* Toast Notifications */
-        #toast-container {
-            position: fixed;
-            bottom: 2rem;
-            right: 2rem;
-            z-index: 9999;
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-        }
-
-        .toast-notification {
-            background: white;
-            padding: 1.25rem 1.75rem;
-            border-radius: 1rem;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-            border-left: 6px solid var(--primary-color);
-            display: flex;
-            align-items: center;
-            gap: 1.25rem;
-            animation: slideIn 0.5s ease-out;
-            max-width: 400px;
-        }
-
-        @keyframes slideIn {
-            from {
-                transform: translateX(100%);
-                opacity: 0;
-            }
-
-            to {
-                transform: translateX(0);
-                opacity: 1;
-            }
-        }
-
-        .toast-notification.fade-out {
-            animation: slideOut 0.5s ease-in forwards;
-        }
-
-        @keyframes slideOut {
-            from {
-                transform: translateX(0);
-                opacity: 1;
-            }
-
-            to {
-                transform: translateX(100%);
-                opacity: 0;
-            }
-        }
-
-        .toast-icon {
-            width: 45px;
-            height: 45px;
-            background: var(--background-soft);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--primary-color);
-            font-size: 1.25rem;
-            flex-shrink: 0;
-        }
-    </style>
     {% block extra_css %}{% endblock %}
 </head>
 
@@ -251,21 +22,17 @@
     <div class="dashboard-wrapper">
         <!-- Dashboard Sidebar -->
         <aside class="sidebar">
-            <div style="margin-bottom: 3rem; padding: 0 0.5rem;">
-                <a href="/" class="logo" style="display: block; margin-bottom: 2rem;">OccaServe</a>
-                <div
-                    style="display: flex; align-items: center; gap: 1rem; padding: 1rem; background: var(--background-soft); border-radius: 1rem;">
-                    <div
-                        style="width: 40px; height: 40px; border-radius: 50%; background: var(--primary-color); color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; flex-shrink: 0;">
+            <div class="sidebar-header">
+                <a href="/" class="logo sidebar-logo">OccaServe</a>
+                <div class="sidebar-user-card">
+                    <div class="user-avatar">
                         {{ user.first_name[0] if user.first_name else '?' }}{{ user.last_name[0] if user.last_name else
                         '' }}
                     </div>
-                    <div style="overflow: hidden;">
-                        <div
-                            style="font-weight: 700; font-size: 0.9rem; color: var(--secondary-color); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                    <div class="user-info">
+                        <div class="user-name">
                             {{ user.first_name }} {{ user.last_name }}</div>
-                        <div
-                            style="font-size: 0.7rem; color: var(--text-light); text-transform: uppercase; letter-spacing: 0.05em;">
+                        <div class="user-role">
                             Customer</div>
                     </div>
                 </div>
@@ -282,17 +49,11 @@
                     </a>
                 </li>
                 <li>
-                    <a href="/customer/promotions" class="{{ 'active' if active_page == 'promotions' }}">
-                        <i class="fas fa-tag"></i> <span>View Offers</span>
-                    </a>
-                </li>
-                <li>
                     <a href="/customer/bookings" class="{{ 'active' if active_page == 'bookings' }}">
                         <i class="fas fa-calendar-check"></i>
                         <span>My Bookings</span>
                         {% if active_page == 'bookings' and current_step %}
-                        <span
-                            style="margin-left: auto; background: var(--booking-accent); color: white; font-size: 0.65rem; padding: 2px 8px; border-radius: 20px; font-weight: 700; letter-spacing: 0.05em;">BOOKING</span>
+                        <span class="nav-badge-booking">BOOKING</span>
                         {% endif %}
                     </a>
                 </li>
@@ -331,50 +92,24 @@
 
     <!-- Scripts -->
     <script src="{{ url_for('static', path='/js/main.js') }}"></script>
-    <script>
-        // Real-time WebSocket Client
-        const clientId = "client_" + Math.random().toString(36).substr(2, 9);
-        const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-        const ws = new WebSocket(`${protocol}//${window.location.host}/ws/${clientId}`);
+    <script src="{{ url_for('static', path='/js/customer/layout.js') }}"></script>
 
-        ws.onmessage = function (event) {
-            const data = JSON.parse(event.data);
-            if (data.type === 'new_package') {
-                showToast(data);
-            }
-        };
-
-        function showToast(data) {
-            const container = document.getElementById('toast-container');
-            const toast = document.createElement('div');
-            toast.className = 'toast-notification';
-            toast.innerHTML = `
-                <div class="toast-icon">
-                    <i class="fas fa-utensils"></i>
-                </div>
-                <div style="flex: 1;">
-                    <div style="font-weight: 700; margin-bottom: 0.25rem;">New Package Added!</div>
-                    <div style="font-size: 0.85rem; color: #64748b; margin-bottom: 0.5rem;">
-                        <strong>${data.caterer_name}</strong> just added <em>"${data.package_name}"</em>
-                    </div>
-                    <a href="/caterers/${data.caterer_id}" style="color: var(--primary-color); font-weight: 600; font-size: 0.8rem; text-decoration: none;">
-                        View Package <i class="fas fa-arrow-right" style="font-size: 0.7rem; margin-left: 0.25rem;"></i>
-                    </a>
-                </div>
-                <button onclick="this.parentElement.remove()" style="background: none; border: none; color: #cbd5e1; cursor: pointer;">
-                    <i class="fas fa-times"></i>
-                </button>
-            `;
-            container.appendChild(toast);
-
-            // Auto-dismiss after 8 seconds
-            setTimeout(() => {
-                toast.classList.add('fade-out');
-                setTimeout(() => toast.remove(), 500);
-            }, 8000);
-        }
-    </script>
     {% block extra_js %}{% endblock %}
+
+    <!-- Inactivity Auto-Logout -->
+    <div id="inactivityModal" class="modal modal-overlay">
+        <div class="modal-content-card">
+            <div class="modal-icon-container">
+                <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <h2 class="modal-title">Session Expiring Soon</h2>
+            <p class="modal-text">You've been inactive for a while. Your session will expire in 1 minute. Would you like
+                to stay logged in?</p>
+            <button id="stayLoggedInBtn" class="btn-primary modal-button-full">Yes, keep me logged in</button>
+        </div>
+    </div>
+
+
 </body>
 
 </html>

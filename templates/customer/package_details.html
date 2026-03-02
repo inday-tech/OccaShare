@@ -3,166 +3,7 @@
 {% block title %}{{ package.name }} - OccaServe{% endblock %}
 
 {% block extra_css %}
-<style>
-    .pkg-header {
-        background: var(--white);
-        border-radius: 2rem;
-        padding: 3rem;
-        margin-bottom: 2rem;
-        border: 1px solid var(--border-color);
-        box-shadow: var(--shadow-sm);
-        display: grid;
-        grid-template-columns: 1fr 400px;
-        gap: 3rem;
-    }
-
-    .pkg-title-area h1 {
-        font-family: 'Playfair Display', serif;
-        font-size: 2.5rem;
-        color: var(--secondary-color);
-        margin-bottom: 1rem;
-    }
-
-    .pkg-metrics {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 1.5rem;
-        margin: 2rem 0;
-    }
-
-    .metric-pill {
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-        background: var(--slate-50);
-        padding: 0.75rem 1.25rem;
-        border-radius: 1rem;
-        font-size: 0.9rem;
-        font-weight: 600;
-        color: var(--text-color);
-    }
-
-    .metric-pill i {
-        color: var(--primary-color);
-        font-size: 1.1rem;
-    }
-
-    .booking-sidebar {
-        background: var(--white);
-        border-radius: 2rem;
-        padding: 2.5rem;
-        border: 1px solid var(--border-color);
-        box-shadow: var(--shadow-md);
-        position: sticky;
-        top: 2rem;
-    }
-
-    .menu-section {
-        margin-bottom: 3rem;
-    }
-
-    .menu-category-title {
-        font-family: 'Playfair Display', serif;
-        font-size: 1.5rem;
-        color: var(--secondary-color);
-        margin-bottom: 1.5rem;
-        padding-bottom: 0.75rem;
-        border-bottom: 2px solid var(--primary-color);
-        display: inline-block;
-    }
-
-    .item-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-        gap: 1.5rem;
-    }
-
-    .menu-item-card {
-        background: var(--white);
-        border: 1px solid var(--border-color);
-        border-radius: 1.25rem;
-        padding: 1.25rem;
-        display: flex;
-        gap: 1.25rem;
-        transition: all 0.3s ease;
-    }
-
-    .menu-item-card:hover {
-        border-color: var(--primary-color);
-        transform: translateY(-3px);
-    }
-
-    .item-img {
-        width: 80px;
-        height: 80px;
-        border-radius: 1rem;
-        object-fit: cover;
-        background: var(--slate-100);
-    }
-
-    .item-info h4 {
-        margin: 0 0 0.5rem 0;
-        font-size: 1.1rem;
-        color: var(--secondary-color);
-    }
-
-    .item-info p {
-        margin: 0;
-        font-size: 0.85rem;
-        color: var(--text-light);
-        line-height: 1.4;
-    }
-
-    .tag-list {
-        display: flex;
-        gap: 0.4rem;
-        margin-top: 0.75rem;
-        flex-wrap: wrap;
-    }
-
-    .tag {
-        font-size: 0.7rem;
-        padding: 0.2rem 0.6rem;
-        border-radius: 0.5rem;
-        background: var(--slate-100);
-        color: var(--slate-600);
-        font-weight: 600;
-    }
-
-    .price-summary-row {
-        display: flex;
-        justify-content: space-between;
-        margin-bottom: 0.75rem;
-        font-size: 0.95rem;
-    }
-
-    .total-row {
-        border-top: 1.5px dashed var(--border-color);
-        margin-top: 1.5rem;
-        padding-top: 1.5rem;
-        font-size: 1.25rem;
-        font-weight: 800;
-        color: var(--secondary-color);
-    }
-
-    .btn-book {
-        width: 100%;
-        padding: 1.25rem;
-        border-radius: 1rem;
-        font-size: 1.1rem;
-        font-weight: 700;
-        margin-top: 2rem;
-        cursor: pointer;
-        transition: all 0.3s;
-    }
-
-    .availability-status {
-        font-size: 0.85rem;
-        margin-top: 1rem;
-        text-align: center;
-        display: none;
-    }
-</style>
+<link rel="stylesheet" href="{{ url_for('static', path='/css/customer/package_details.css') }}">
 {% endblock %}
 
 {% block content %}
@@ -173,6 +14,15 @@
         <a href="/caterers/{{ package.caterer.id }}" style="color: inherit;">{{ package.caterer.business_name }}</a> /
         <span style="color: var(--primary-color); font-weight: 600;">{{ package.name }}</span>
     </div>
+
+    <!-- Package Cover Image -->
+    {% if package.image_url %}
+    <div
+        style="width: 100%; height: 340px; border-radius: 1.5rem; overflow: hidden; margin-bottom: 2.5rem; box-shadow: 0 10px 40px rgba(0,0,0,0.1);">
+        <img src="{{ package.image_url }}" alt="{{ package.name }}"
+            style="width: 100%; height: 100%; object-fit: cover;">
+    </div>
+    {% endif %}
 
     <div style="display: grid; grid-template-columns: 1fr 400px; gap: 3rem; align-items: flex-start;">
         <!-- Left: Details & Menu -->
@@ -228,8 +78,8 @@
                 <div class="item-grid">
                     {% for item in items %}
                     <div class="menu-item-card">
-                        <img src="{{ item.image_url or '/static/img/placeholder-dish.jpg' }}" class="item-img"
-                            alt="{{ item.name }}">
+                        <img src="{{ item.image_url or url_for('static', path='/img/placeholder-dish.jpg') }}"
+                            class="item-img" alt="{{ item.name }}">
                         <div class="item-info" style="flex: 1;">
                             <div style="display: flex; justify-content: space-between; align-items: center;">
                                 <h4>{{ item.name }}</h4>
@@ -264,8 +114,8 @@
                 <div class="item-grid">
                     {% for item in addons %}
                     <div class="menu-item-card" style="position: relative;">
-                        <img src="{{ item.image_url or '/static/img/placeholder-dish.jpg' }}" class="item-img"
-                            alt="{{ item.name }}">
+                        <img src="{{ item.image_url or url_for('static', path='/img/placeholder-dish.jpg') }}"
+                            class="item-img" alt="{{ item.name }}">
                         <div class="item-info" style="flex: 1;">
                             <div style="display: flex; justify-content: space-between;">
                                 <h4>{{ item.name }}</h4>
@@ -373,71 +223,6 @@
     const basePricePerHead = Number("{{ package.price_per_head or package.price or 0 }}");
     const packageId = Number("{{ package.id }}");
     const catererId = Number("{{ package.caterer.id }}");
-
-    function calculateTotal() {
-        const guests = parseInt(document.getElementById('guest_count').value) || 0;
-        document.getElementById('display-guests').innerText = guests;
-
-        const baseTotal = guests * basePricePerHead;
-        document.getElementById('display-base-price').innerText = '₱' + baseTotal.toLocaleString(undefined, { minimumFractionDigits: 2 });
-
-        const addonCheckboxes = document.querySelectorAll('input[name="selected_addons"]:checked');
-        const addonContainer = document.getElementById('addon-rows');
-        addonContainer.innerHTML = '';
-
-        let addonTotal = 0;
-        addonCheckboxes.forEach(cb => {
-            const price = parseFloat(cb.dataset.price);
-            addonTotal += price;
-
-            const row = document.createElement('div');
-            row.className = 'price-summary-row';
-            row.innerHTML = `<span>+ ${cb.closest('.menu-item-card').querySelector('h4').innerText}</span><span>₱${price.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>`;
-            addonContainer.appendChild(row);
-        });
-
-        const grandTotal = baseTotal + addonTotal;
-        const resFee = grandTotal * 0.20;
-
-        document.getElementById('display-grand-total').innerText = '₱' + grandTotal.toLocaleString(undefined, { minimumFractionDigits: 2 });
-        document.getElementById('display-res-fee').innerText = '₱' + resFee.toLocaleString(undefined, { minimumFractionDigits: 2 });
-
-        document.getElementById('total_price_input').value = grandTotal;
-        document.getElementById('reservation_fee_input').value = resFee;
-    }
-
-    async function checkAvailability() {
-        const date = document.getElementById('event_date').value;
-        const msg = document.getElementById('availability-msg');
-        const submitBtn = document.getElementById('submitBtn');
-
-        if (!date) return;
-
-        msg.style.display = 'block';
-        msg.style.color = 'var(--text-light)';
-        msg.innerText = 'Checking availability...';
-
-        try {
-            const response = await fetch(`/packages/api/check-availability?caterer_id=${catererId}&date_str=${date}`);
-            const data = await response.json();
-
-            if (data.available) {
-                msg.style.color = '#10b981';
-                msg.innerHTML = '<i class="fas fa-check-circle"></i> Date is available!';
-                submitBtn.disabled = false;
-                submitBtn.style.opacity = '1';
-            } else {
-                msg.style.color = '#ef4444';
-                msg.innerHTML = `<i class="fas fa-times-circle"></i> ${data.reason || 'Not available'}`;
-                submitBtn.disabled = true;
-                submitBtn.style.opacity = '0.5';
-            }
-        } catch (error) {
-            msg.innerText = 'Error checking availability.';
-        }
-    }
-
-    // Initial calculation
-    calculateTotal();
 </script>
+<script src="{{ url_for('static', path='/js/customer/package_details.js') }}"></script>
 {% endblock %}

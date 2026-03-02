@@ -3,116 +3,7 @@
 {% block title %}My Bookings - OccaServe Dashboard{% endblock %}
 
 {% block extra_css %}
-<style>
-    .bookings-hero {
-        background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
-        border-radius: 2.5rem;
-        padding: 4rem 3rem;
-        margin-bottom: 3rem;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        position: relative;
-        overflow: hidden;
-    }
-
-    .bookings-hero h1 {
-        font-family: 'Playfair Display', serif;
-        font-size: 3rem;
-        color: #1e40af;
-        margin-bottom: 0.5rem;
-    }
-
-    .bookings-hero p {
-        color: #3b82f6;
-        font-size: 1.15rem;
-    }
-
-    .bookings-table-container {
-        background: var(--white);
-        border-radius: 2rem;
-        padding: 2.5rem;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-        border: 1px solid var(--border-color);
-    }
-
-    .bookings-table {
-        width: 100%;
-        border-collapse: separate;
-        border-spacing: 0 1rem;
-    }
-
-    .bookings-table th {
-        text-align: left;
-        color: var(--text-light);
-        font-size: 0.85rem;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 0.1em;
-        padding: 0 1.5rem;
-    }
-
-    .booking-row {
-        background: #f8fafc;
-        border-radius: 1.25rem;
-        transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
-    }
-
-    .booking-row:hover {
-        transform: scale(1.01);
-        background: white;
-        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
-        z-index: 10;
-        position: relative;
-    }
-
-    .booking-status {
-        padding: 0.5rem 1rem;
-        border-radius: 2rem;
-        font-size: 0.75rem;
-        font-weight: 800;
-        text-transform: uppercase;
-        display: inline-block;
-    }
-
-    .status-pending {
-        background: #fef3c7;
-        color: #92400e;
-    }
-
-    .status-confirmed {
-        background: #dcfce7;
-        color: #166534;
-    }
-
-    .status-completed {
-        background: #dbeafe;
-        color: #1e40af;
-    }
-
-    .status-cancelled {
-        background: #fee2e2;
-        color: #991b1b;
-    }
-
-    .btn-view-details {
-        padding: 0.6rem 1.25rem;
-        background: white;
-        border: 1px solid var(--border-color);
-        color: var(--secondary-color);
-        border-radius: 0.75rem;
-        font-size: 0.85rem;
-        font-weight: 600;
-        text-decoration: none;
-        transition: all 0.2s;
-    }
-
-    .btn-view-details:hover {
-        border-color: var(--primary-color);
-        color: var(--primary-color);
-        background: var(--background-soft);
-    }
-</style>
+<link rel="stylesheet" href="{{ url_for('static', path='/css/customer/bookings.css') }}">
 {% endblock %}
 
 {% block content %}
@@ -121,15 +12,14 @@
         <h1>My Bookings</h1>
         <p>Track and manage all your catering reservations in one place.</p>
     </div>
-    <a href="/customer/marketplace" class="btn-primary"
-        style="padding: 1.25rem 2rem; border-radius: 1.25rem; box-shadow: 0 10px 15px -3px rgba(34, 197, 94, 0.2);">
-        <i class="fas fa-plus" style="margin-right: 0.5rem;"></i> New Booking
+    <a href="/customer/marketplace" class="btn-primary btn-new-booking">
+        <i class="fas fa-plus"></i> New Booking
     </a>
 </div>
 
 <div class="bookings-table-container">
     {% if bookings %}
-    <div style="overflow-x: auto;">
+    <div class="bookings-table-wrapper">
         <table class="bookings-table">
             <thead>
                 <tr>
@@ -144,37 +34,54 @@
             <tbody>
                 {% for booking in bookings %}
                 <tr class="booking-row">
-                    <td style="padding: 1.5rem; border-radius: 1.25rem 0 0 1.25rem;">
-                        <div style="font-weight: 700; color: var(--secondary-color); margin-bottom: 0.25rem;">
+                    <td class="booking-cell booking-cell-first">
+                        <div class="booking-date">
                             {{ booking.event_date.strftime('%b %d, %Y') }}
                         </div>
-                        <div style="font-size: 0.85rem; color: var(--text-light);">
-                            <i class="far fa-clock" style="margin-right: 0.25rem;"></i>
+                        <div class="booking-event-name">
+                            {{ booking.event_name or 'N/A' }}
+                        </div>
+                        <div class="booking-time">
+                            <i class="far fa-clock"></i>
                             {{ booking.event_time.strftime('%H:%M') if booking.event_time else 'TBD' }}
                         </div>
                     </td>
-                    <td style="padding: 1.5rem;">
-                        <div style="font-weight: 600; color: var(--secondary-color);">{{ booking.caterer.business_name
+                    <td class="booking-cell">
+                        <div class="booking-caterer-name">{{ booking.caterer.business_name }}</div>
+                        <div class="booking-package-name">{{ booking.package.name if booking.package else 'Custom Menu'
                             }}</div>
-                        <div style="font-size: 0.85rem; color: var(--text-light);">{{ booking.package.name if
-                            booking.package else 'Custom Menu' }}</div>
                     </td>
-                    <td style="padding: 1.5rem; color: var(--secondary-color); font-weight: 500;">
-                        <span
-                            style="background: #f1f5f9; padding: 0.4rem 0.8rem; border-radius: 0.5rem; font-size: 0.85rem;">
+                    <td class="booking-cell">
+                        <span class="booking-guests-badge">
                             {{ booking.guest_count }} guests
                         </span>
                     </td>
-                    <td style="padding: 1.5rem; font-weight: 800; color: var(--primary-color); font-size: 1.05rem;">
-                        ₱{{ "{:,.2f}".format(booking.total_amount) if booking.total_amount else 'TBD' }}
+                    <td class="booking-cell">
+                        <div class="booking-amount">
+                            ₱{{ "{:,.2f}".format(booking.total_amount) if booking.total_amount else 'TBD' }}
+                        </div>
                     </td>
-                    <td style="padding: 1.5rem;">
+                    <td class="booking-cell">
                         <span class="booking-status status-{{ booking.status or 'pending' }}">
                             {{ booking.status or 'pending' }}
                         </span>
                     </td>
-                    <td style="padding: 1.5rem; border-radius: 0 1.25rem 1.25rem 0; text-align: right;">
-                        <a href="/bookings/manage/{{ booking.id }}" class="btn-view-details">Manage</a>
+                    <td class="booking-cell booking-cell-last">
+                        {% if booking.status == 'draft' %}
+                        <div class="booking-actions">
+                            <a href="/bookings/continue/{{ booking.id }}"
+                                class="btn-primary btn-continue-booking">Continue</a>
+                            <form action="/customer/bookings/manage/{{ booking.id }}/cancel" method="POST"
+                                onsubmit="return confirm('Are you sure you want to delete this draft booking?');"
+                                style="margin: 0;">
+                                <button type="submit" class="btn-outline btn-delete-draft">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </form>
+                        </div>
+                        {% else %}
+                        <a href="/customer/bookings/manage/{{ booking.id }}" class="btn-view-details">Manage</a>
+                        {% endif %}
                     </td>
                 </tr>
                 {% endfor %}
@@ -182,20 +89,15 @@
         </table>
     </div>
     {% else %}
-    <div class="empty-state" style="border: none; padding: 4rem 2rem;">
-        <div
-            style="width: 120px; height: 120px; background: #eff6ff; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 2rem;">
-            <i class="fas fa-calendar-times" style="font-size: 3rem; color: #60a5fa;"></i>
+    <div class="empty-state bookings-empty-state">
+        <div class="empty-state-icon-box">
+            <i class="fas fa-calendar-times"></i>
         </div>
-        <h2 style="font-family: 'Playfair Display', serif; font-size: 2.5rem; color: var(--secondary-color);">No
-            bookings yet</h2>
-        <p
-            style="color: var(--text-light); max-width: 450px; margin: 1.5rem auto; font-size: 1.1rem; line-height: 1.6;">
+        <h2 class="empty-state-title">No bookings yet</h2>
+        <p class="empty-state-description">
             Your upcoming events will appear here once you start booking. Explore our caterers to get started!
         </p>
-        <a href="/customer/marketplace" class="btn-primary"
-            style="padding: 1.25rem 3rem; border-radius: 1.25rem; display: inline-block; margin-top: 1rem;">Browse
-            Caterers</a>
+        <a href="/customer/marketplace" class="btn-primary btn-empty-browse">Browse Caterers</a>
     </div>
     {% endif %}
 </div>

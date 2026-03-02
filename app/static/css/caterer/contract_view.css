@@ -1,0 +1,254 @@
+/* Caterer Contract View Styles */
+
+@media print {
+    body * {
+        visibility: hidden;
+    }
+
+    #printable-contract,
+    #printable-contract * {
+        visibility: visible;
+    }
+
+    #printable-contract {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        margin: 0;
+        padding: 0;
+        box-shadow: none;
+        border: none;
+    }
+
+    .print-btn-container {
+        display: none !important;
+    }
+
+    /* Ensure tables and borders print properly */
+    table {
+        page-break-inside: auto;
+    }
+
+    tr {
+        page-break-inside: avoid;
+        page-break-after: auto;
+    }
+}
+
+.contract-print-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 2rem;
+}
+
+.btn-print-contract {
+    padding: 0.75rem 2rem;
+    border-radius: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.contract-document-wrapper {
+    background: white;
+    max-width: 8.5in;
+    min-height: 11in;
+    margin: 0 auto;
+    padding: 1in;
+    font-family: 'Times New Roman', Times, serif;
+    color: #000;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    border: 1px solid #d1d5db;
+}
+
+.contract-header {
+    text-align: center;
+    border-bottom: 2px solid #000;
+    padding-bottom: 20px;
+    margin-bottom: 30px;
+}
+
+.contract-header h1 {
+    font-size: 24pt;
+    font-weight: bold;
+    margin: 0;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+.contract-ref-text {
+    font-size: 11pt;
+    margin: 5px 0 0 0;
+}
+
+.contract-preamble {
+    font-size: 11pt;
+    line-height: 1.6;
+    text-align: justify;
+    margin-bottom: 20px;
+}
+
+.contract-parties-info {
+    margin-bottom: 30px;
+    font-size: 11pt;
+    line-height: 1.6;
+}
+
+.party-block {
+    margin-top: 15px;
+}
+
+.contract-section-title {
+    font-size: 14pt;
+    font-weight: bold;
+    border-bottom: 1px solid #ccc;
+    padding-bottom: 5px;
+    margin-top: 30px;
+    margin-bottom: 15px;
+}
+
+.contract-details-table-wrapper {
+    font-size: 11pt;
+    line-height: 1.8;
+    margin-left: 15px;
+    margin-bottom: 30px;
+}
+
+.contract-spec-table {
+    width: 100%;
+    text-align: left;
+}
+
+.spec-label-col {
+    width: 150px;
+    font-weight: bold;
+}
+
+.financial-terms-para {
+    font-size: 11pt;
+    line-height: 1.6;
+    text-align: justify;
+    margin-bottom: 15px;
+}
+
+.financial-summary-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 30px;
+    font-size: 11pt;
+}
+
+.summary-header-row {
+    border-bottom: 2px solid #000;
+}
+
+.summary-th-desc {
+    padding: 10px 5px;
+    text-align: left;
+}
+
+.summary-th-amount {
+    padding: 10px 5px;
+    text-align: right;
+}
+
+.summary-row-item {
+    border-bottom: 1px solid #eee;
+}
+
+.summary-td-desc {
+    padding: 10px 5px;
+}
+
+.summary-desc-subtext {
+    font-size: 10pt;
+}
+
+.summary-td-amount {
+    padding: 10px 5px;
+    text-align: right;
+}
+
+.addon-row-item {
+    border-bottom: 1px solid #eee;
+}
+
+.addon-td-desc {
+    padding: 10px 5px;
+    padding-left: 20px;
+}
+
+.summary-tfoot {
+    border-top: 2px solid #000;
+}
+
+.total-value-label-cell {
+    padding: 15px 5px 5px;
+    text-align: right;
+    font-weight: bold;
+}
+
+.total-value-amount-cell {
+    padding: 15px 5px 5px;
+    text-align: right;
+    font-weight: bold;
+    font-size: 12pt;
+}
+
+.deposit-info-label-cell {
+    padding: 5px;
+    text-align: right;
+}
+
+.deposit-info-amount-cell {
+    padding: 5px;
+    text-align: right;
+}
+
+.agreement-status-para {
+    font-size: 11pt;
+    line-height: 1.6;
+    text-align: justify;
+    margin-bottom: 40px;
+}
+
+.signatures-container {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 60px;
+    page-break-inside: avoid;
+}
+
+.signature-block {
+    width: 45%;
+    text-align: center;
+}
+
+.signature-title {
+    margin-bottom: 10px;
+    font-style: italic;
+    font-weight: bold;
+}
+
+.signature-line-name {
+    border-bottom: 1px solid #000;
+    padding-bottom: 5px;
+    font-weight: bold;
+    font-size: 12pt;
+    height: 30px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+}
+
+.signature-role-sub {
+    margin-top: 5px;
+    font-size: 10pt;
+}
+
+.signature-date-sub {
+    font-size: 9pt;
+    color: #555;
+    margin-top: 2px;
+}

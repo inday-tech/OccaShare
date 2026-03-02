@@ -2,77 +2,79 @@
 
 {% block title %}Manage Customers - Admin Dashboard{% endblock %}
 
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', path='/css/admin/customers.css') }}">
+{% endblock %}
+
 {% block content %}
 <div class="page-header">
     <h1>Manage Customers</h1>
     <p>View and manage individual customer accounts and their platform activity.</p>
 </div>
 
-<div
-    style="background: var(--white); border-radius: 2rem; padding: 2.5rem; border: 1px solid var(--border-color); box-shadow: var(--shadow-md);">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2.5rem;">
-        <h3 style="font-size: 1.5rem;"><i class="fas fa-users"></i> Platform Users</h3>
-        <input type="text" placeholder="Filter by email or name..."
-            style="padding: 0.75rem 1.25rem; border: 1px solid var(--border-color); border-radius: 2rem; font-size: 0.9rem; width: 300px;">
+<div class="customers-management-wrapper">
+    <div class="management-header-flex">
+        <h3 class="management-title"><i class="fas fa-users"></i> Platform Users</h3>
+        <input type="text" placeholder="Filter by email or name..." class="filter-input-fancy">
     </div>
 
     {% if customers %}
     <div style="overflow-x: auto;">
-        <table style="width: 100%; border-collapse: separate; border-spacing: 0 1rem;">
+        <table class="customers-list-table">
             <thead>
-                <tr style="text-align: left; color: var(--text-light); font-size: 0.9rem; text-transform: uppercase;">
-                    <th style="padding: 0 1.5rem;">Customer Name</th>
-                    <th style="padding: 0 1.5rem;">Email Address</th>
-                    <th style="padding: 0 1.5rem;">Join Date</th>
-                    <th style="padding: 0 1.5rem;">Status</th>
-                    <th style="padding: 0 1.5rem; text-align: right;">Action</th>
+                <tr>
+                    <th>Customer Name</th>
+                    <th>Email Address</th>
+                    <th>Join Date</th>
+                    <th>Status</th>
+                    <th style="text-align: right;">Action</th>
                 </tr>
             </thead>
             <tbody>
                 {% for customer in customers %}
-                <tr style="background: #f8fafc; border-radius: 1rem;">
-                    <td style="padding: 1.5rem; border-radius: 1rem 0 0 1rem;">
-                        <div style="font-weight: 700; color: var(--secondary-color);">{{ customer.first_name }} {{
-                            customer.last_name }}</div>
+                <tr class="customer-row">
+                    <td>
+                        <div class="customer-name-identity">{{ customer.first_name }} {{ customer.last_name }}</div>
                     </td>
-                    <td style="padding: 1.5rem;">{{ customer.email }}</td>
-                    <td style="padding: 1.5rem; color: var(--text-light);">{{ customer.created_at.strftime('%b %d, %Y')
-                        if customer.created_at else 'N/A' }}</td>
-                    <td style="padding: 1.5rem;">
+                    <td>{{ customer.email }}</td>
+                    <td class="customer-join-date">{{ customer.created_at.strftime('%b %d, %Y') if customer.created_at
+                        else 'N/A' }}</td>
+                    <td>
                         {% if customer.status == 'active' %}
-                        <span
-                            style="padding: 0.25rem 0.75rem; border-radius: 2rem; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; background: #eff6ff; color: #1e40af; border: 1px solid #dbeafe;">
+                        <span class="status-badge-fancy active">
                             <i class="fas fa-check-circle"></i> Active
                         </span>
                         {% else %}
-                        <span
-                            style="padding: 0.25rem 0.75rem; border-radius: 2rem; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; background: #fef2f2; color: #ef4444; border: 1px solid #fee2e2;">
+                        <span class="status-badge-fancy suspended">
                             <i class="fas fa-times-circle"></i> {{ customer.status|title }}
                         </span>
                         {% endif %}
                     </td>
-                    <td style="padding: 1.5rem; border-radius: 0 1rem 1rem 0; text-align: right;">
-                        <div style="display: flex; gap: 0.75rem; justify-content: flex-end; align-items: center;">
-                            <a href="/admin/verify/{{ customer.id }}" class="btn-outline"
-                                style="padding: 0.6rem 1.2rem; font-size: 0.85rem; text-decoration: none; border-radius: 0.75rem; display: flex; align-items: center; gap: 0.5rem;">
+                    <td>
+                        <div class="actions-cell-flex">
+                            <a href="/admin/verify/{{ customer.id }}" class="btn-outline btn-review-id">
                                 <i class="fas fa-eye"></i> Review ID
                             </a>
 
                             <form action="/admin/customers/{{ customer.id }}/status" method="POST"
                                 style="display: inline;">
                                 {% if customer.status == 'suspended' %}
-                                <button type="submit"
-                                    style="background: #10b981; color: white; border: none; padding: 0.6rem 1rem; border-radius: 0.75rem; font-size: 0.85rem; cursor: pointer; display: flex; align-items: center; gap: 0.5rem; font-weight: 600;"
-                                    title="Activate Account">
-                                    <i class="fas fa-user-check"></i> Activate
+                                <button type="submit" class="btn-status-toggle activate" title="Activate Account">
+                                    <i class="fas fa-user-check"></i>
                                 </button>
                                 {% else %}
-                                <button type="submit"
-                                    style="background: #fef2f2; color: #ef4444; border: 1px solid #fee2e2; padding: 0.6rem 1rem; border-radius: 0.75rem; font-size: 0.85rem; cursor: pointer; display: flex; align-items: center; gap: 0.5rem; font-weight: 600;"
-                                    title="Suspend Account">
-                                    <i class="fas fa-user-slash"></i> Suspend
+                                <button type="submit" class="btn-status-toggle suspend" title="Suspend Account">
+                                    <i class="fas fa-user-slash"></i>
                                 </button>
                                 {% endif %}
+                            </form>
+
+                            <form action="/admin/customers/{{ customer.id }}/delete" method="POST"
+                                style="display: inline;"
+                                onsubmit="return confirm('ARE YOU ABSOLUTELY SURE? This will permanently ERASE this customer and all their records from the platform. This action CANNOT be undone.');">
+                                <button type="submit" class="btn-delete-customer" title="Permanently Delete">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
                             </form>
                         </div>
                     </td>

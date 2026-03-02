@@ -219,8 +219,16 @@ async def view_kyc_document(
         encrypted_data = f.read()
     
     try:
+        from cryptography.fernet import InvalidToken
         decrypted_data = decrypt_data(encrypted_data)
-    except Exception:
+    except InvalidToken:
+        # This happens if the KYC_ENCRYPTION_KEY in .env was changed
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, 
+            detail="Document decryption failed. The encryption key has changed since this file was uploaded. Please ask the user to re-upload."
+        )
+    except Exception as e:
+        print(f"Decryption error: {e}")
         raise HTTPException(status_code=500, detail="Failed to decrypt document.")
 
     # Infer MIME type from filename or just use image/jpeg as default

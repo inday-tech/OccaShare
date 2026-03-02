@@ -1,0 +1,473 @@
+/* Caterer Bookings Styles */
+
+.bookings-card-container {
+    background: var(--white);
+    border-radius: 2rem;
+    padding: 2.5rem;
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow-md);
+    max-width: 100%;
+    overflow: hidden;
+    box-sizing: border-box;
+}
+
+.bookings-table-scroll-wrapper {
+    overflow-x: auto;
+    padding-bottom: 1rem;
+    width: 100%;
+    scrollbar-width: thin;
+    scrollbar-color: var(--primary-color) #f1f5f9;
+    box-sizing: border-box;
+}
+
+.bookings-list-table {
+    width: 100%;
+    min-width: 1100px;
+    border-collapse: separate;
+    border-spacing: 0 1rem;
+}
+
+.bookings-list-table th {
+    text-align: left;
+    color: var(--text-light);
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    white-space: nowrap;
+    padding: 0 1.5rem;
+}
+
+.booking-row-item {
+    background: #f8fafc;
+    border-radius: 1rem;
+}
+
+.booking-cell-padding {
+    padding: 1.5rem;
+}
+
+.booking-cell-first {
+    border-radius: 1rem 0 0 1rem;
+    white-space: nowrap;
+}
+
+.booking-cell-last {
+    border-radius: 0 1rem 1rem 0;
+    text-align: right;
+}
+
+.event-date-main {
+    font-weight: 700;
+}
+
+.event-time-sub {
+    font-size: 0.8rem;
+    color: var(--text-light);
+    margin-top: 0.25rem;
+}
+
+.event-name-display {
+    font-weight: 600;
+    color: var(--primary-color);
+    font-size: 0.95rem;
+}
+
+.booked-on-date {
+    font-size: 0.85rem;
+    color: var(--text-light);
+}
+
+.customer-name-bold {
+    font-weight: 600;
+}
+
+.customer-email-sub {
+    font-size: 0.85rem;
+    color: var(--text-light);
+}
+
+.package-name-bold {
+    font-weight: 600;
+}
+
+.view-selection-trigger {
+    font-size: 0.75rem;
+    color: var(--primary-color);
+    cursor: pointer;
+    text-decoration: underline;
+    margin-top: 0.5rem;
+    display: inline-block;
+}
+
+.guest-count-bold {
+    font-weight: 600;
+}
+
+.total-amount-bold {
+    font-weight: 700;
+    color: var(--secondary-color);
+}
+
+.status-badge-bookings {
+    padding: 0.5rem 1rem;
+    border-radius: 2rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.status-pending-bookings {
+    color: #92400e;
+    background: #fef3c7;
+}
+
+.status-confirmed-bookings {
+    color: #166534;
+    background: #dcfce7;
+}
+
+.status-completed-bookings {
+    color: #1e40af;
+    background: #dbeafe;
+}
+
+.status-cancelled-bookings {
+    color: #991b1b;
+    background: #fee2e2;
+}
+
+.status-default-bookings {
+    color: #374151;
+    background: #f1f5f9;
+}
+
+.btn-details-bookings {
+    padding: 0.5rem 1rem;
+    font-size: 0.8rem;
+}
+
+.no-bookings-empty {
+    text-align: center;
+    padding: 4rem;
+}
+
+.no-bookings-empty p {
+    color: var(--text-light);
+}
+
+/* Modal Specific Styles */
+.modal-overlay-p {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+    padding: 2.5rem;
+    overflow: hidden;
+    background-color: rgba(15, 23, 42, 0.4);
+    backdrop-filter: blur(8px);
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-content-p {
+    background-color: #ffffff;
+    border: none;
+    width: 100%;
+    max-width: 700px;
+    border-radius: 1.5rem;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    max-height: 100%;
+}
+
+.modal-header-p {
+    background: var(--background-soft);
+    padding: 1.5rem 2.5rem;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.modal-title-p {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--secondary-color);
+    margin-bottom: 0.25rem;
+}
+
+.modal-header-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.modal-status-badge {
+    padding: 0.35rem 0.75rem;
+    border-radius: 2rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.modal-booked-on-text {
+    color: var(--text-light);
+    font-size: 0.85rem;
+}
+
+.btn-close-modal-p {
+    background: none;
+    border: none;
+    color: #94a3b8;
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 0.5rem;
+    transition: color 0.2s;
+}
+
+.modal-body-p {
+    padding: 2.5rem;
+    overflow-y: auto;
+    flex: 1;
+}
+
+.modal-summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2.5rem;
+}
+
+.modal-info-card {
+    background: #ffffff;
+    border: 1px solid var(--border-color);
+    border-radius: 1rem;
+    padding: 1.25rem;
+}
+
+.modal-card-label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--text-light);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.modal-card-value-main {
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: var(--secondary-color);
+    margin-bottom: 0.25rem;
+}
+
+.modal-card-value-sub {
+    font-size: 0.9rem;
+    color: var(--text-light);
+}
+
+.modal-guest-count-badge {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--primary-color);
+    background: var(--background-soft);
+    padding: 0.2rem 0.6rem;
+    border-radius: 1rem;
+}
+
+.modal-section-title {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--secondary-color);
+    text-transform: uppercase;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border-color);
+    margin-bottom: 1rem;
+}
+
+.modal-venue-text {
+    color: #475569;
+    line-height: 1.5;
+    font-size: 0.95rem;
+}
+
+.modal-requests-box {
+    background: #fefce8;
+    border: 1px solid #fef08a;
+    padding: 1rem;
+    border-radius: 0.75rem;
+    color: #854d0e;
+    font-size: 0.9rem;
+    font-style: italic;
+    line-height: 1.5;
+}
+
+.modal-menu-container {
+    background: #f8fafc;
+    border: 1px solid var(--border-color);
+    padding: 1rem;
+    border-radius: 0.75rem;
+    font-size: 0.95rem;
+}
+
+.financials-grid-p {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 2rem;
+}
+
+.financial-stat-box {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    background: #f8fafc;
+    border-radius: 0.75rem;
+    border: 1px solid var(--border-color);
+}
+
+.financial-stat-label {
+    font-size: 0.9rem;
+    color: var(--text-light);
+    font-weight: 500;
+}
+
+.financial-stat-value {
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: var(--secondary-color);
+}
+
+.payment-details-box {
+    padding: 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: 0.75rem;
+    margin-top: 0.75rem;
+}
+
+.payment-row-p {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+}
+
+.payment-row-p:last-child {
+    margin-bottom: 0;
+}
+
+.payment-label-p {
+    font-size: 0.85rem;
+    color: var(--text-light);
+}
+
+.payment-value-p {
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.payment-value-method-p {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--secondary-color);
+}
+
+.activity-logs-container-p {
+    max-height: 200px;
+    overflow-y: auto;
+    padding-right: 0.5rem;
+    font-size: 0.85rem;
+}
+
+.modal-footer-p {
+    background: #ffffff;
+    padding: 1.5rem 2.5rem;
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 1rem;
+    position: sticky;
+    bottom: 0;
+    z-index: 10;
+}
+
+.modal-actions-container-p {
+    display: flex;
+    gap: 0.5rem;
+    flex: 1;
+}
+
+.btn-action-modal {
+    flex: 1;
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 0.5rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+}
+
+.btn-status-confirm {
+    background: #10b981;
+}
+
+.btn-status-reject {
+    background: #ef4444;
+}
+
+.btn-status-complete {
+    background: #3b82f6;
+}
+
+.btn-status-cancel {
+    background: #94a3b8;
+}
+
+.btn-contract-view-p {
+    flex: 1;
+    text-align: center;
+    justify-content: center;
+    padding: 0.75rem 1.5rem;
+    background: #f8fafc;
+    color: var(--primary-color);
+    border: 1px solid var(--primary-color);
+    border-radius: 0.5rem;
+    font-weight: 700;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.menu-item-row-modal {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.menu-item-row-modal:last-child {
+    border-bottom: none;
+}
+
+.total-summary-row {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 2px dashed #e2e8f0;
+}

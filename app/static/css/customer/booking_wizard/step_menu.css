@@ -1,0 +1,138 @@
+.packages-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+    gap: 3rem;
+}
+
+.package-wizard-card {
+    background: var(--white);
+    border-radius: 2.5rem;
+    overflow: hidden;
+    box-shadow: var(--wizard-shadow);
+    border: 1px solid var(--border-color);
+    transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+    display: flex;
+    flex-direction: column;
+    animation: slideUp 0.6s ease-out forwards;
+}
+
+.package-wizard-card:hover {
+    transform: translateY(-12px);
+    box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.15);
+    border-color: var(--primary-color);
+}
+
+.package-card-image {
+    height: 240px;
+    background-size: cover;
+    background-position: center;
+    position: relative;
+}
+
+.package-card-price-badge {
+    position: absolute;
+    top: 2rem;
+    right: 2rem;
+    background: rgba(255, 255, 255, 0.9);
+    padding: 0.6rem 1.25rem;
+    border-radius: 1.25rem;
+    font-weight: 800;
+    color: var(--primary-color);
+    box-shadow: var(--shadow-sm);
+    backdrop-filter: blur(10px);
+    font-size: 1.1rem;
+    border: 1px solid rgba(255, 255, 255, 0.4);
+}
+
+.price-unit {
+    font-size: 0.8rem;
+    font-weight: 600;
+    opacity: 0.8;
+}
+
+.package-card-content {
+    padding: 2.5rem;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.package-card-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.75rem;
+    color: var(--secondary-color);
+    margin-bottom: 1rem;
+    font-weight: 700;
+}
+
+.package-card-description {
+    color: #64748b;
+    line-height: 1.7;
+    margin-bottom: 2.5rem;
+    flex: 1;
+    font-size: 1rem;
+}
+
+.package-card-btn {
+    width: 100%;
+    border-radius: 1.25rem;
+    padding: 1.25rem;
+    font-weight: 800;
+    font-size: 1.1rem;
+    transition: all 0.3s ease;
+}
+
+.package-card-btn i {
+    margin-left: 0.75rem;
+}
+
+.custom-journey-footer {
+    margin-top: 6rem;
+    justify-content: center;
+    border-top: none;
+    padding-top: 0;
+}
+
+.custom-journey-card {
+    text-align: center;
+    background: #f8fafc;
+    padding: 2.5rem;
+    border-radius: 2rem;
+    border: 1px dashed #e2e8f0;
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+.custom-journey-text {
+    color: #64748b;
+    font-size: 1rem;
+    margin-bottom: 1rem;
+    font-weight: 500;
+}
+
+.contact-chef-link {
+    color: var(--primary-color);
+    font-weight: 800;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    font-size: 1.1rem;
+}
+
+.contact-chef-link i {
+    font-size: 0.9rem;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

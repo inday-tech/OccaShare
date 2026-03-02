@@ -10,7 +10,7 @@ from ..db import database, models, crud
 # Configuration
 SECRET_KEY = "your-secret-key-change-this-in-production"
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 15 # Fintech standard: shorter duration
+ACCESS_TOKEN_EXPIRE_MINUTES = 1440 # 24 hours. Frontend inactivity JS handles the 15-minute idle timeout.
 REFRESH_TOKEN_EXPIRE_DAYS = 7
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")

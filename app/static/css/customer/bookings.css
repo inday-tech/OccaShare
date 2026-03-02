@@ -1,0 +1,249 @@
+.bookings-hero {
+    background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+    border-radius: 2.5rem;
+    padding: 4rem 3rem;
+    margin-bottom: 3rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.bookings-hero h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 3rem;
+    color: #1e40af;
+    margin-bottom: 0.5rem;
+}
+
+.bookings-hero p {
+    color: #3b82f6;
+    font-size: 1.15rem;
+}
+
+.btn-new-booking {
+    padding: 1.25rem 2rem;
+    border-radius: 1.25rem;
+    box-shadow: 0 10px 15px -3px rgba(34, 197, 94, 0.2);
+}
+
+.btn-new-booking i {
+    margin-right: 0.5rem;
+}
+
+.bookings-table-container {
+    background: var(--white);
+    border-radius: 2rem;
+    padding: 2.5rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    border: 1px solid var(--border-color);
+}
+
+.bookings-table-wrapper {
+    overflow-x: auto;
+}
+
+.bookings-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 1rem;
+}
+
+.bookings-table th {
+    text-align: left;
+    color: var(--text-light);
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    padding: 0 1.5rem;
+}
+
+.booking-row {
+    background: #f8fafc;
+    border-radius: 1.25rem;
+    transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+
+.booking-row:hover {
+    transform: scale(1.01);
+    background: white;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
+    z-index: 10;
+    position: relative;
+}
+
+.booking-cell {
+    padding: 1.5rem;
+}
+
+.booking-cell-first {
+    border-radius: 1.25rem 0 0 1.25rem;
+}
+
+.booking-cell-last {
+    border-radius: 0 1.25rem 1.25rem 0;
+    text-align: right;
+}
+
+/* Cell Content Styles */
+.booking-date {
+    font-weight: 700;
+    color: var(--secondary-color);
+    margin-bottom: 0.25rem;
+}
+
+.booking-event-name {
+    font-weight: 600;
+    color: var(--primary-color);
+    font-size: 0.85rem;
+    margin-bottom: 0.25rem;
+}
+
+.booking-time {
+    font-size: 0.85rem;
+    color: var(--text-light);
+}
+
+.booking-time i {
+    margin-right: 0.25rem;
+}
+
+.booking-caterer-name {
+    font-weight: 600;
+    color: var(--secondary-color);
+}
+
+.booking-package-name {
+    font-size: 0.85rem;
+    color: var(--text-light);
+}
+
+.booking-guests-badge {
+    background: #f1f5f9;
+    padding: 0.4rem 0.8rem;
+    border-radius: 0.5rem;
+    font-size: 0.85rem;
+}
+
+.booking-amount {
+    font-weight: 800;
+    color: var(--primary-color);
+    font-size: 1.05rem;
+}
+
+.booking-status {
+    padding: 0.5rem 1rem;
+    border-radius: 2rem;
+    font-size: 0.75rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    display: inline-block;
+}
+
+.status-pending {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.status-confirmed {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.status-completed {
+    background: #dbeafe;
+    color: #1e40af;
+}
+
+.status-cancelled {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.booking-actions {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: flex-end;
+}
+
+.btn-continue-booking {
+    padding: 0.6rem 1.25rem;
+    border-radius: 0.75rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.btn-delete-draft {
+    padding: 0.6rem 1rem;
+    border-radius: 0.75rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #ef4444;
+    border-color: #ef4444;
+    cursor: pointer;
+    background: white;
+}
+
+.btn-view-details {
+    padding: 0.6rem 1.25rem;
+    background: white;
+    border: 1px solid var(--border-color);
+    color: var(--secondary-color);
+    border-radius: 0.75rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.2s;
+}
+
+.btn-view-details:hover {
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+    background: var(--background-soft);
+}
+
+/* Empty State Override */
+.bookings-empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+}
+
+.empty-state-icon-box {
+    width: 120px;
+    height: 120px;
+    background: #eff6ff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 2rem;
+}
+
+.empty-state-icon-box i {
+    font-size: 3rem;
+    color: #60a5fa;
+}
+
+.empty-state-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.5rem;
+    color: var(--secondary-color);
+}
+
+.empty-state-description {
+    color: var(--text-light);
+    max-width: 450px;
+    margin: 1.5rem auto;
+    font-size: 1.1rem;
+    line-height: 1.6;
+}
+
+.btn-empty-browse {
+    padding: 1.25rem 3rem;
+    border-radius: 1.25rem;
+    display: inline-block;
+    margin-top: 1rem;
+}

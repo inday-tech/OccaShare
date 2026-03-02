@@ -1,488 +1,295 @@
 {% extends "customer/booking_wizard/wizard_base.html" %}
 
-{% block wizard_title %}Quotation & Contract{% endblock %}
+{% block wizard_title %}Quotation &amp; Contract{% endblock %}
 
 {% block wizard_content %}
 <div class="quotation-step">
-    <h2 class="wizard-title">Review Your Quotation</h2>
-    <p class="wizard-subtitle">Please review the costs and sign the service contract to proceed.</p>
 
-    <div class="quote-card animate-fade-in">
-        <div class="quote-header">
-            <div class="brand-info">
-                <i class="fas fa-file-invoice-dollar quote-icon"></i>
-                <div>
-                    <h3>{{ quotation.package_details.name }}</h3>
-                    <p class="text-muted">{{ quotation.package_details.description[:100] }}...</p>
-                </div>
-            </div>
-            <div class="quote-meta">
-                <span class="quote-id">Quote #{{ quotation.id }}</span>
-                <span class="quote-date">{{ quotation.created_at.strftime('%b %d, %Y') if quotation.created_at else ''
-                    }}</span>
+    <!-- Page Header -->
+    <div class="q-page-header animate-fade-in">
+        <div class="q-header-left">
+            <div class="q-header-icon"><i class="fas fa-file-invoice-dollar"></i></div>
+            <div>
+                <h2 class="q-title">Official Quotation</h2>
+                <p class="q-subtitle">Review your booking details and select your preferred downpayment tier.</p>
             </div>
         </div>
+        <div class="q-header-right">
+            <div class="q-badge"><span class="badge-dot"></span> Official Estimate</div>
+            <div class="q-ref">Booking <strong>#{{ quotation.booking_id }}</strong></div>
+            <div class="q-date">{{ quotation.created_at.strftime('%b %d, %Y') if quotation.created_at else 'Today' }}
+            </div>
+        </div>
+    </div>
 
-        <div class="quote-body">
-            <table class="quote-table">
-                <thead>
-                    <tr>
-                        <th>Description</th>
-                        <th class="text-right">Quantity</th>
-                        <th class="text-right">Unit Price</th>
-                        <th class="text-right">Total</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>
-                            <strong>Base Package - {{ quotation.package_details.name }}</strong>
-                            <div class="small text-muted">Service for <span id="pax-count-display">{{
-                                    quotation.package_details.guest_count }}</span> guests
-                            </div>
-                        </td>
-                        <td class="text-right">
-                            <input type="number" id="pax-input" value="{{ quotation.package_details.guest_count }}"
-                                min="{{ package.min_guests or 10 }}" class="pax-adjust-input" oninput="recalculate()">
-                            <span class="small-label">pax</span>
-                        </td>
-                        <td class="text-right">₱{{ "{:,.2f}".format(quotation.package_details.unit_price) }}</td>
-                        <td class="text-right" id="base-total-display">₱{{
-                            "{:,.2f}".format(quotation.package_details.base_amount or
-                            (quotation.package_details.unit_price * quotation.package_details.guest_count)) }}</td>
-                    </tr>
-
-                    {% for addon in quotation.addons %}
-                    <tr class="addon-row">
-                        <td>
-                            <i class="fas fa-plus-circle text-primary"></i> {{ addon.name }}
-                        </td>
-                        <td class="text-right">1</td>
-                        <td class="text-right">₱{{ "{:,.2f}".format(addon.price) }}</td>
-                        <td class="text-right">₱{{ "{:,.2f}".format(addon.price) }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-
-            <div class="quote-summary">
-                <div class="summary-line">
-                    <span>Subtotal</span>
-                    <span id="subtotal-val">₱{{ "{:,.2f}".format(quotation.total_amount) }}</span>
+    <!-- ── PACKAGE PRICE SUMMARY BANNER ── -->
+    <div class="pkg-summary-banner animate-slide-up">
+        <div class="pkg-summary-left">
+            <div class="pkg-tag">Package</div>
+            <div class="pkg-name">{{ quotation.package_details.name }}</div>
+            <div class="pkg-meta">
+                {% if package and package.service_type %}
+                <span class="pkg-meta-chip"><i class="fas fa-concierge-bell"></i> {{ package.service_type }}</span>
+                {% endif %}
+                {% if package and package.location_coverage %}
+                <span class="pkg-meta-chip"><i class="fas fa-map-marker-alt"></i> {{ package.location_coverage }}</span>
+                {% endif %}
+                {% if package and package.service_duration %}
+                <span class="pkg-meta-chip"><i class="fas fa-clock"></i> {{ package.service_duration }}hrs
+                    Service</span>
+                {% endif %}
+            </div>
+        </div>
+        <div class="pkg-summary-right">
+            <div class="pkg-price-group">
+                <div class="pkg-price-item">
+                    <span class="ppi-label">Price per Head</span>
+                    <span class="ppi-value">₱{{ "{:,.2f}".format(quotation.package_details.unit_price) }}</span>
                 </div>
-                <div class="summary-line highlight">
-                    <span>Grand Total Project Cost</span>
-                    <span class="total-price" id="total-val">₱{{ "{:,.2f}".format(quotation.total_amount) }}</span>
+                <div class="pkg-price-divider"></div>
+                <div class="pkg-price-item">
+                    <span class="ppi-label">Guests</span>
+                    <span class="ppi-value" id="banner-pax-display">{{ quotation.package_details.guest_count }}
+                        pax</span>
                 </div>
-                <div class="summary-line deposit">
-                    <span>Required Downpayment ({{ quotation.downpayment_percent }}%)</span>
-                    <span class="deposit-price" id="deposit-val">₱{{ "{:,.2f}".format(quotation.total_amount *
-                        quotation.downpayment_percent / 100) }}</span>
+                <div class="pkg-price-divider"></div>
+                <div class="pkg-price-item highlight">
+                    <span class="ppi-label">Package Total</span>
+                    <span class="ppi-value" id="banner-total-display">₱{{
+                        "{:,.2f}".format(quotation.package_details.unit_price * quotation.package_details.guest_count)
+                        }}</span>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="contract-section card-premium">
-        <div class="section-header">
-            <h3><i class="fas fa-file-contract"></i> Service Agreement</h3>
-            <span class="badge badge-outline">Legal Document</span>
+    <!-- ── MAIN INVOICE CARD ── -->
+    <div class="invoice-card animate-slide-up">
+
+        <!-- Table Header -->
+        <div class="inv-table-head">
+            <div class="itc-desc">Service Description</div>
+            <div class="itc-pax">Guest Count</div>
+            <div class="itc-unit">Unit Price</div>
+            <div class="itc-total">Amount</div>
         </div>
 
-        <div class="contract-viewer">
-            <div class="contract-inner">
-                <h4>1. SCOPE OF SERVICES</h4>
-                <p>The Caterer agrees to provide catering services as specified in the quotation above for the event
-                    date and location previously confirmed.</p>
-
-                <h4>2. PRICING AND PAYMENT</h4>
-                <p>The total contract amount is <span class="contract-total-text">₱{{
-                        "{:,.2f}".format(quotation.total_amount) }}</span>. A non-refundable
-                    reservation fee of <span class="contract-deposit-text">₱{{ "{:,.2f}".format(quotation.total_amount *
-                        quotation.downpayment_percent /
-                        100) }}</span> ({{ quotation.downpayment_percent }}%) is required to lock the date.</p>
-
-                <h4>3. GUEST COUNT POLICY</h4>
-                <p>Final guest count must be confirmed at least 14 days before the event. Any increase in guest count
-                    will be billed accordingly. Decreases in count after confirmation will not result in a refund.</p>
-
-                <h4>4. CANCELLATION</h4>
-                <p>Cancellations made 30 days or more before the event will forfeit only the reservation fee.
-                    Cancellations made within 14 days will be billed 50% of the total amount.</p>
+        <!-- Main Package Row -->
+        <div class="inv-row inv-row-main">
+            <div class="itc-desc-block">
+                <div class="ir-tag">Package</div>
+                <div class="ir-name">{{ quotation.package_details.name }}</div>
+                {% if package and package.description %}
+                <div class="ir-desc">{{ package.description[:120] }}{% if package.description|length > 120 %}…{% endif
+                    %}</div>
+                {% else %}
+                <div class="ir-desc">Full-service catering package.</div>
+                {% endif %}
+            </div>
+            <div class="itc-pax-cell">
+                <div class="pax-control">
+                    <button type="button" class="pax-btn" onclick="adjustPax(-1)"><i class="fas fa-minus"></i></button>
+                    <input type="number" id="pax-input" value="{{ quotation.package_details.guest_count }}"
+                        min="{{ package.min_guests if package and package.min_guests else 10 }}"
+                        max="{{ package.max_guests if package and package.max_guests else 9999 }}" class="pax-field"
+                        oninput="recalculate()">
+                    <button type="button" class="pax-btn" onclick="adjustPax(1)"><i class="fas fa-plus"></i></button>
+                </div>
+                <div class="pax-hint">min {{ package.min_guests if package and package.min_guests else 10 }} pax</div>
+            </div>
+            <div class="itc-unit-cell">
+                <div class="unit-price-display">₱{{ "{:,.2f}".format(quotation.package_details.unit_price) }}</div>
+                <div class="unit-price-sub">per head</div>
+            </div>
+            <div class="itc-total-cell">
+                <span class="row-total" id="base-total-display">₱{{
+                    "{:,.2f}".format(quotation.package_details.base_amount or (quotation.package_details.unit_price *
+                    quotation.package_details.guest_count)) }}</span>
             </div>
         </div>
 
-        <div class="signature-box">
-            <div class="form-group mb-4">
-                <label class="form-label">Digital Signature</label>
-                <div class="signature-input-wrap">
-                    <input type="text" id="signature_name" class="signature-input"
-                        placeholder="Type your full legal name to sign" oninput="toggleSignButton()">
-                    <i class="fas fa-pen-nib"></i>
+        <!-- Add-ons -->
+        {% if quotation.addons %}
+        <div class="addons-header"><i class="fas fa-plus-circle"></i> Selected Add-ons</div>
+        {% for addon in quotation.addons %}
+        <div class="inv-row inv-row-addon">
+            <div class="itc-desc-block">
+                <div class="addon-dot"></div><span>{{ addon.name }}</span>
+            </div>
+            <div class="itc-pax-cell addon-qty">1×</div>
+            <div class="itc-unit-cell"><span class="money">₱{{ "{:,.2f}".format(addon.price) }}</span></div>
+            <div class="itc-total-cell"><span class="money">₱{{ "{:,.2f}".format(addon.price) }}</span></div>
+        </div>
+        {% endfor %}
+        {% endif %}
+
+        <!-- ── INCLUSIONS + MENU ── -->
+        {% if (package and package.inclusions) or (package and package.menu_items) %}
+        <div class="package-details-section">
+            {% if package and package.inclusions %}
+            <div class="pd-block">
+                <div class="pd-block-header"><i class="fas fa-check-circle"></i> What's Included</div>
+                <ul class="inclusions-list">
+                    {% for inc in package.inclusions %}
+                    <li class="inc-item">
+                        <span class="inc-check"><i class="fas fa-check"></i></span>
+                        <span>{{ inc }}</span>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+            {% if package and package.menu_items %}
+            <div class="pd-block">
+                <div class="pd-block-header"><i class="fas fa-utensils"></i> Menu Highlights</div>
+                <div class="menu-pills">
+                    {% for item in package.menu_items %}
+                    <span class="menu-pill">{{ item.name }}</span>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        <!-- ── PRICING SUMMARY + DOWNPAYMENT ── -->
+        <div class="inv-footer-section">
+            <div class="pricing-stack">
+                <div class="ps-row ps-row-muted">
+                    <span>Package Unit Rate</span>
+                    <span>₱{{ "{:,.2f}".format(quotation.package_details.unit_price) }} / head</span>
+                </div>
+                <div class="ps-row">
+                    <span>Package Subtotal</span>
+                    <span id="base-subtotal-val">₱{{ "{:,.2f}".format(quotation.package_details.base_amount or
+                        (quotation.package_details.unit_price * quotation.package_details.guest_count)) }}</span>
+                </div>
+                {% if quotation.addons %}
+                <div class="ps-row">
+                    <span>Add-ons</span>
+                    <span id="addon-val">₱{{ "{:,.2f}".format(quotation.addons | sum(attribute='price')) }}</span>
+                </div>
+                {% endif %}
+                <div class="ps-row ps-grand-total">
+                    <div>
+                        <strong>Grand Total</strong>
+                        <small>All services included</small>
+                    </div>
+                    <span id="total-val">₱{{ "{:,.2f}".format(quotation.total_amount) }}</span>
                 </div>
             </div>
 
-            <label class="modern-checkbox">
+            <div class="dp-configurator">
+                <div class="dp-configurator-label"><i class="fas fa-sliders-h"></i> Select Downpayment Tier</div>
+                <div class="dp-tier-group">
+                    <button type="button"
+                        class="dp-tier-btn {% if quotation.downpayment_percent == 30 %}active{% endif %}"
+                        onclick="setDPTier(30)">
+                        <span class="dpt-percent">30%</span><span class="dpt-label">Standard</span>
+                    </button>
+                    <button type="button"
+                        class="dp-tier-btn {% if quotation.downpayment_percent == 40 %}active{% endif %}"
+                        onclick="setDPTier(40)">
+                        <span class="dpt-percent">40%</span><span class="dpt-label">Preferred</span>
+                    </button>
+                    <button type="button"
+                        class="dp-tier-btn {% if quotation.downpayment_percent == 50 %}active{% endif %}"
+                        onclick="setDPTier(50)">
+                        <span class="dpt-percent">50%</span><span class="dpt-label">Priority</span>
+                    </button>
+                </div>
+                <input type="hidden" id="dp-percent-input" value="{{ quotation.downpayment_percent }}">
+
+                <div class="deposit-card" id="deposit-card">
+                    <div class="deposit-card-top">
+                        <div class="dc-icon"><i class="fas fa-shield-alt"></i></div>
+                        <div class="dc-label">Reservation Fee Required</div>
+                        <div class="dc-calc" id="dc-calc-label">₱{{ "{:,.2f}".format(quotation.total_amount) }} × {{
+                            quotation.downpayment_percent }}%</div>
+                    </div>
+                    <div class="deposit-amount" id="deposit-val">₱{{ "{:,.2f}".format(quotation.total_amount *
+                        quotation.downpayment_percent / 100) }}</div>
+                    <div class="deposit-card-note"><i class="fas fa-info-circle"></i> Ireserba ang iyong event date sa
+                        pamamagitan ng downpayment na ito.</div>
+                    <div class="dc-loading" id="dc-loading">
+                        <div class="dc-spinner"></div><span>Computing…</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── CONTRACT ── -->
+    <div class="contract-card animate-slide-up-delayed">
+        <div class="cc-header">
+            <div class="cc-header-left"><i class="fas fa-gavel"></i> SERVICE AGREEMENT &amp; CONTRACT</div>
+            <div class="cc-badge">BINDING DOCUMENT</div>
+        </div>
+        <div class="cc-body">
+            <p class="cc-intro">This agreement is made between <strong>{{ quotation.booking.user.first_name }} {{
+                    quotation.booking.user.last_name }}</strong>
+                (the "Client") and the selected Service Provider (the "Caterer") regarding Booking #{{
+                quotation.booking_id }}.</p>
+            <div class="cc-clause">
+                <h5>1. FINANCIAL TERMS</h5>
+                <p>The total consideration for services described is <strong class="contract-total-text">₱{{
+                        "{:,.2f}".format(quotation.total_amount) }}</strong>.
+                    To formalize this booking, a non-refundable Reservation Fee of
+                    <strong class="contract-deposit-text">₱{{ "{:,.2f}".format(quotation.total_amount *
+                        quotation.downpayment_percent / 100) }}</strong>
+                    (<span class="contract-dp-percent">{{ quotation.downpayment_percent }}</span>%) must be paid upon
+                    signing.
+                </p>
+            </div>
+            <div class="cc-clause">
+                <h5>2. MODIFICATION OF ATTENDANCE</h5>
+                <p>Guest count adjustments must be finalized 14 days prior to the event. Increases are subject to
+                    availability and will be billed at the stated unit price per head.</p>
+            </div>
+            <div class="cc-clause">
+                <h5>3. CANCELLATION POLICY</h5>
+                <p>Cancellations 30 days prior result in forfeiture of the reservation fee. Cancellations within 14 days
+                    incur a 50% charge of the total contract amount.</p>
+            </div>
+        </div>
+        <div class="cc-signature">
+            <div class="sig-label">Electronic Signature</div>
+            <div class="sig-field">
+                <input type="text" id="signature_name" placeholder="Type your full legal name…"
+                    oninput="toggleSignButton()">
+                <div class="sig-underline"></div>
+            </div>
+            <p class="sig-hint">By typing your name, you are legally signing this contract.</p>
+            <label class="agree-checkbox">
                 <input type="checkbox" id="agree_terms" onchange="toggleSignButton()">
-                <span class="box"></span>
-                <span class="text">I, the undersigned, have read and agree to the terms and conditions outlined
-                    above.</span>
+                <span class="check-box"></span>
+                <span>I have reviewed the quotation and agree to the terms of this contract.</span>
             </label>
         </div>
     </div>
 
+    <!-- Actions -->
     <div class="wizard-actions">
-        <button type="button" class="btn-prev" onclick="history.back()">
-            <i class="fas fa-chevron-left"></i> Back to KYC
+        <button type="button" class="btn-back-soft" onclick="history.back()">
+            <i class="fas fa-chevron-left"></i> Previous Step
         </button>
-        <button type="button" id="btn-sign" class="btn-sign-proceed" disabled onclick="submitSignature()">
-            Confirm Order & Pay Downpayment <i class="fas fa-arrow-right"></i>
+        <button type="button" id="btn-sign" class="btn-confirm-premium" disabled onclick="submitSignature()">
+            <i class="fas fa-check-circle"></i> <span>Confirm &amp; Proceed to Payment</span>
         </button>
     </div>
 </div>
 
-<style>
-    :root {
-        --primary-soft: rgba(153, 204, 102, 0.1);
-        --slate-800: #1e293b;
-        --slate-600: #475569;
-        --slate-100: #f1f5f9;
-        --border-color: #e2e8f0;
-    }
+{% endblock %}
 
-    .quotation-step {
-        max-width: 850px;
-        margin: 0 auto;
-    }
-
-    .quote-card {
-        background: white;
-        border-radius: 2rem;
-        border: 1px solid var(--border-color);
-        box-shadow: 0 15px 35px -10px rgba(0, 0, 0, 0.05);
-        overflow: hidden;
-        margin-bottom: 2.5rem;
-    }
-
-    .quote-header {
-        background: #f8fafc;
-        padding: 2.5rem;
-        display: flex;
-        justify-content: space-between;
-        align-items: flex-start;
-        border-bottom: 1px solid var(--border-color);
-    }
-
-    .brand-info {
-        display: flex;
-        gap: 1.5rem;
-        align-items: center;
-    }
-
-    .quote-icon {
-        font-size: 2.5rem;
-        color: var(--primary-color);
-        background: var(--primary-soft);
-        padding: 1rem;
-        border-radius: 1.25rem;
-    }
-
-    .quote-id {
-        font-family: 'Outfit', sans-serif;
-        font-weight: 800;
-        color: var(--slate-800);
-        display: block;
-        font-size: 1.25rem;
-        text-align: right;
-    }
-
-    .quote-date {
-        font-size: 0.9rem;
-        color: var(--slate-600);
-        display: block;
-        text-align: right;
-    }
-
-    .quote-body {
-        padding: 2.5rem;
-    }
-
-    .quote-table {
-        width: 100%;
-        border-collapse: collapse;
-        margin-bottom: 2rem;
-    }
-
-    .quote-table th {
-        text-align: left;
-        padding: 1rem;
-        border-bottom: 2px solid var(--slate-100);
-        color: var(--slate-600);
-        font-weight: 700;
-        text-transform: uppercase;
-        font-size: 0.8rem;
-        letter-spacing: 0.05em;
-    }
-
-    .quote-table td {
-        padding: 1.5rem 1rem;
-        border-bottom: 1px solid var(--slate-100);
-        font-size: 1rem;
-    }
-
-    .text-right {
-        text-align: right !important;
-    }
-
-    .quote-summary {
-        margin-left: auto;
-        max-width: 400px;
-        background: #f8fafc;
-        padding: 2rem;
-        border-radius: 1.5rem;
-    }
-
-    .summary-line {
-        display: flex;
-        justify-content: space-between;
-        margin-bottom: 1rem;
-        font-weight: 600;
-        color: var(--slate-600);
-    }
-
-    .summary-line.highlight {
-        margin-top: 1.5rem;
-        padding-top: 1.5rem;
-        border-top: 2px dashed #cbd5e1;
-        font-size: 1.25rem;
-        color: var(--slate-800);
-        font-weight: 800;
-    }
-
-    .summary-line.deposit {
-        color: var(--primary-color);
-        font-size: 1.1rem;
-    }
-
-    .card-premium {
-        background: white;
-        border-radius: 2rem;
-        border: 1px solid var(--border-color);
-        padding: 2.5rem;
-        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.03);
-    }
-
-    .section-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 2rem;
-    }
-
-    .contract-viewer {
-        height: 250px;
-        overflow-y: auto;
-        background: #f8fafc;
-        border-radius: 1.25rem;
-        padding: 2rem;
-        border: 1px solid var(--border-color);
-        margin-bottom: 2rem;
-    }
-
-    .contract-inner h4 {
-        font-family: 'Outfit', sans-serif;
-        font-size: 1rem;
-        margin: 1.5rem 0 0.5rem;
-        color: var(--slate-800);
-    }
-
-    .contract-inner p {
-        font-size: 0.9rem;
-        color: var(--slate-600);
-        line-height: 1.6;
-    }
-
-    .signature-input-wrap {
-        position: relative;
-    }
-
-    .signature-input {
-        width: 100%;
-        padding: 1.25rem 3rem;
-        border: 2.5px solid var(--slate-100);
-        border-radius: 1.25rem;
-        font-family: 'Playfair Display', serif;
-        font-size: 1.5rem;
-        font-style: italic;
-        background: #fff;
-        transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-
-    .signature-input-wrap i {
-        position: absolute;
-        left: 1.25rem;
-        top: 50%;
-        transform: translateY(-50%);
-        color: #94a3b8;
-        font-size: 1.25rem;
-    }
-
-    .signature-input:focus {
-        border-color: var(--primary-color);
-        outline: none;
-        box-shadow: 0 8px 30px rgba(153, 204, 102, 0.1);
-    }
-
-    .modern-checkbox {
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-        cursor: pointer;
-        padding: 0.5rem;
-    }
-
-    .modern-checkbox input {
-        display: none;
-    }
-
-    .modern-checkbox .box {
-        width: 24px;
-        height: 24px;
-        border: 2px solid #cbd5e1;
-        border-radius: 6px;
-        position: relative;
-        transition: all 0.2s;
-    }
-
-    .modern-checkbox input:checked+.box {
-        background: var(--primary-color);
-        border-color: var(--primary-color);
-    }
-
-    .modern-checkbox input:checked+.box::after {
-        content: '\f00c';
-        font-family: 'Font Awesome 5 Free';
-        font-weight: 900;
-        color: white;
-        font-size: 0.8rem;
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-    }
-
-    .btn-sign-proceed {
-        background: var(--slate-900);
-        color: white;
-        padding: 1.25rem 2.5rem;
-        border-radius: 1.5rem;
-        font-weight: 800;
-        border: none;
-        cursor: pointer;
-        transition: all 0.3s;
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-        font-size: 1.1rem;
-    }
-
-    .btn-sign-proceed:not(:disabled):hover {
-        background: var(--primary-color);
-        transform: translateY(-3px);
-        box-shadow: 0 15px 30px rgba(153, 204, 102, 0.3);
-    }
-
-    .btn-sign-proceed:disabled {
-        opacity: 0.5;
-        cursor: not-allowed;
-    }
-
-    .pax-adjust-input {
-        width: 70px;
-        padding: 0.5rem;
-        border: 2px solid var(--slate-100);
-        border-radius: 0.75rem;
-        font-weight: 700;
-        text-align: center;
-        font-family: 'Outfit', sans-serif;
-    }
-
-    .pax-adjust-input:focus {
-        border-color: var(--primary-color);
-        outline: none;
-    }
-
-    .small-label {
-        font-size: 0.85rem;
-        font-weight: 600;
-        color: var(--slate-600);
-        margin-left: 0.5rem;
-    }
-</style>
+{% block step_css %}
+<link rel="stylesheet" href="{{ url_for('static', path='/css/customer/booking_wizard/step_quotation.css') }}">
 {% endblock %}
 
 {% block step_js %}
 <script>
-    const unitPrice = parseFloat("{{ quotation.package_details.unit_price }}");
-    const downpaymentPercent = parseFloat("{{ quotation.downpayment_percent }}") / 100;
-    const addonTotal = parseFloat("{% set at = 0 %}{% for a in quotation.addons %}{% set at = at + a.price %}{% endfor %}{{ at }}");
-
-    function formatCurrency(num) {
-        return '₱' + num.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-    }
-
-    function recalculate() {
-        const pax = parseInt(document.getElementById('pax-input').value) || 0;
-        document.getElementById('pax-count-display').innerText = pax;
-
-        const baseTotal = pax * unitPrice;
-        document.getElementById('base-total-display').innerText = formatCurrency(baseTotal);
-
-        const total = baseTotal + addonTotal;
-        document.getElementById('subtotal-val').innerText = formatCurrency(total);
-        document.getElementById('total-val').innerText = formatCurrency(total);
-
-        const deposit = total * downpaymentPercent;
-        document.getElementById('deposit-val').innerText = formatCurrency(deposit);
-
-        // Update contract text too for consistency
-        const contractTotalTexts = document.querySelectorAll('.contract-total-text');
-        contractTotalTexts.forEach(el => el.innerText = formatCurrency(total));
-
-        const contractDepositTexts = document.querySelectorAll('.contract-deposit-text');
-        contractDepositTexts.forEach(el => el.innerText = formatCurrency(deposit));
-    }
-
-    function toggleSignButton() {
-        const name = document.getElementById('signature_name').value;
-        const agree = document.getElementById('agree_terms').checked;
-        document.getElementById('btn-sign').disabled = !(name.length > 5 && agree);
-    }
-
-    async function submitSignature() {
-        const bookingId = "{{ quotation.booking_id }}";
-        const signature = document.getElementById('signature_name').value;
-        const paxCount = document.getElementById('pax-input').value;
-
-        const formData = new FormData();
-        formData.append('signature_data', signature);
-        formData.append('guest_count', paxCount);
-
-        try {
-            const res = await fetch(`/bookings/${bookingId}/contract/sign`, {
-                method: 'POST',
-                body: formData
-            });
-            const data = await res.json();
-            if (data.success) {
-                window.location.href = `/bookings/step/payment/${bookingId}`;
-            }
-        } catch (err) {
-            alert('Error signing contract: ' + err);
-        }
-    }
-
-    // Initial sync of contract text
-    recalculate();
+    window.unitPrice = "{{ quotation.package_details.unit_price }}";
+    window.bookingId = "{{ quotation.booking_id }}";
+    window.addonTotal = "{{ quotation.addons | sum(attribute='price') if quotation.addons else 0 }}";
 </script>
+<script src="{{ url_for('static', path='/js/customer/booking_wizard/step_quotation.js') }}"></script>
 {% endblock %}

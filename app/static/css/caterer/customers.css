@@ -1,0 +1,87 @@
+/* Caterer Customers Styles */
+
+.customers-container {
+    background: var(--white);
+    border-radius: 2rem;
+    padding: 2.5rem;
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow-md);
+}
+
+.customers-title {
+    font-size: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.customers-title i {
+    margin-right: 0.5rem;
+}
+
+.customers-table-wrapper {
+    overflow-x: auto;
+}
+
+.customers-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 1rem;
+}
+
+.customers-table thead tr {
+    text-align: left;
+    color: var(--text-light);
+    font-size: 0.9rem;
+    text-transform: uppercase;
+}
+
+.customers-table th {
+    padding: 0 1.5rem;
+}
+
+.customer-row {
+    background: #f8fafc;
+    border-radius: 1rem;
+}
+
+.customer-td-name {
+    padding: 1.5rem;
+    border-radius: 1rem 0 0 1rem;
+}
+
+.customer-name-bold {
+    font-weight: 600;
+}
+
+.customer-td-email {
+    padding: 1.5rem;
+}
+
+.customer-td-bookings {
+    padding: 1.5rem;
+    font-weight: 600;
+}
+
+.customer-td-rating {
+    padding: 1.5rem;
+}
+
+.rating-star-color {
+    color: #f59e0b;
+}
+
+.customer-td-action {
+    padding: 1.5rem;
+    border-radius: 0 1rem 1rem 0;
+    text-align: right;
+}
+
+.btn-email-client {
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
+}
+
+.empty-customers-text {
+    text-align: center;
+    color: var(--text-light);
+    padding: 3rem;
+}

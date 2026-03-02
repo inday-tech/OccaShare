@@ -2,6 +2,10 @@
 
 {% block title %}Manage Caterers - Admin Dashboard{% endblock %}
 
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', path='/css/admin/caterers.css') }}">
+{% endblock %}
+
 {% block content %}
 <div class="page-header">
     <h1>Manage Caterers</h1>
@@ -9,120 +13,104 @@
 </div>
 
 <!-- Caterer Stats Cards -->
-<div
-    style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-bottom: 2.5rem;">
-    <div
-        style="background: white; padding: 1.5rem; border-radius: 1rem; border: 1px solid var(--border-color); box-shadow: var(--shadow-sm); display: flex; align-items: center; gap: 1rem;">
-        <div
-            style="width: 50px; height: 50px; background: #eff6ff; color: #1e40af; border-radius: 0.75rem; display: flex; align-items: center; justify-content: center; font-size: 1.25rem;">
+<div class="caterer-stats-grid">
+    <div class="caterer-stat-card">
+        <div class="stat-icon-container total">
             <i class="fas fa-store"></i>
         </div>
-        <div>
-            <div style="font-size: 0.8rem; color: #64748b; font-weight: 600; text-transform: uppercase;">Total</div>
-            <div style="font-size: 1.25rem; font-weight: 800;">{{ metrics.total_caterers }}</div>
+        <div class="stat-info-group">
+            <div class="stat-info-label">Total</div>
+            <div class="stat-info-value">{{ metrics.total_caterers }}</div>
         </div>
     </div>
-    <div
-        style="background: white; padding: 1.5rem; border-radius: 1rem; border: 1px solid var(--border-color); box-shadow: var(--shadow-sm); display: flex; align-items: center; gap: 1rem;">
-        <div
-            style="width: 50px; height: 50px; background: #fffbeb; color: #92400e; border-radius: 0.75rem; display: flex; align-items: center; justify-content: center; font-size: 1.25rem;">
+    <div class="caterer-stat-card">
+        <div class="stat-icon-container pending">
             <i class="fas fa-clock"></i>
         </div>
-        <div>
-            <div style="font-size: 0.8rem; color: #64748b; font-weight: 600; text-transform: uppercase;">Pending</div>
-            <div style="font-size: 1.25rem; font-weight: 800;">{{ metrics.pending_caterers_count }}</div>
+        <div class="stat-info-group">
+            <div class="stat-info-label">Pending</div>
+            <div class="stat-info-value">{{ metrics.pending_caterers_count }}</div>
         </div>
     </div>
-    <div
-        style="background: white; padding: 1.5rem; border-radius: 1rem; border: 1px solid var(--border-color); box-shadow: var(--shadow-sm); display: flex; align-items: center; gap: 1rem;">
-        <div
-            style="width: 50px; height: 50px; background: #dcfce7; color: #166534; border-radius: 0.75rem; display: flex; align-items: center; justify-content: center; font-size: 1.25rem;">
+    <div class="caterer-stat-card">
+        <div class="stat-icon-container approved">
             <i class="fas fa-check-circle"></i>
         </div>
-        <div>
-            <div style="font-size: 0.8rem; color: #64748b; font-weight: 600; text-transform: uppercase;">Approved</div>
-            <div style="font-size: 1.25rem; font-weight: 800;">{{ metrics.approved_caterers_count }}</div>
+        <div class="stat-info-group">
+            <div class="stat-info-label">Approved</div>
+            <div class="stat-info-value">{{ metrics.approved_caterers_count }}</div>
         </div>
     </div>
-    <div
-        style="background: white; padding: 1.5rem; border-radius: 1rem; border: 1px solid var(--border-color); box-shadow: var(--shadow-sm); display: flex; align-items: center; gap: 1rem;">
-        <div
-            style="width: 50px; height: 50px; background: #fef2f2; color: #991b1b; border-radius: 0.75rem; display: flex; align-items: center; justify-content: center; font-size: 1.25rem;">
+    <div class="caterer-stat-card">
+        <div class="stat-icon-container rejected">
             <i class="fas fa-times-circle"></i>
         </div>
-        <div>
-            <div style="font-size: 0.8rem; color: #64748b; font-weight: 600; text-transform: uppercase;">Rejected</div>
-            <div style="font-size: 1.25rem; font-weight: 800;">{{ metrics.rejected_caterers_count }}</div>
+        <div class="stat-info-group">
+            <div class="stat-info-label">Rejected</div>
+            <div class="stat-info-value">{{ metrics.rejected_caterers_count }}</div>
         </div>
     </div>
 </div>
 
-<div
-    style="background: var(--white); border-radius: 2rem; padding: 2.5rem; border: 1px solid var(--border-color); box-shadow: var(--shadow-md);">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2.5rem;">
-        <h3 style="font-size: 1.5rem;"><i class="fas fa-store"></i> Application Management</h3>
-        <div style="display: flex; gap: 0.5rem;">
-            <input type="text" placeholder="Search businesses..."
-                style="padding: 0.75rem 1.25rem; border: 1px solid var(--border-color); border-radius: 2rem; font-size: 0.9rem; width: 300px;">
+<div class="caterer-management-wrapper">
+    <div class="management-header-flex">
+        <h3 class="management-title"><i class="fas fa-store"></i> Application Management</h3>
+        <div class="search-filter-group">
+            <input type="text" placeholder="Search businesses..." class="search-input-fancy">
             <button class="btn-primary" style="padding: 0.75rem 1.5rem;">Search</button>
         </div>
     </div>
 
     {% if caterers %}
     <div style="overflow-x: auto;">
-        <table style="width: 100%; border-collapse: separate; border-spacing: 0 1rem;">
+        <table class="caterers-list-table">
             <thead>
-                <tr style="text-align: left; color: var(--text-light); font-size: 0.9rem; text-transform: uppercase;">
-                    <th style="padding: 0 1.5rem;">Business Name</th>
-                    <th style="padding: 0 1.5rem;">Owner</th>
-                    <th style="padding: 0 1.5rem;">Location</th>
-                    <th style="padding: 0 1.5rem;">Status</th>
-                    <th style="padding: 0 1.5rem; text-align: right;">Action</th>
+                <tr>
+                    <th>Business Name</th>
+                    <th>Owner</th>
+                    <th>Location</th>
+                    <th>Status</th>
+                    <th style="text-align: right;">Action</th>
                 </tr>
             </thead>
             <tbody>
                 {% for caterer in caterers %}
-                <tr style="background: #f8fafc; border-radius: 1rem;">
-                    <td style="padding: 1.5rem; border-radius: 1rem 0 0 1rem;">
-                        <div style="font-weight: 700; color: var(--secondary-color);">{{ caterer.business_name }}</div>
-                        <div style="font-size: 0.8rem; color: var(--text-light);">Registered on {{
+                <tr class="caterer-row">
+                    <td>
+                        <div class="business-identity-cell">{{ caterer.business_name }}</div>
+                        <div class="registration-date-text">Registered on {{
                             caterer.created_at.strftime('%b %d, %Y') if caterer.created_at else 'TBD' }}</div>
                     </td>
-                    <td style="padding: 1.5rem;">
-                        <div style="font-weight: 600;">{{ caterer.user.first_name }} {{ caterer.user.last_name }}</div>
-                        <div style="font-size: 0.8rem; color: var(--text-light);">{{ caterer.user.email }}</div>
+                    <td>
+                        <div class="owner-name-text">{{ caterer.user.first_name }} {{ caterer.user.last_name }}</div>
+                        <div class="owner-email-text">{{ caterer.user.email }}</div>
                     </td>
-                    <td style="padding: 1.5rem;">{{ caterer.city }}</td>
-                    <td style="padding: 1.5rem;">
+                    <td>{{ caterer.city }}</td>
+                    <td>
                         <div style="display: flex; flex-direction: column; gap: 0.5rem;">
                             <!-- Verification Status -->
                             {% if caterer.verification_status == 'Verified' %}
-                            <span
-                                style="padding: 0.25rem 0.75rem; border-radius: 2rem; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; background: #dcfce7; color: #166534; width: fit-content; border: 1px solid #bbf7d0;">
+                            <span class="status-badge-fancy approved">
                                 <i class="fas fa-check-circle"></i> Approved
                             </span>
                             {% elif caterer.verification_status == 'Pending' %}
-                            <span
-                                style="padding: 0.25rem 0.75rem; border-radius: 2rem; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; background: #fef3c7; color: #92400e; width: fit-content; border: 1px solid #fde68a;">
+                            <span class="status-badge-fancy pending">
                                 <i class="fas fa-clock"></i> Pending
                             </span>
                             {% elif caterer.verification_status == 'Rejected' %}
-                            <span
-                                style="padding: 0.25rem 0.75rem; border-radius: 2rem; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; background: #fee2e2; color: #991b1b; width: fit-content; border: 1px solid #fecaca;">
+                            <span class="status-badge-fancy rejected">
                                 <i class="fas fa-times-circle"></i> Rejected
                             </span>
                             {% else %}
-                            <span
-                                style="padding: 0.25rem 0.75rem; border-radius: 2rem; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; background: #f4f4f5; color: #3f3f46; width: fit-content; border: 1px solid #e4e4e7;">
+                            <span class="status-badge-fancy default">
                                 {{ caterer.verification_status }}
                             </span>
                             {% endif %}
                         </div>
                     </td>
-                    <td style="padding: 1.5rem; border-radius: 0 1rem 1rem 0; text-align: right;">
-                        <div style="display: flex; gap: 0.75rem; justify-content: flex-end; align-items: center;">
-                            <a href="/admin/verify/{{ caterer.user_id }}" class="btn-primary"
-                                style="padding: 0.6rem 1.2rem; font-size: 0.85rem; text-decoration: none; display: flex; align-items: center; gap: 0.5rem; border-radius: 0.75rem;">
+                    <td>
+                        <div class="actions-cell-flex">
+                            <a href="/admin/verify/{{ caterer.user_id }}" class="btn-primary btn-view-profile">
                                 View
                             </a>
                         </div>

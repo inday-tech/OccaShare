@@ -1,0 +1,275 @@
+/* Caterer Calendar Styles */
+
+:root {
+    --fc-border-color: var(--border-color);
+    --fc-button-bg-color: var(--primary-color);
+    --fc-button-border-color: var(--primary-color);
+    --fc-button-hover-bg-color: var(--secondary-color);
+    --fc-button-active-bg-color: var(--secondary-color);
+    --fc-today-bg-color: rgba(79, 70, 229, 0.05);
+}
+
+.calendar-main-container {
+    background: var(--white);
+    border-radius: 2rem;
+    padding: 2.5rem;
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow-md);
+}
+
+.fc-toolbar-title {
+    font-size: 1.5rem !important;
+    font-weight: 700 !important;
+    color: var(--secondary-color);
+}
+
+.fc-button {
+    border-radius: 0.75rem !important;
+    font-weight: 600 !important;
+    text-transform: capitalize !important;
+    padding: 0.6rem 1.2rem !important;
+    border: none !important;
+}
+
+.fc-event {
+    cursor: pointer;
+    border-radius: 0.5rem !important;
+    padding: 0.2rem 0.5rem !important;
+    border: none !important;
+    font-weight: 500 !important;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.fc-daygrid-event-dot {
+    border-color: currentColor !important;
+}
+
+/* Modal Styles */
+.calendar-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(15, 23, 42, 0.4);
+    backdrop-filter: blur(8px);
+    z-index: 2000;
+    align-items: center;
+    justify-content: center;
+}
+
+.calendar-modal-content {
+    background: white;
+    padding: 2.5rem;
+    border-radius: 2rem;
+    max-width: 500px;
+    width: 90%;
+    box-shadow: var(--shadow-lg);
+    animation: calendarModalSlideUp 0.3s ease-out;
+}
+
+@keyframes calendarModalSlideUp {
+    from {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.modal-header-flex {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.modal-close-btn {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: var(--text-light);
+}
+
+.calendar-detail-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+    padding-bottom: 1.25rem;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.calendar-detail-item:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+}
+
+.calendar-detail-item i {
+    width: 32px;
+    height: 32px;
+    background: #f1f5f9;
+    color: var(--primary-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.75rem;
+    font-size: 0.9rem;
+}
+
+.calendar-detail-label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-light);
+    font-weight: 600;
+    margin-bottom: 0.15rem;
+}
+
+.calendar-detail-value {
+    font-weight: 600;
+    color: var(--secondary-color);
+}
+
+/* Sidebar Sections */
+.calendar-sidebar-section {
+    background: var(--white);
+    border-radius: 2rem;
+    padding: 2rem;
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow-md);
+}
+
+.calendar-sidebar-section h4 {
+    margin-bottom: 1.5rem;
+    font-size: 1.1rem;
+}
+
+/* Availability Form */
+.availability-form-grid {
+    display: grid;
+    gap: 1rem;
+}
+
+.availability-input-group {
+    display: block;
+}
+
+.availability-label-small {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-light);
+    display: block;
+    margin-bottom: 0.5rem;
+}
+
+.availability-input-field {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid var(--border-color);
+    border-radius: 0.75rem;
+    font-family: inherit;
+}
+
+.btn-block-date {
+    padding: 0.75rem;
+    background: #ef4444;
+    font-size: 0.9rem;
+}
+
+.btn-unblock-date {
+    padding: 0.75rem;
+    font-size: 0.9rem;
+}
+
+/* Legend Styles */
+.calendar-legend-grid {
+    display: grid;
+    gap: 1rem;
+}
+
+.legend-item-flex {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.legend-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+}
+
+.legend-text {
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.legend-blocked-box {
+    width: 12px;
+    height: 12px;
+    border-radius: 3px;
+    background: #fee2e2;
+    border: 1px solid #fecaca;
+}
+
+.legend-text-danger {
+    color: #ef4444;
+}
+
+/* Weekly List */
+.weekly-events-grid {
+    display: grid;
+    gap: 1rem;
+}
+
+.weekly-event-card {
+    padding: 1rem;
+    background: #f8fafc;
+    border-radius: 1rem;
+    border-left: 4px solid var(--primary-color);
+}
+
+.weekly-event-date {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--primary-color);
+    margin-bottom: 0.25rem;
+}
+
+.weekly-event-name {
+    font-weight: 700;
+    font-size: 0.9rem;
+    color: var(--secondary-color);
+}
+
+.weekly-event-guests {
+    font-size: 0.75rem;
+    color: var(--text-light);
+}
+
+.empty-week-text {
+    font-size: 0.85rem;
+    color: var(--text-light);
+    text-align: center;
+}
+
+/* Modal Layout Utilities */
+.modal-footer-gap {
+    margin-top: 2rem;
+    display: flex;
+    gap: 1rem;
+}
+
+.flex-1 {
+    flex: 1;
+}
+
+.p-1 {
+    padding: 1rem;
+}

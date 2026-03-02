@@ -29,37 +29,329 @@
         </div>
     </nav>
     <div class="success-container">
-        <i class="fas fa-check-circle success-icon"></i>
-        <h1>Booking Request Sent!</h1>
-        <p>Your request has been sent to the caterer. We have created an account for you.</p>
-
-        <div
-            style="background: #f3f4f6; padding: 2rem; border-radius: 0.5rem; margin: 2rem 0; text-align: left; border: 1px solid #e5e7eb;">
-            <div style="margin-bottom: 1rem; border-bottom: 1px solid #e5e7eb; padding-bottom: 1rem;">
-                <h4 style="margin-bottom: 0.5rem;">Verification Status</h4>
-                <p style="color: #059669; font-weight: 600;"><i class="fas fa-shield-alt"></i> Identity Verified</p>
+        <div class="success-card">
+            <div class="success-header">
+                <div class="icon-pulse">
+                    <i class="fas fa-check-circle success-icon"></i>
+                </div>
+                <h1 class="font-playfair">Booking Success!</h1>
+                <p class="subtitle">Your request has been delivered to the caterer.</p>
             </div>
 
-            {% if is_new_user %}
-            <div
-                style="background: #eff6ff; padding: 1rem; border-radius: 0.5rem; border: 1px dashed #3b82f6; margin-bottom: 1rem;">
-                <h4 style="color: #1e40af; margin-bottom: 0.5rem;">Account Created Successfully</h4>
-                <p style="font-size: 0.9rem; margin-bottom: 0.5rem;">We've generated a temporary password for you:</p>
-                <code
-                    style="background: #fff; padding: 0.5rem; border-radius: 0.25rem; font-weight: bold; font-size: 1.1rem; border: 1px solid #bfdbfe; display: block; text-align: center;">{{ password_generated }}</code>
-                <p style="font-size: 0.85rem; margin-top: 0.5rem; color: #6b7280;">Please save this password. We sent a
-                    copy to {{ user.email }}.</p>
-            </div>
-            {% endif %}
+            <div class="success-details">
+                <!-- Method Specific Instructions -->
+                {% if booking.payment_method == 'Cash' %}
+                <div class="instruction-box cash-instruction">
+                    <div class="box-icon"><i class="fas fa-hand-holding-usd"></i></div>
+                    <div class="box-content">
+                        <h4>Cash Payment Selected</h4>
+                        <p>Please coordinate directly with <strong>{{ booking.caterer.business_name }}</strong>
+                            regarding the settlement of your reservation fee and total balance.</p>
+                    </div>
+                </div>
+                {% else %}
+                <div class="instruction-box digital-instruction">
+                    <div class="box-icon"><i class="fas fa-credit-card"></i></div>
+                    <div class="box-content">
+                        <h4>Digital Payment Recorded</h4>
+                        <p>Your transaction has been logged. The caterer will review your booking and finalize the
+                            confirmation shortly.</p>
+                    </div>
+                </div>
+                {% endif %}
 
-            <div style="display: flex; justify-content: space-between; font-size: 0.9rem;">
-                <span><strong>Booking ID:</strong> #{{ booking.id }}</span>
-                <span><strong>Email:</strong> {{ user.email }}</span>
+                <div class="status-summary">
+                    <div class="summary-item">
+                        <span class="label">Booking ID</span>
+                        <span class="value">#{{ booking.id }}</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="label">Event Date</span>
+                        <span class="value">{{ booking.event_date.strftime('%B %d, %Y') }}</span>
+                    </div>
+                </div>
+
+                {% if is_new_user %}
+                <div class="account-notice">
+                    <div class="notice-header">
+                        <i class="fas fa-user-plus"></i>
+                        <span>Account Created Successfully</span>
+                    </div>
+                    <p>We've generated a secure temporary password for your new account:</p>
+                    <div class="password-display">
+                        <code>{{ password_generated }}</code>
+                        <button class="btn-copy" onclick="copyPassword('{{ password_generated }}')"><i
+                                class="far fa-copy"></i></button>
+                    </div>
+                    <p class="notice-footer">A copy has been sent to <strong>{{ user.email }}</strong></p>
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="success-actions">
+                <a href="/bookings/my" class="btn-primary">Manage My Bookings <i class="fas fa-arrow-right"></i></a>
+                <a href="/" class="btn-link">Return to Home</a>
             </div>
         </div>
-
-        <a href="/bookings/my" class="btn-primary">View My Bookings</a>
     </div>
+
+    <style>
+        :root {
+            --primary-color: #f7b733;
+            --secondary-color: #2c3e50;
+            --success-color: #10b981;
+            --info-color: #3b82f6;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-main: #1e293b;
+            --text-light: #64748b;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        }
+
+        .success-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 80vh;
+            padding: 2rem;
+        }
+
+        .success-card {
+            background: var(--card-bg);
+            border-radius: 2rem;
+            width: 100%;
+            max-width: 550px;
+            padding: 3rem;
+            box-shadow: 0 20px 50px -10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .success-header h1 {
+            font-size: 2.25rem;
+            margin: 1rem 0 0.5rem;
+            color: var(--secondary-color);
+        }
+
+        .success-header .subtitle {
+            color: var(--text-light);
+            margin-bottom: 2rem;
+        }
+
+        .success-icon {
+            font-size: 5rem;
+            color: var(--success-color);
+        }
+
+        .icon-pulse {
+            animation: pulse 2s infinite;
+            display: inline-block;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.05);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        .instruction-box {
+            display: flex;
+            gap: 1.25rem;
+            padding: 1.5rem;
+            border-radius: 1.25rem;
+            text-align: left;
+            margin-bottom: 2rem;
+            border: 1px solid transparent;
+        }
+
+        .cash-instruction {
+            background: rgba(16, 185, 129, 0.05);
+            border-color: rgba(16, 185, 129, 0.2);
+        }
+
+        .digital-instruction {
+            background: rgba(59, 130, 246, 0.05);
+            border-color: rgba(59, 130, 246, 0.2);
+        }
+
+        .box-icon {
+            font-size: 1.5rem;
+            width: 48px;
+            height: 48px;
+            border-radius: 1rem;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .cash-instruction .box-icon {
+            color: var(--success-color);
+        }
+
+        .digital-instruction .box-icon {
+            color: var(--info-color);
+        }
+
+        .box-content h4 {
+            margin: 0 0 0.25rem;
+            font-size: 1rem;
+            color: var(--secondary-color);
+        }
+
+        .box-content p {
+            margin: 0;
+            font-size: 0.85rem;
+            color: var(--text-light);
+            line-height: 1.4;
+        }
+
+        .status-summary {
+            display: flex;
+            justify-content: space-around;
+            padding: 1.25rem;
+            background: #f1f5f9;
+            border-radius: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .summary-item {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .summary-item .label {
+            font-size: 0.75rem;
+            color: var(--text-light);
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+
+        .summary-item .value {
+            font-weight: 800;
+            color: var(--secondary-color);
+        }
+
+        .account-notice {
+            background: #fff;
+            border: 2px dashed #e2e8f0;
+            border-radius: 1.25rem;
+            padding: 1.5rem;
+            margin-top: 2rem;
+            text-align: left;
+        }
+
+        .notice-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: var(--info-color);
+            font-weight: 700;
+            margin-bottom: 0.75rem;
+        }
+
+        .password-display {
+            display: flex;
+            align-items: center;
+            background: #f8fafc;
+            padding: 0.75rem 1rem;
+            border-radius: 0.75rem;
+            margin: 0.75rem 0;
+            border: 1px solid #e2e8f0;
+        }
+
+        .password-display code {
+            flex-grow: 1;
+            font-size: 1.25rem;
+            font-weight: 900;
+            letter-spacing: 1px;
+            color: var(--secondary-color);
+        }
+
+        .btn-copy {
+            background: none;
+            border: none;
+            color: var(--text-light);
+            cursor: pointer;
+            padding: 0.5rem;
+            transition: color 0.2s;
+        }
+
+        .btn-copy:hover {
+            color: var(--primary-color);
+        }
+
+        .success-actions {
+            margin-top: 3rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .btn-primary {
+            background: var(--secondary-color);
+            color: white;
+            padding: 1.25rem;
+            border-radius: 1.25rem;
+            text-decoration: none;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 10px 20px -5px rgba(44, 62, 80, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            background: var(--primary-color);
+            box-shadow: 0 15px 30px -10px rgba(247, 183, 51, 0.4);
+        }
+
+        .btn-link {
+            color: var(--text-light);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .btn-link:hover {
+            color: var(--secondary-color);
+        }
+
+        .font-playfair {
+            font-family: 'Playfair Display', serif;
+        }
+    </style>
+
+    <script>
+        function copyPassword(pw) {
+            navigator.clipboard.writeText(pw).then(() => {
+                const btn = document.querySelector('.btn-copy i');
+                btn.className = 'fas fa-check';
+                btn.style.color = '#10b981';
+                setTimeout(() => {
+                    btn.className = 'far fa-copy';
+                    btn.style.color = '';
+                }, 2000);
+            });
+        }
+    </script>
 </body>
 
 </html>

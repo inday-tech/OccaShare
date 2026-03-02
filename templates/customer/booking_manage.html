@@ -1,0 +1,324 @@
+{% extends "customer/layout.html" %}
+
+{% block title %}Manage Booking #{{ booking.id }} - OccaServe{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', path='/css/customer/booking_manage.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="back-navigation">
+    <a href="/customer/bookings">
+        <i class="fas fa-arrow-left"></i> Back to Bookings
+    </a>
+</div>
+
+<div class="info-card" style="padding: 3rem;">
+    <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+        <div>
+            <h1 style="font-family: 'Playfair Display', serif; font-size: 2.5rem; margin-bottom: 0.5rem;">
+                Booking #{{ booking.id }}
+            </h1>
+            <p style="color: var(--text-light);">{{ booking.event_name or 'Untitled Event' }} &bull; {{
+                booking.event_date.strftime('%B %d, %Y') }}</p>
+        </div>
+        <div class="status-badge status-{{ booking.status or 'pending' }}">
+            {{ booking.status or 'pending' }}
+        </div>
+    </div>
+
+    <!-- Status Timeline -->
+    <div class="status-timeline">
+        <div class="timeline-track"></div>
+        <div class="timeline-progress" style="width: {{ (current_step_idx / (status_steps|length - 1)) * 100 }}%;">
+        </div>
+
+        {% for step in status_steps %}
+        <div
+            class="timeline-step {% if loop.index0 < current_step_idx %}completed{% elif loop.index0 == current_step_idx %}active{% endif %}">
+            <div class="step-circle">
+                {% if loop.index0 < current_step_idx %} <i class="fas fa-check"></i>
+                    {% else %}
+                    <i
+                        class="fas {% if step == 'draft' %}fa-file{% elif step == 'pending' %}fa-clock{% elif step == 'confirmed' %}fa-calendar-check{% else %}fa-star{% endif %}"></i>
+                    {% endif %}
+            </div>
+            <div class="step-label">{{ step }}</div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<div class="manage-grid">
+    <div class="left-col">
+        <!-- Event Details -->
+        <div class="info-card">
+            <h2 class="section-title"><i class="fas fa-calendar-alt"></i> Event Details</h2>
+            <div class="detail-row">
+                <span class="detail-label">Event Type</span>
+                <span class="detail-value">{{ booking.event_type or 'N/A' }}</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Event Name</span>
+                <span class="detail-value">{{ booking.event_name or 'N/A' }}</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Schedule</span>
+                <span class="detail-value">
+                    {{ booking.event_date.strftime('%B %d, %Y') }} at
+                    {{ booking.event_time.strftime('%I:%M %p') if booking.event_time else 'TBD' }}
+                </span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Venue</span>
+                <span class="detail-value">{{ booking.venue_address or 'TBD' }}</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Guest Count</span>
+                <span class="detail-value">{{ booking.guest_count }} guests</span>
+            </div>
+            {% if booking.special_requests %}
+            <div
+                style="margin-top: 1.5rem; padding: 1rem; background: #f8fafc; border-radius: 1rem; font-style: italic; color: #475569;">
+                "{{ booking.special_requests }}"
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Menu Details -->
+        <div class="info-card">
+            <h2 class="section-title"><i class="fas fa-utensils"></i> Menu Selection</h2>
+            <div style="margin-bottom: 1rem;">
+                <div style="font-weight: 700; color: var(--secondary-color);">Package: {{ booking.package.name if
+                    booking.package else 'Custom Menu' }}</div>
+                <div style="font-size: 0.9rem; color: var(--text-light);">{{ booking.package.description if
+                    booking.package else '' }}</div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1.5rem;">
+                {% for b_item in booking.selected_items %}
+                <div
+                    style="display: flex; align-items: center; gap: 1rem; padding: 0.75rem; background: #f8fafc; border-radius: 1rem;">
+                    <div style="width: 8px; height: 8px; border-radius: 50%; background: var(--primary-color);"></div>
+                    <span style="font-weight: 600; font-size: 0.9rem;">
+                        {{ b_item.menu_item.name }}
+                        {% if b_item.is_add_on %} <span
+                            style="font-size: 0.7rem; color: var(--primary-color);">(ADD-ON)</span> {% endif %}
+                    </span>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- History -->
+        <div class="info-card">
+            <h2 class="section-title"><i class="fas fa-history"></i> Activity History</h2>
+            <div style="display: flex; flex-direction: column; gap: 1.5rem; position: relative; padding-left: 2rem;">
+                <div style="position: absolute; left: 7px; top: 0; bottom: 0; width: 2px; background: #e2e8f0;"></div>
+                {% for log in booking.history|sort(attribute='created_at', reverse=True) %}
+                <div style="position: relative;">
+                    <div
+                        style="position: absolute; left: -21px; top: 4px; width: 16px; height: 16px; border-radius: 50%; background: white; border: 2px solid var(--primary-color);">
+                    </div>
+                    <div style="font-size: 0.8rem; color: var(--text-light);">{{ log.created_at.strftime('%b %d, %Y
+                        &bull; %H:%M') }}</div>
+                    <div style="font-weight: 700; color: var(--secondary-color); margin: 0.25rem 0;">Status: {{
+                        log.status|capitalize }}</div>
+                    <div style="font-size: 0.9rem; color: #4b5563;">{{ log.notes }}</div>
+                </div>
+                {% endfor %}
+                <div style="position: relative;">
+                    <div
+                        style="position: absolute; left: -21px; top: 4px; width: 16px; height: 16px; border-radius: 50%; background: white; border: 2px solid #e2e8f0;">
+                    </div>
+                    <div style="font-size: 0.8rem; color: var(--text-light);">{{ booking.created_at.strftime('%b %d, %Y
+                        &bull; %H:%M') }}</div>
+                    <div style="font-weight: 700; color: var(--secondary-color); margin: 0.25rem 0;">Booking Created
+                    </div>
+                    <div style="font-size: 0.9rem; color: #4b5563;">Reservation placeholder created.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="right-col">
+        <!-- Caterer Info -->
+        <div class="info-card">
+            <h2 class="section-title"><i class="fas fa-store"></i> Your Caterer</h2>
+            <div class="caterer-mini-profile">
+                <img src="{{ booking.caterer.logo_url or url_for('static', path='/img/default_caterer.png') }}"
+                    class="caterer-logo" alt="Logo">
+                <div>
+                    <h3 style="font-size: 1.2rem; color: var(--secondary-color); margin-bottom: 0.25rem;">{{
+                        booking.caterer.business_name }}</h3>
+                    <div style="color: var(--primary-color); font-weight: 700;">Verified Partner</div>
+                </div>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                <a href="/caterers/{{ booking.caterer.id }}" class="btn-outline"
+                    style="width: 100%; text-align: center; padding: 0.8rem;">View Profile</a>
+                <a href="mailto:{{ booking.caterer.user.email }}" class="btn-primary"
+                    style="width: 100%; text-align: center; padding: 0.8rem; background: var(--secondary-color);">Contact
+                    Caterer</a>
+            </div>
+        </div>
+
+        <!-- Payment Info / Action Center -->
+        <div class="info-card payment-action-card">
+            <h2 class="section-title"><i class="fas fa-receipt"></i> Payment & Actions</h2>
+            <div class="detail-row">
+                <span class="detail-label">Total Amount</span>
+                <span class="detail-value total-value">₱{{ "{:,.2f}".format(booking.total_amount) }}</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Paid (Reservation Fee)</span>
+                <span class="detail-value">₱{{ "{:,.2f}".format(booking.reservation_fee) if booking.payment_status in
+                    ['paid', 'deposit_paid'] else '0.00' }}</span>
+            </div>
+            {% set balance_val = (booking.total_amount|float) - ((booking.reservation_fee|float) if
+            booking.payment_status in ['paid', 'deposit_paid'] and booking.reservation_fee else 0.0) %}
+            <div class="detail-row balance-highlight-row">
+                <span class="detail-label">Outstanding Balance</span>
+                <span class="detail-value text-danger">
+                    ₱{{ "{:,.2f}".format(balance_val) }}
+                </span>
+            </div>
+
+            <div style="margin-top: 2rem; text-align: center;">
+
+                {% if booking.status == 'draft' %}
+                <div class="alert-banner alert-warning">
+                    <p>This booking is incomplete. You need to finalize your quotation and reservation fee to secure
+                        your caterer.</p>
+                </div>
+
+                {% set next_step = '/bookings/step/kyc/' ~ booking.id %}
+                {% if current_step_idx == 2 %} {% set next_step = '/bookings/step/quotation/' ~ booking.id %} {% endif
+                %}
+                {% if current_step_idx == 3 %} {% set next_step = '/bookings/step/payment/' ~ booking.id %} {% endif %}
+
+                <a href="{{ next_step }}" class="btn-primary"
+                    style="display: block; width: 100%; text-decoration: none; padding: 1rem; font-weight: 700;">
+                    Continue Booking <i class="fas fa-arrow-right" style="margin-left: 0.5rem;"></i>
+                </a>
+
+                <form action="/customer/bookings/manage/{{ booking.id }}/cancel" method="POST" style="margin-top: 1rem;"
+                    onsubmit="return confirm('Are you sure you want to delete this draft booking? This action cannot be undone.');">
+                    <button type="submit" class="btn-outline"
+                        style="width: 100%; padding: 1rem; font-weight: 700; color: #ef4444; border-color: #ef4444; background: white;">
+                        <i class="fas fa-trash-alt" style="margin-right: 0.5rem;"></i> Delete Draft
+                    </button>
+                </form>
+
+                {% elif booking.status == 'pending_payment' or booking.status == 'pending' %}
+                <div class="alert-banner alert-info">
+                    <p>Your reservation is pending payment. Please complete the transaction to secure your date.</p>
+                    <div class="amount-due-highlight">
+                        <strong>Amount Due: ₱{{ "{:,.2f}".format(booking.reservation_fee or 0) }}</strong>
+                    </div>
+                </div>
+                <form action="/bookings/step/payment/{{ booking.id }}" method="POST">
+                    <button type="submit" class="btn-primary" style="width: 100%; padding: 1rem; font-weight: 700;">
+                        Pay Reservation Fee
+                    </button>
+                </form>
+
+                <form action="/customer/bookings/manage/{{ booking.id }}/cancel" method="POST" style="margin-top: 1rem;"
+                    onsubmit="return confirm('Are you sure you want to cancel this booking request?');">
+                    <button type="submit" class="btn-outline"
+                        style="width: 100%; padding: 1rem; font-weight: 700; color: #ef4444; border-color: #ef4444; background: white;">
+                        <i class="fas fa-times" style="margin-right: 0.5rem;"></i> Cancel Request
+                    </button>
+                </form>
+
+                {% elif booking.status == 'confirmed' %}
+                <div class="alert-banner alert-success">
+                    <p><i class="fas fa-check-circle"></i> Reservation Confirmed</p>
+                </div>
+
+                {% set balance_val = (booking.total_amount|float) - ((booking.reservation_fee|float) if
+                booking.payment_status in ['paid', 'deposit_paid'] and booking.reservation_fee else 0.0) %}
+
+                {% if balance_val > 0 %}
+                <div class="payment-settlement-container">
+                    <div class="payment-settlement-header">
+                        <i class="fas fa-wallet"></i>
+                        <div>
+                            <h4 style="margin: 0; font-size: 1.1rem;">Settle Outstanding Balance</h4>
+                            <p style="margin: 0; font-size: 0.85rem; color: var(--text-light);">Complete your payment to
+                                finalize the event details.</p>
+                        </div>
+                    </div>
+
+                    <div class="balance-display-box">
+                        <span class="label">Amount Due</span>
+                        <span class="value">₱{{ "{:,.2f}".format(balance_val) }}</span>
+                    </div>
+
+                    <form action="/bookings/pay-balance/{{ booking.id }}" method="POST" id="balance-payment-form">
+                        <input type="hidden" name="payment_method" id="selected-balance-method" value="Paymongo">
+
+                        <div class="balance-method-grid">
+                            <div class="method-select-card active" onclick="setBalanceMethod('Paymongo', this)">
+                                <div class="method-icon"><i class="fas fa-shield-alt"></i></div>
+                                <div class="method-details">
+                                    <span class="name">Digital Checkout</span>
+                                    <span class="desc">Quick & Secure</span>
+                                </div>
+                                <div class="selection-indicator"><i class="fas fa-check-circle"></i></div>
+                            </div>
+                            <div class="method-select-card" onclick="setBalanceMethod('Cash', this)">
+                                <div class="method-icon"><i class="fas fa-hand-holding-usd"></i></div>
+                                <div class="method-details">
+                                    <span class="name">Cash Payment</span>
+                                    <span class="desc">Manual Settlement</span>
+                                </div>
+                                <div class="selection-indicator"><i class="fas fa-check-circle"></i></div>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn-pay-balance">
+                            <span>Pay Now</span>
+                            <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </form>
+                </div>
+
+                <script>
+                    function setBalanceMethod(method, element) {
+                        document.getElementById('selected-balance-method').value = method;
+                        document.querySelectorAll('.method-select-card').forEach(c => c.classList.remove('active'));
+                        element.classList.add('active');
+
+                        const btn = document.querySelector('.btn-pay-balance span');
+                        btn.innerText = method === 'Cash' ? 'Confirm Cash Intent' : 'Pay Now';
+                    }
+                </script>
+                {% else %}
+                <div class="settled-status-box">
+                    <p><i class="fas fa-stamp"></i> Fully Paid & Settled</p>
+                </div>
+                {% endif %}
+
+                {% if booking.payment_method %}
+                <div class="payment-method-summary">
+                    <div class="summary-line">
+                        <strong>Latest Method:</strong> <span>{{ booking.payment_method }}</span>
+                    </div>
+                    <div class="summary-line">
+                        <strong>Reference:</strong> <span class="ref-id">{{ booking.payment_reference or 'Pending
+                            Verification' }}</span>
+                    </div>
+                </div>
+                {% endif %}
+
+                {% elif booking.status == 'cancelled' %}
+                <div class="alert-banner alert-danger">
+                    <p>This booking was cancelled.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

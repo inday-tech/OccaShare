@@ -31,17 +31,38 @@ async def payment_webhook(
     request: Request,
     db: Session = Depends(database.get_db)
 ):
-    # This endpoint receives callbacks from the payment gateway
+    # This endpoint receives callbacks from the payment gateway (Paymongo or Mock)
     try:
         payload = await request.json()
-        booking_id = payload.get("booking_id")
-        status = payload.get("status") # 'success', 'failed'
+        
+        # Determine if it's Paymongo format
+        if "data" in payload and "attributes" in payload["data"]:
+            pm_attrs = payload["data"]["attributes"]
+            if pm_attrs.get("type") == "link.payment.paid":
+                payment_data = pm_attrs.get("data", {}).get("attributes", {})
+                status = payment_data.get("status")
+                remarks = payment_data.get("remarks", "")
+                
+                # Extract booking ID from remarks e.g. "booking_id:15"
+                if remarks.startswith("booking_id:"):
+                    try:
+                        booking_id = int(remarks.split(":", 1)[1])
+                    except ValueError:
+                        booking_id = None
+                else:
+                    booking_id = None
+            else:
+                return {"status": "ignored"}
+        else:
+            # Mock Fallback
+            booking_id = payload.get("booking_id")
+            status = payload.get("status") # 'success', 'failed'
         
         booking = db.query(models.Booking).get(booking_id)
         if not booking:
              return {"error": "Booking not found"}
 
-        if status == "success":
+        if status in ["success", "paid"]:
             booking.status = "confirmed"
             booking.payment_status = "paid"
             

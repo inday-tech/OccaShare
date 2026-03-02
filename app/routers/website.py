@@ -25,16 +25,23 @@ async def read_root(request: Request, db: Session = Depends(database.get_db)):
 
     packages = db.query(models.CateringPackage).filter(models.CateringPackage.is_active == True).limit(3).all()
     caterers = db.query(models.CatererProfile).order_by(models.CatererProfile.rating.desc()).limit(5).all()
+    highlighted_reviews = db.query(models.Review).filter(models.Review.is_highlighted == True).order_by(models.Review.created_at.desc()).limit(6).all()
+    
     return templates.TemplateResponse("index.html", {
         "request": request, 
         "packages": packages,
         "caterers": caterers,
+        "highlighted_reviews": highlighted_reviews,
         "user": user
     })
 
 @router.get("/about", response_class=HTMLResponse)
 async def about_page(request: Request):
     return templates.TemplateResponse("about.html", {"request": request})
+
+@router.get("/support/help-center", response_class=HTMLResponse)
+async def help_center_page(request: Request):
+    return templates.TemplateResponse("support/help_center.html", {"request": request})
 
 @router.get("/support/privacy-policy", response_class=HTMLResponse)
 async def privacy_policy_page(request: Request):

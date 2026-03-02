@@ -2,6 +2,10 @@
 
 {% block wizard_title %}Identity Verification{% endblock %}
 
+{% block step_css %}
+<link rel="stylesheet" href="{{ url_for('static', path='/css/customer/booking_wizard/step_kyc.css') }}">
+{% endblock %}
+
 {% block wizard_content %}
 <div class="kyc-step">
     <h2 class="wizard-title">Identity Verification</h2>
@@ -10,13 +14,10 @@
     <div id="kyc-form-container">
         <!-- Phase 1: ID Upload -->
         <div id="step-id-upload" class="kyc-substep active">
-            <div class="kyc-controls-grid"
-                style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 2rem;">
+            <div class="kyc-controls-grid">
                 <div class="id-type-selection">
-                    <label for="id_type"
-                        style="display: block; font-weight: 600; margin-bottom: 0.5rem; color: var(--slate-700);">Select
-                        ID Type</label>
-                    <select id="id_type" class="minimal-input" style="width: 100%;" onchange="validateIdSelection()">
+                    <label for="id_type" class="kyc-label kyc-label-slate">Select ID Type</label>
+                    <select id="id_type" class="minimal-input" onchange="validateIdSelection()">
                         <option value="">-- Choose ID Type --</option>
                         <option value="Passport">Passport</option>
                         <option value="Driver's License">Driver's License</option>
@@ -32,9 +33,7 @@
                     </select>
                 </div>
                 <div class="id-number-input">
-                    <label for="id_number"
-                        style="display: block; font-weight: 600; margin-bottom: 0.5rem; color: var(--slate-700);">ID
-                        Number</label>
+                    <label for="id_number" class="kyc-label kyc-label-slate">ID Number</label>
                     <input type="text" id="id_number" class="minimal-input" placeholder="Enter ID Number"
                         oninput="validateIdSelection()">
                 </div>
@@ -48,7 +47,7 @@
                     onchange="handleIdUpload(this)">
             </div>
             <div id="id-preview" class="image-preview" style="display: none;">
-                <div class="badge badge-success" id="id-valid-badge" style="display: none; margin-bottom: 1rem;"><i
+                <div class="badge badge-success kyc-preview-badge" id="id-valid-badge" style="display: none;"><i
                         class="fas fa-check-circle"></i> ID Pattern Validated</div>
                 <img id="id-image" src="" alt="ID Preview">
                 <div class="preview-actions">
@@ -102,17 +101,14 @@
                 <h3 id="status-text">Uploading Secure Data...</h3>
                 <p id="status-subtext">Initializing background verification.</p>
 
-                <div id="fraud-meter" style="display: none; margin: 2rem 0;">
-                    <label style="font-size: 0.8rem; font-weight: 600; color: var(--slate-500);">FRAUD SCORE TRUST
-                        LEVEL</label>
-                    <div class="progress" style="height: 8px; border-radius: 4px; background: #e2e8f0;">
-                        <div id="fraud-bar" class="progress-bar"
-                            style="width: 0%; background: var(--primary-color); transition: width 1s ease-in-out;">
-                        </div>
+                <div id="fraud-meter" class="fraud-meter-container" style="display: none;">
+                    <label class="kyc-label-small">FRAUD SCORE TRUST LEVEL</label>
+                    <div class="fraud-progress-wrapper">
+                        <div id="fraud-bar" class="fraud-progress-bar"></div>
                     </div>
                 </div>
 
-                <div id="retry-container" style="display: none; margin-top: 2rem;">
+                <div id="retry-container" class="retry-wrapper" style="display: none;">
                     <button type="button" class="btn btn-primary" onclick="window.location.reload()">
                         <i class="fas fa-redo"></i> Try Again / Ulitin
                     </button>
@@ -131,490 +127,12 @@
         </button>
     </div>
 </div>
-</div>
 
-<style>
-    .upload-zone {
-        border: 2px dashed var(--border-color);
-        border-radius: 1.5rem;
-        padding: 4rem 2rem;
-        text-align: center;
-        cursor: pointer;
-        background: #f8fafc;
-        transition: all 0.2s;
-    }
-
-    .upload-zone:hover:not(.disabled) {
-        border-color: var(--primary-color);
-        background: #f1f5f9;
-    }
-
-    .upload-zone.disabled {
-        opacity: 0.6;
-        cursor: not-allowed;
-        background: #f1f5f9;
-    }
-
-    .minimal-input {
-        width: 100%;
-        padding: 0.875rem 1rem;
-        border: 2px solid #e2e8f0;
-        border-radius: 0.75rem;
-        font-size: 0.95rem;
-        transition: all 0.2s ease;
-        background: #fff;
-        color: #1a2e18;
-    }
-
-    .minimal-input:focus {
-        outline: none;
-        border-color: var(--primary-color);
-        box-shadow: 0 0 0 4px rgba(var(--primary-rgb), 0.1);
-    }
-
-    .upload-zone i {
-        color: var(--primary-color);
-        margin-bottom: 1.5rem;
-    }
-
-    .image-preview {
-        text-align: center;
-        margin-top: 2rem;
-    }
-
-    .image-preview img {
-        max-width: 100%;
-        max-height: 300px;
-        border-radius: 1rem;
-        box-shadow: var(--shadow-lg);
-    }
-
-    .preview-actions {
-        margin-top: 1.5rem;
-        display: flex;
-        gap: 1rem;
-        justify-content: center;
-    }
-
-    .scanner-viewport {
-        position: relative;
-        width: 300px;
-        height: 300px;
-        background: #000;
-        margin: 0 auto 1.5rem;
-        border-radius: 50%;
-        overflow: hidden;
-        border: 4px solid var(--primary-color);
-        box-shadow: 0 0 20px rgba(var(--primary-rgb), 0.3);
-    }
-
-    #webcam {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-    }
-
-    .scanner-overlay {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        pointer-events: none;
-        z-index: 10;
-    }
-
-    .face-guide {
-        width: 70%;
-        height: 80%;
-        border: 2px solid rgba(255, 255, 255, 0.4);
-        border-radius: 50% / 60% 60% 40% 40%;
-        box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.4);
-        position: relative;
-    }
-
-    /* Scanning Line Animation */
-    .scanning-line {
-        position: absolute;
-        width: 100%;
-        height: 4px;
-        background: var(--primary-color);
-        box-shadow: 0 0 15px var(--primary-color);
-        top: 0;
-        left: 0;
-        animation: scanMove 2.5s infinite ease-in-out;
-        z-index: 20;
-        display: none;
-    }
-
-    @keyframes scanMove {
-        0% {
-            top: 0%;
-            opacity: 0;
-        }
-
-        10% {
-            opacity: 1;
-        }
-
-        90% {
-            opacity: 1;
-        }
-
-        100% {
-            top: 100%;
-            opacity: 0;
-        }
-    }
-
-    .scanner-header h3 {
-        color: var(--slate-900);
-        font-weight: 700;
-        margin-bottom: 0.5rem;
-    }
-
-    .scanner-header p {
-        color: var(--slate-500);
-        font-size: 0.95rem;
-    }
-
-    .comparison-preview {
-        display: flex;
-        gap: 1.5rem;
-        justify-content: center;
-        margin-top: 2rem;
-        animation: slideUp 0.4s ease-out;
-    }
-
-    .prev-box {
-        text-align: center;
-        padding: 0.5rem;
-        background: #fff;
-        border-radius: 1rem;
-        box-shadow: var(--shadow-sm);
-    }
-
-    .prev-box img {
-        width: 140px;
-        height: 140px;
-        object-fit: cover;
-        border-radius: 0.8rem;
-        border: 2px solid #e2e8f0;
-    }
-
-    .prev-box label {
-        display: block;
-        font-size: 0.75rem;
-        margin-top: 0.5rem;
-        color: #64748b;
-        font-weight: 600;
-        text-transform: uppercase;
-    }
-
-    .scan-feedback {
-        position: absolute;
-        bottom: 2rem;
-        color: #fff;
-        background: rgba(15, 23, 42, 0.8);
-        backdrop-filter: blur(4px);
-        padding: 0.6rem 1.2rem;
-        border-radius: 2rem;
-        font-size: 0.85rem;
-        font-weight: 500;
-        letter-spacing: 0.02em;
-        border: 1px solid rgba(255, 255, 255, 0.1);
-    }
-
-    .liveliness-prompt {
-        text-align: center;
-        margin-bottom: 1.5rem;
-        background: #ecfdf5;
-        padding: 1rem;
-        border-radius: 1rem;
-        border: 2px solid #10b981;
-        animation: pulse 2s infinite;
-    }
-
-    @keyframes pulse {
-        0% {
-            transform: scale(1);
-        }
-
-        50% {
-            transform: scale(1.02);
-        }
-
-        100% {
-            transform: scale(1);
-        }
-    }
-
-    .scanner-controls {
-        text-align: center;
-    }
-
-    .spinner {
-        width: 60px;
-        height: 60px;
-        border: 5px solid #f3f3f3;
-        border-top: 5px solid var(--primary-color);
-        border-radius: 50%;
-        animation: spin 1s linear infinite;
-        margin: 0 auto 2rem;
-    }
-
-    .frame-indicators {
-        display: flex;
-        gap: 0.5rem;
-        justify-content: center;
-        margin-top: 0.5rem;
-    }
-
-    .dot {
-        width: 12px;
-        height: 12px;
-        background: #e2e8f0;
-        border-radius: 50%;
-        transition: all 0.3s;
-    }
-
-    .dot.active {
-        background: var(--primary-color);
-        transform: scale(1.2);
-        box-shadow: 0 0 10px rgba(var(--primary-rgb), 0.4);
-    }
-
-    @keyframes spin {
-        0% {
-            transform: rotate(0deg);
-        }
-
-        100% {
-            transform: rotate(360deg);
-        }
-    }
-</style>
 {% endblock %}
 
 {% block step_js %}
 <script>
-    let bookingId = "{{ booking_id }}";
-    let stream = null;
-    let idFile = null;
-    let selfieFrames = [];
-    let pollingInterval = null;
-
-    function validateIdSelection() {
-        const idType = document.getElementById('id_type').value;
-        const idNumber = document.getElementById('id_number').value.trim();
-        const uploadZone = document.getElementById('upload-zone');
-
-        if (idType && idNumber.length >= 5) {
-            uploadZone.classList.remove('disabled');
-        } else {
-            uploadZone.classList.add('disabled');
-        }
-    }
-
-    function handleUploadClick() {
-        if (document.getElementById('upload-zone').classList.contains('disabled')) {
-            alert('Please select an ID type and enter the ID number first.');
-            return;
-        }
-        document.getElementById('id_document').click();
-    }
-
-    async function handleIdUpload(input) {
-        if (input.files && input.files[0]) {
-            idFile = input.files[0];
-            const reader = new FileReader();
-            reader.onload = function (e) {
-                document.getElementById('id-image').src = e.target.result;
-                document.getElementById('upload-zone').style.display = 'none';
-                document.querySelector('.kyc-controls-grid').style.display = 'none';
-                document.getElementById('id-preview').style.display = 'block';
-            };
-            reader.readAsDataURL(idFile);
-        }
-    }
-
-    function resetIdUpload() {
-        idFile = null;
-        document.getElementById('id-preview').style.display = 'none';
-        document.getElementById('upload-zone').style.display = 'block';
-        document.querySelector('.kyc-controls-grid').style.display = 'grid';
-        document.getElementById('id_document').value = '';
-    }
-
-    async function proceedToCamera() {
-        const idType = document.getElementById('id_type').value;
-        const idNumber = document.getElementById('id_number').value.trim();
-
-        const btn = document.getElementById('btn-proceed-camera');
-        btn.disabled = true;
-        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Validating...';
-
-        const formData = new FormData();
-        formData.append('id_type', idType);
-        formData.append('id_number', idNumber);
-        formData.append('id_document', idFile);
-
-        try {
-            const res = await fetch(`/api/bookings/${bookingId}/upload-id`, { method: 'POST', body: formData });
-            if (res.ok) {
-                document.getElementById('step-id-upload').style.display = 'none';
-                document.getElementById('scanner-container').style.display = 'block';
-            } else {
-                const data = await res.json();
-                alert('Error: ' + (data.detail || 'Failed to validate ID Pattern'));
-                btn.disabled = false;
-                btn.innerHTML = 'Use this ID <i class="fas fa-arrow-right"></i>';
-            }
-        } catch (err) {
-            alert('Network error. Check connection.');
-            btn.disabled = false;
-            btn.innerHTML = 'Use this ID <i class="fas fa-arrow-right"></i>';
-        }
-    }
-
-    async function startRealtimeScanner() {
-        const video = document.getElementById('webcam');
-        try {
-            stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } });
-            video.srcObject = stream;
-            document.getElementById('btn-start-scan').style.display = 'none';
-            document.getElementById('liveliness-prompt').style.display = 'block';
-            document.getElementById('capture-progress').style.display = 'block';
-            document.getElementById('scan-line').style.display = 'block';
-
-            // Sequential capture logic
-            const prompts = [
-                "Stay still...",
-                "Blink your eyes!",
-                "Turn your head slightly..."
-            ];
-
-            for (let i = 0; i < 3; i++) {
-                document.getElementById('prompt-instruction').innerText = prompts[i];
-                document.getElementById('scan-feedback').innerText = `Capturing Frame ${i + 1}/3...`;
-                await new Promise(r => setTimeout(r, 1200));
-                captureFrame(i + 1);
-                document.getElementById(`dot-${i + 1}`).classList.add('active');
-            }
-
-            finalizeCapture();
-        } catch (err) {
-            alert("Camera access denied: " + err);
-        }
-    }
-
-    function captureFrame(index) {
-        const video = document.getElementById('webcam');
-        const canvas = document.getElementById('frame-canvas');
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
-        canvas.getContext('2d').drawImage(video, 0, 0);
-
-        canvas.toBlob((blob) => {
-            selfieFrames.push(new File([blob], `selfie_${index}.jpg`, { type: 'image/jpeg' }));
-        }, 'image/jpeg', 0.9);
-    }
-
-    async function finalizeCapture() {
-        document.getElementById('scan-line').style.display = 'none';
-        document.getElementById('scan-feedback').innerText = "Capture Complete";
-
-        if (stream) {
-            stream.getTracks().forEach(track => track.stop());
-        }
-
-        document.getElementById('scanner-container').style.display = 'none';
-        document.getElementById('step-processing').style.display = 'block';
-
-        const formData = new FormData();
-        selfieFrames.forEach(file => formData.append('selfies', file));
-
-        try {
-            const res = await fetch(`/api/bookings/${bookingId}/verify-full`, { method: 'POST', body: formData });
-            const data = await res.json();
-
-            if (res.ok) {
-                updateStatus("Background Processing Started", "Our AI is analyzing your biometrics. Please do not close this window.");
-                startPolling();
-            } else {
-                handleRejection(data.detail);
-            }
-        } catch (err) {
-            handleRejection("Connection lost during upload.");
-        }
-    }
-
-    function startPolling() {
-        pollingInterval = setInterval(async () => {
-            try {
-                const res = await fetch(`/api/bookings/${bookingId}/status`);
-                const data = await res.json();
-
-                if (data.status === 'processing') {
-                    updateStatus("Verification in Progress...", "Analyzing patterns and fraud signals...");
-                } else if (data.status === 'approved') {
-                    stopPolling();
-                    handleApproval(data);
-                } else if (data.status === 'rejected' || data.status === 'blocked') {
-                    stopPolling();
-                    handleRejection(data.reason || "Verification failed.");
-                } else if (data.status === 'manual_review') {
-                    stopPolling();
-                    handleManualReview();
-                }
-            } catch (e) {
-                console.error("Polling error", e);
-            }
-        }, 3000);
-    }
-
-    function stopPolling() {
-        if (pollingInterval) clearInterval(pollingInterval);
-    }
-
-    function handleApproval(data) {
-        document.getElementById('processing-spinner').style.display = 'none';
-        document.getElementById('fraud-meter').style.display = 'block';
-        document.getElementById('fraud-bar').style.width = data.fraud_score + "%";
-
-        updateStatus("Verification Approved!", "Trust Score: " + data.fraud_score + "/100");
-        document.getElementById('status-text').style.color = "var(--primary-color)";
-
-        setTimeout(() => {
-            document.getElementById('btn-next').style.display = 'inline-block';
-            window.location.href = `/bookings/step/quotation/${bookingId}`;
-        }, 2000);
-    }
-
-    function handleManualReview() {
-        document.getElementById('processing-spinner').style.display = 'none';
-        updateStatus("Pending Manual Review", "Your data requires a second look by our compliance team. We will notify you shortly.");
-        document.getElementById('status-text').style.color = "#f59e0b";
-
-        setTimeout(() => {
-            window.location.href = "/customer/dashboard";
-        }, 3000);
-    }
-
-    function updateStatus(title, sub) {
-        document.getElementById('status-text').innerText = title;
-        document.getElementById('status-subtext').innerText = sub;
-    }
-
-    function handleRejection(msg) {
-        document.getElementById('processing-spinner').style.display = 'none';
-        document.getElementById('retry-container').style.display = 'block';
-        updateStatus("Security Rejection", msg);
-        document.getElementById('status-text').style.color = "#dc2626";
-    }
+    window.bookingId = "{{ booking_id }}";
 </script>
+<script src="{{ url_for('static', path='/js/customer/booking_wizard/step_kyc.js') }}"></script>
 {% endblock %}

@@ -93,6 +93,7 @@ class CatererProfile(Base):
     promotions = relationship("Promotion", back_populates="caterer")
     availability = relationship("Availability", back_populates="caterer")
     inquiries = relationship("Inquiry", back_populates="caterer")
+    payouts = relationship("Payout", back_populates="caterer")
 
 class CateringPackage(Base):
     __tablename__ = "catering_packages"
@@ -186,6 +187,7 @@ class Booking(Base):
     payment_method = Column(String, nullable=True) # GCash, Credit Card, etc.
     payment_reference = Column(String, nullable=True)
     payment_proof_url = Column(String, nullable=True)
+    payout_id = Column(Integer, ForeignKey("payouts.id"), nullable=True)
     ocr_verification = relationship("OCRVerification", back_populates="booking", uselist=False)
 
     ocr_verified = Column(Boolean, default=False)
@@ -207,6 +209,7 @@ class Booking(Base):
     verification_attempts = relationship("VerificationAttempt", back_populates="booking")
     fraud_flags = relationship("FraudFlag", back_populates="booking")
     selected_items = relationship("BookingMenuItem", back_populates="booking", cascade="all, delete-orphan")
+    payout = relationship("Payout", back_populates="bookings")
 
 class BookingMenuItem(Base):
     __tablename__ = "booking_menu_items"
@@ -258,6 +261,7 @@ class Review(Base):
     comment = Column(Text)
     recommend = Column(Boolean, default=False)
     was_punctual = Column(Boolean, default=False)
+    is_highlighted = Column(Boolean, default=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     booking = relationship("Booking", back_populates="review")
@@ -312,9 +316,9 @@ class IdentityVerification(Base):
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"), unique=True)
     verification_type = Column(String, default='government_id')
-    document_url = Column(String, nullable=False)
+    document_url = Column(String, nullable=True)
     id_number = Column(String, nullable=True)
-    selfie_url = Column(String, nullable=False) # selfie_1
+    selfie_url = Column(String, nullable=True) # selfie_1
     selfie_2_url = Column(String, nullable=True)
     selfie_3_url = Column(String, nullable=True)
     ocr_data = Column(JSONB)
@@ -404,3 +408,30 @@ class FraudFlag(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     booking = relationship("Booking", back_populates="fraud_flags")
+
+class Payout(Base):
+    __tablename__ = "payouts"
+
+    id = Column(Integer, primary_key=True, index=True)
+    caterer_id = Column(Integer, ForeignKey("caterer_profiles.id"))
+    amount = Column(Float)
+    status = Column(String, default="pending") # pending, processing, completed
+    reference_number = Column(String, nullable=True)
+    notes = Column(Text, nullable=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    completed_at = Column(DateTime(timezone=True), nullable=True)
+
+    caterer = relationship("CatererProfile", back_populates="payouts")
+    items = relationship("PayoutItem", back_populates="payout", cascade="all, delete-orphan")
+    bookings = relationship("Booking", back_populates="payout")
+
+class PayoutItem(Base):
+    __tablename__ = "payout_items"
+
+    id = Column(Integer, primary_key=True, index=True)
+    payout_id = Column(Integer, ForeignKey("payouts.id"))
+    booking_id = Column(Integer, ForeignKey("bookings.id"))
+    amount = Column(Float)
+    
+    payout = relationship("Payout", back_populates="items")
+    booking = relationship("Booking")

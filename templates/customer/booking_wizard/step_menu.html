@@ -2,6 +2,10 @@
 
 {% block wizard_title %}Select Package{% endblock %}
 
+{% block step_css %}
+<link rel="stylesheet" href="{{ url_for('static', path='/css/customer/booking_wizard/step_menu.css') }}">
+{% endblock %}
+
 {% block wizard_content %}
 <div class="wizard-header-content">
     <h2 class="wizard-title font-playfair">Select Your Catering Package</h2>
@@ -9,36 +13,27 @@
         journey.</p>
 </div>
 
-<div class="packages-grid"
-    style="display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 3rem;">
+<div class="packages-grid">
     {% for pkg in packages %}
-    <div class="package-wizard-card"
-        style="background: var(--white); border-radius: 2.5rem; overflow: hidden; box-shadow: var(--wizard-shadow); border: 1px solid var(--border-color); transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1); display: flex; flex-direction: column; animation: slideUp 0.6s ease-out forwards;">
-        <div
-            style="height: 240px; background-image: url('{{ pkg.image_url or 'https://images.unsplash.com/photo-1555244162-803834f70033?q=80&w=2070&auto=format&fit=crop' }}'); background-size: cover; background-position: center; position: relative;">
-            <div
-                style="position: absolute; top: 2rem; right: 2rem; background: rgba(255, 255, 255, 0.9); padding: 0.6rem 1.25rem; border-radius: 1.25rem; font-weight: 800; color: var(--primary-color); box-shadow: var(--shadow-sm); backdrop-filter: blur(10px); font-size: 1.1rem; border: 1px solid rgba(255,255,255,0.4);">
+    <div class="package-wizard-card">
+        <div class="package-card-image"
+            style="background-image: url('{{ pkg.image_url or 'https://images.unsplash.com/photo-1555244162-803834f70033?q=80&w=2070&auto=format&fit=crop' }}');">
+            <div class="package-card-price-badge">
                 {% if pkg.price_unit == 'per_guest' %}
-                ₱{{ "{:,.2f}".format(pkg.price) }} <span style="font-size: 0.8rem; font-weight: 600; opacity: 0.8;">/
-                    Pax</span>
+                ₱{{ "{:,.2f}".format(pkg.price) }} <span class="price-unit">/ Pax</span>
                 {% else %}
-                ₱{{ "{:,.2f}".format(pkg.price) }} <span
-                    style="font-size: 0.8rem; font-weight: 600; opacity: 0.8;">Total</span>
+                ₱{{ "{:,.2f}".format(pkg.price) }} <span class="price-unit">Total</span>
                 {% endif %}
             </div>
         </div>
-        <div style="padding: 2.5rem; flex: 1; display: flex; flex-direction: column;">
-            <h4
-                style="font-family: 'Playfair Display', serif; font-size: 1.75rem; color: var(--secondary-color); margin-bottom: 1rem; font-weight: 700;">
-                {{ pkg.name }}</h4>
-            <p style="color: #64748b; line-height: 1.7; margin-bottom: 2.5rem; flex: 1; font-size: 1rem;">{{
-                pkg.description }}</p>
+        <div class="package-card-content">
+            <h4 class="package-card-title">{{ pkg.name }}</h4>
+            <p class="package-card-description">{{ pkg.description }}</p>
 
             <form action="/bookings/step/menu" method="POST" style="margin-top: auto;">
                 <input type="hidden" name="package_id" value="{{ pkg.id }}">
-                <button type="submit" class="btn-primary"
-                    style="width: 100%; border-radius: 1.25rem; padding: 1.25rem; font-weight: 800; font-size: 1.1rem; transition: all 0.3s ease;">
-                    Select Experience <i class="fas fa-arrow-right" style="margin-left: 0.75rem;"></i>
+                <button type="submit" class="btn-primary package-card-btn">
+                    Select Experience <i class="fas fa-arrow-right"></i>
                 </button>
             </form>
         </div>
@@ -46,36 +41,14 @@
     {% endfor %}
 </div>
 
-<div class="wizard-actions" style="margin-top: 6rem; justify-content: center; border-top: none; padding-top: 0;">
-    <div
-        style="text-align: center; background: #f8fafc; padding: 2.5rem; border-radius: 2rem; border: 1px dashed #e2e8f0; max-width: 500px; margin: 0 auto;">
-        <p style="color: #64748b; font-size: 1rem; margin-bottom: 1rem; font-weight: 500;">
+<div class="wizard-actions custom-journey-footer">
+    <div class="custom-journey-card">
+        <p class="custom-journey-text">
             Seeking a customized culinary journey?
         </p>
-        <a href="/caterers/{{ caterer.id }}"
-            style="color: var(--primary-color); font-weight: 800; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 0.5rem; font-size: 1.1rem;">
-            Contact Master Chef <i class="fas fa-comment-alt-edit" style="font-size: 0.9rem;"></i>
+        <a href="/caterers/{{ caterer.id }}" class="contact-chef-link">
+            Contact Master Chef <i class="fas fa-comment-alt-edit"></i>
         </a>
     </div>
 </div>
-
-<style>
-    @keyframes slideUp {
-        from {
-            opacity: 0;
-            transform: translateY(30px);
-        }
-
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-
-    .package-wizard-card:hover {
-        transform: translateY(-12px);
-        box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.15);
-        border-color: var(--primary-color);
-    }
-</style>
 {% endblock %}

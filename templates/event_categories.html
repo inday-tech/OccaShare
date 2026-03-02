@@ -3,8 +3,12 @@
 
 {% block title %}Event Categories - OccaServe{% endblock %}
 
-{% block content %}
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', path='/css/event_categories.css') }}">
+{% endblock %}
 
+
+{% block content %}
 <!-- Page Hero -->
 <div class="page-hero" style="background: linear-gradient(135deg, #1a2e18 0%, #2d5a1b 60%, #4a9e2e 100%);">
     <div class="container">
@@ -61,16 +65,13 @@
         ["Chef-prepared fresh cuisine", "10–50 pax packages", "Private dining ambiance", "Personalized menu planning"]),
         ] %}
 
-        <div
+        <div class="categories-grid"
             style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 2rem; margin-top: 2rem;">
             {% set cats = categories if categories else [] %}
             {% if cats %}
             {% for category in cats %}
-            <div style="background: white; border-radius: 1.25rem; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.06); border: 1px solid var(--border-color, #e5e7eb); transition: transform 0.2s, box-shadow 0.2s;"
-                onmouseover="this.style.transform='translateY(-6px)'; this.style.boxShadow='0 12px 30px rgba(0,0,0,0.12)';"
-                onmouseout="this.style.transform=''; this.style.boxShadow='0 4px 20px rgba(0,0,0,0.06)';">
-                <div
-                    style="height: 160px; background: var(--primary-light, #e8f5d0); display: flex; align-items: center; justify-content: center;">
+            <div class="category-item">
+                <div class="category-item-image-box">
                     {% if category.image_url %}
                     <img src="{{ category.image_url }}" alt="{{ category.name }}"
                         style="width:100%; height:100%; object-fit:cover;">
@@ -79,47 +80,38 @@
                         style="font-size: 4rem; color: var(--primary-color, #99cc66); opacity: 0.6;"></i>
                     {% endif %}
                 </div>
-                <div style="padding: 1.75rem;">
-                    <h3 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 0.75rem;">{{ category.name }}</h3>
-                    <p
-                        style="color: var(--text-light, #6b7280); font-size: 0.9rem; line-height: 1.7; margin-bottom: 1.25rem;">
-                        {{ category.description }}</p>
-                    <a href="/#caterers"
-                        style="display: inline-flex; align-items: center; gap: 0.5rem; color: var(--primary-color, #99cc66); font-weight: 600; text-decoration: none; font-size: 0.9rem;">Browse
-                        Caterers <i class="fas fa-arrow-right" style="font-size: 0.75rem;"></i></a>
+                <div class="category-item-content">
+                    <h3 class="category-item-title">{{ category.name }}</h3>
+                    <p class="category-item-desc">{{ category.description }}</p>
+                    <a href="/#caterers" class="category-item-link">Browse Caterers <i class="fas fa-arrow-right"
+                            style="font-size: 0.75rem;"></i></a>
                 </div>
             </div>
             {% endfor %}
             {% else %}
             {% for name, icon, color, bg, slug, desc, features in static_categories %}
-            <div style="background: white; border-radius: 1.25rem; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.06); border: 1px solid #f0f0f0; transition: transform 0.2s, box-shadow 0.2s;"
-                onmouseover="this.style.transform='translateY(-6px)'; this.style.boxShadow='0 12px 30px rgba(0,0,0,0.12)';"
-                onmouseout="this.style.transform=''; this.style.boxShadow='0 4px 20px rgba(0,0,0,0.06)';">
-                <div
-                    style="height: 140px; background: {{ bg }}; display: flex; align-items: center; justify-content: center; position: relative;">
+            <div class="static-category-item">
+                <div class="static-category-header" style="background: {{ bg }};">
                     <i class="{{ icon }}" style="font-size: 4rem; color: {{ color }};"></i>
                 </div>
-                <div style="padding: 1.75rem;">
-                    <h3 style="font-size: 1.2rem; font-weight: 700; margin-bottom: 0.5rem; color: #1a2e18;">{{ name }}
-                    </h3>
-                    <p style="color: #6b7280; font-size: 0.88rem; line-height: 1.7; margin-bottom: 1rem;">{{ desc }}</p>
-                    <ul
-                        style="list-style: none; padding: 0; margin: 0 0 1.25rem; display: flex; flex-direction: column; gap: 0.4rem;">
+                <div class="static-category-body">
+                    <h3 class="static-category-title">{{ name }}</h3>
+                    <p class="static-category-desc">{{ desc }}</p>
+                    <ul class="static-category-features">
                         {% for f in features %}
-                        <li
-                            style="font-size: 0.82rem; color: #4b5563; display: flex; align-items: center; gap: 0.5rem;">
+                        <li class="static-category-feature-item">
                             <i class="fas fa-check" style="color: {{ color }}; font-size: 0.7rem;"></i> {{ f }}
                         </li>
                         {% endfor %}
                     </ul>
-                    <a href="/#caterers"
-                        style="display: inline-flex; align-items: center; gap: 0.5rem; color: {{ color }}; font-weight: 600; text-decoration: none; font-size: 0.88rem;">Find
-                        {{ name }} Caterers <i class="fas fa-arrow-right" style="font-size: 0.7rem;"></i></a>
+                    <a href="/#caterers" class="static-category-link" style="color: {{ color }};">Find {{ name }}
+                        Caterers <i class="fas fa-arrow-right" style="font-size: 0.7rem;"></i></a>
                 </div>
             </div>
             {% endfor %}
             {% endif %}
         </div>
+
 
         <div style="text-align:center; margin-top: 3rem;">
             <p style="color: var(--text-light, #6b7280); margin-bottom: 1.5rem;">Don't see your event type? We can still
