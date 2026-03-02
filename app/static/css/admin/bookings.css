@@ -1,0 +1,162 @@
+/* Admin Bookings Management Styles */
+
+.bookings-management-wrapper {
+    background: var(--white);
+    border-radius: 2rem;
+    padding: 2.5rem;
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow-md);
+}
+
+.management-header-flex {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2.5rem;
+}
+
+.management-title {
+    font-size: 1.5rem;
+}
+
+.status-filter-dropdown {
+    padding: 0.75rem 1.25rem;
+    border: 1px solid var(--border-color);
+    border-radius: 2rem;
+    font-size: 0.9rem;
+    background: white;
+    cursor: pointer;
+}
+
+/* Table Styles */
+.bookings-list-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 1rem;
+}
+
+.bookings-list-table thead tr {
+    text-align: left;
+    color: var(--text-light);
+    font-size: 0.9rem;
+    text-transform: uppercase;
+}
+
+.bookings-list-table th {
+    padding: 0 1.5rem;
+}
+
+.booking-row {
+    background: #f8fafc;
+    border-radius: 1rem;
+}
+
+.booking-row td {
+    padding: 1.5rem;
+}
+
+.booking-row td:first-child {
+    border-radius: 1rem 0 0 1rem;
+}
+
+.booking-row td:last-child {
+    border-radius: 0 1rem 1rem 0;
+}
+
+.booking-id-link {
+    font-weight: 700;
+    color: var(--primary-color);
+    text-decoration: none;
+}
+
+.booking-id-link:hover {
+    text-decoration: underline;
+}
+
+.booking-date-text {
+    font-size: 0.8rem;
+    color: var(--text-light);
+}
+
+.booking-amount-value {
+    font-weight: 700;
+    color: var(--secondary-color);
+}
+
+/* Status Badges */
+.status-badge-container {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.status-badge-pill {
+    padding: 0.5rem 1rem;
+    border-radius: 2rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+/* Status Colors */
+.status-draft {
+    color: #64748b;
+    background: #f1f5f9;
+}
+
+.status-pending_payment {
+    color: #92400e;
+    background: #fef3c7;
+}
+
+.status-pending {
+    color: #92400e;
+    background: #fef3c7;
+}
+
+.status-verified {
+    color: #10b981;
+    background: #ecfdf5;
+}
+
+.status-confirmed {
+    color: #166534;
+    background: #dcfce7;
+}
+
+.status-completed {
+    color: #1e40af;
+    background: #dbeafe;
+}
+
+.status-cancelled {
+    color: #991b1b;
+    background: #fee2e2;
+}
+
+.status-expired {
+    color: #71717a;
+    background: #f4f4f5;
+}
+
+.status-flagged {
+    color: #ef4444;
+    background: #fef2f2;
+}
+
+.status-default {
+    color: #374151;
+    background: #f1f5f9;
+}
+
+.btn-manual-confirm {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.75rem;
+    border-color: #10b981;
+    color: #10b981;
+}
+
+.btn-manual-confirm:hover {
+    background: #ecfdf5;
+}

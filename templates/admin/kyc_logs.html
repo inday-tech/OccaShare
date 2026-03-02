@@ -2,19 +2,23 @@
 
 {% block title %}KYC & Fraud Review - Admin Dashboard{% endblock %}
 
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', path='/css/admin/kyc_logs.css') }}">
+{% endblock %}
+
 {% block content %}
 <div class="page-header">
     <h1>KYC & Fraud Review Queue</h1>
     <p>Monitor high-risk verifications and review flagged activities.</p>
 </div>
 
-<div class="review-filters mb-4">
-    <div class="search-box">
+<div class="review-filters-container">
+    <div class="kyc-search-wrapper">
         <i class="fas fa-search"></i>
-        <input type="text" placeholder="Search by booking or customer name..." class="form-control">
+        <input type="text" placeholder="Search by booking or customer name..." class="kyc-search-input">
     </div>
-    <div class="filter-group">
-        <select class="form-control">
+    <div class="kyc-filter-group">
+        <select>
             <option>All Risk Levels</option>
             <option>High Risk Only</option>
             <option>OCR Failures</option>
@@ -22,8 +26,8 @@
     </div>
 </div>
 
-<div class="review-card">
-    <table class="audit-table">
+<div class="kyc-review-card-wrapper">
+    <table class="audit-review-table">
         <thead>
             <tr>
                 <th>Customer</th>
@@ -38,34 +42,35 @@
             {% for kyc in kyc_requests %}
             <tr>
                 <td>
-                    <div class="user-info">
-                        <strong>{{ kyc.user.first_name }} {{ kyc.user.last_name }}</strong>
-                        <span class="text-muted d-block" style="font-size: 0.8rem;">{{ kyc.user.email }}</span>
+                    <div class="kyc-user-identity-box">
+                        <strong class="kyc-user-name">{{ kyc.user.first_name }} {{ kyc.user.last_name }}</strong>
+                        <span class="kyc-user-email">{{ kyc.user.email }}</span>
                     </div>
                 </td>
                 <td>{{ kyc.verification_type or 'N/A' }}</td>
                 <td>
                     <div
-                        class="score-pill {% if kyc.fraud_score >= 75 %}high{% elif kyc.fraud_score >= 60 %}mid{% else %}low{% endif %}">
+                        class="fraud-score-pill {% if kyc.fraud_score >= 75 %}high{% elif kyc.fraud_score >= 60 %}mid{% else %}low{% endif %}">
                         {{ kyc.fraud_score }}/100
                     </div>
                 </td>
                 <td>
                     {% if kyc.liveness_status == 'passed' %}
-                    <span class="text-success"><i class="fas fa-check-circle"></i> Passed</span>
+                    <span class="liveness-passed"><i class="fas fa-check-circle"></i> Passed</span>
                     {% elif kyc.liveness_status == 'failed' %}
-                    <span class="text-danger"><i class="fas fa-times-circle"></i> Failed</span>
+                    <span class="liveness-failed"><i class="fas fa-times-circle"></i> Failed</span>
                     {% else %}
                     <span class="text-muted">N/A</span>
                     {% endif %}
                 </td>
                 <td>
-                    <span class="status-badge status-{{ kyc.verification_status }}">
+                    <span class="kyc-status-badge status-{{ kyc.verification_status }}">
                         {{ kyc.verification_status|replace('_', ' ')|capitalize }}
                     </span>
                 </td>
                 <td>
-                    <a href="/admin/verify/{{ kyc.user_id }}" class="btn btn-sm btn-outline">Review Details</a>
+                    <a href="/admin/verify/{{ kyc.user_id }}" class="btn btn-sm btn-outline btn-review-kyc">Review
+                        Details</a>
                 </td>
             </tr>
             {% endfor %}
@@ -77,115 +82,4 @@
         </tbody>
     </table>
 </div>
-
-<style>
-    .score-pill {
-        display: inline-block;
-        padding: 0.25rem 0.75rem;
-        border-radius: 1rem;
-        font-weight: 700;
-        font-size: 0.85rem;
-    }
-
-    .score-pill.high {
-        background: #dcfce7;
-        color: #166534;
-    }
-
-    .score-pill.mid {
-        background: #fef9c3;
-        color: #854d0e;
-    }
-
-    .score-pill.low {
-        background: #fee2e2;
-        color: #991b1b;
-    }
-
-    .status-badge.status-manual_review {
-        background: #fef3c7;
-        color: #d97706;
-    }
-
-    .status-badge.status-processing {
-        background: #e0f2fe;
-        color: #0369a1;
-    }
-
-    .status-badge.status-blocked {
-        background: #111827;
-        color: #ffffff;
-    }
-</style>
-
-<style>
-    .review-filters {
-        display: flex;
-        gap: 1rem;
-        margin-bottom: 2rem;
-    }
-
-    .search-box {
-        position: relative;
-        flex: 1;
-    }
-
-    .search-box i {
-        position: absolute;
-        left: 1rem;
-        top: 1rem;
-        color: #94a3b8;
-    }
-
-    .search-box input {
-        padding-left: 3rem;
-        border-radius: 2rem;
-    }
-
-    .filter-group select {
-        border-radius: 2rem;
-        width: 200px;
-    }
-
-    .flag-pill {
-        font-size: 0.75rem;
-        padding: 0.25rem 0.6rem;
-        border-radius: 1rem;
-        font-weight: 700;
-    }
-
-    .flag-pill.high_risk {
-        background: #fee2e2;
-        color: #ef4444;
-    }
-
-    .flag-pill.ocr_failure {
-        background: #fef3c7;
-        color: #d97706;
-    }
-
-    .audit-table {
-        width: 100%;
-        border-collapse: collapse;
-    }
-
-    .audit-table th,
-    .audit-table td {
-        padding: 1.25rem;
-        border-bottom: 1px solid #f1f5f9;
-        text-align: left;
-    }
-
-    .status-badge {
-        padding: 0.4rem 0.8rem;
-        border-radius: 2rem;
-        font-size: 0.8rem;
-        font-weight: 700;
-    }
-
-    .status-badge.status-flagged {
-        background: #fef2f2;
-        color: #ef4444;
-    }
-</style>
 {% endblock %}

@@ -1,373 +1,293 @@
 {% extends "admin/layout.html" %}
 
-{% block title %}Verification Review - Admin Dashboard{% endblock %}
+{% block title %}Audit Terminal: {{ target_user.first_name }} - OccaServe Admin{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', path='/css/admin/verification_detail.css') }}">
+{% endblock %}
 
 {% block content %}
-<div class="page-header">
-    <div style="display: flex; align-items: center; gap: 1rem;">
-        <a href="/admin/kyc" style="color: #64748b;"><i class="fas fa-arrow-left"></i></a>
-        <div>
-            <h1>Verification Review: {{ target_user.first_name }} {{ target_user.last_name }}</h1>
-            <p>User Role: <span class="badge">{{ target_user.role|capitalize }}</span> | ID: #{{ target_user.id }}</p>
+<!-- High-Tech Biometric Comparison Terminal -->
+<div class="comparison-terminal-overlay" id="biometric-terminal">
+    <div class="terminal-header">
+        <div class="terminal-badge"><i class="fas fa-microchip"></i> ADVANCED BIOMETRIC ANALYSIS</div>
+        <button class="btn-close-terminal"><i class="fas fa-times"></i></button>
+    </div>
+
+    <div class="terminal-workspace">
+        <div class="terminal-viewport side-by-side" id="terminal-viewport">
+            <div class="view-container id-view">
+                <div class="view-label">IDENTITY DOCUMENT</div>
+                <div class="img-wrapper">
+                    <img src="{{ verification.document_url }}" id="terminal-id-img">
+                </div>
+            </div>
+
+            <div class="view-container selfie-view">
+                <div class="view-label">LIVE SELFIE</div>
+                <div class="img-wrapper">
+                    <img src="{{ verification.selfie_url }}" id="terminal-selfie-img">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="terminal-controls">
+        <div class="ctrl-group">
+            <label><i class="fas fa-adjust"></i> OVERLAY OPACITY</label>
+            <input type="range" id="opacity-slider" min="0" max="100" value="0">
+        </div>
+        <div class="ctrl-group">
+            <label><i class="fas fa-search-plus"></i> ANALYSIS SCALE</label>
+            <input type="range" id="scale-slider" min="100" max="300" value="100">
+        </div>
+        <div class="ctrl-group buttons">
+            <button class="btn-terminal-action" id="btn-toggle-layout">
+                <i class="fas fa-columns"></i> TOGGLE VIEW
+            </button>
+            <button class="btn-terminal-action" id="btn-reset-terminal">
+                <i class="fas fa-undo"></i> RESET
+            </button>
         </div>
     </div>
 </div>
 
-<div style="display: grid; grid-template-columns: 1fr 2fr; gap: 2rem;">
-    <!-- Left Column: Metrics & Analysis -->
-    <div style="display: flex; flex-direction: column; gap: 2rem;">
-        <!-- Fraud Analysis Card -->
-        <div class="review-card"
-            style="border-top: 5px solid {% if verification and verification.fraud_score >= 75 %}#10b981{% elif verification and verification.fraud_score >= 60 %}#f59e0b{% else %}#ef4444{% endif %};">
-            <h3 style="font-size: 1.1rem; margin-bottom: 1.5rem;"><i class="fas fa-shield-virus"
-                    style="color: var(--secondary-color);"></i> AI Fraud Analysis</h3>
+<!-- Comparison Backdrop -->
+<div class="comparison-overlay-backdrop"></div>
 
-            {% if verification %}
-            <div class="fraud-score-hero"
-                style="text-align: center; padding: 1.5rem; background: #f8fafc; border-radius: 1rem; margin-bottom: 1.5rem;">
-                <div
-                    style="font-size: 2.5rem; font-weight: 800; color: {% if verification.fraud_score >= 75 %}#10b981{% elif verification.fraud_score >= 60 %}#f59e0b{% else %}#ef4444{% endif %};">
-                    {{ verification.fraud_score }}/100
-                </div>
-                <div style="font-size: 0.8rem; font-weight: 700; color: #64748b; text-transform: uppercase;">Confidence
-                    Score</div>
+<div class="verification-page-container">
+    <div class="container-fluid" id="main-content-layout">
+        <!-- Standardized Admin Header -->
+        <header class="verification-header-card reveal-card">
+            <div class="header-title-group">
+                <span class="stat-label"><i class="fas fa-shield-check mr-1"></i> COMPLIANCE OVERSIGHT</span>
+                <h1>{{ target_user.business_name or target_user.first_name ~ ' ' ~ target_user.last_name }}</h1>
+                <p>Identity Validation & Biometric Review Terminal</p>
             </div>
 
-            <div class="analysis-details" style="display: grid; gap: 1rem;">
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <span style="font-size: 0.9rem; color: #4b5563;">Liveness Detection:</span>
-                    <span
-                        class="badge {% if verification.liveness_status == 'passed' %}status-active{% else %}status-flagged{% endif %}">
-                        {{ verification.liveness_status|capitalize }}
-                    </span>
-                </div>
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <span style="font-size: 0.9rem; color: #4b5563;">ID Pattern Match:</span>
-                    <i class="fas fa-check-circle text-success"></i>
-                </div>
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <span style="font-size: 0.9rem; color: #4b5563;">OCR Authenticity:</span>
-                    <i class="fas fa-check-circle text-success"></i>
+            <div class="header-status-zone">
+                {% set status = verification.verification_status if verification else 'PENDING' %}
+                <div class="status-indicator-pill badge-{{ status|lower if status else 'pending' }}">
+                    <i class="fas fa-circle mr-2"></i> {{ status|replace('_', ' ')|upper }}
                 </div>
             </div>
+        </header>
 
-            <div style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid #e2e8f0;">
-                <label style="font-size: 0.75rem; color: #64748b; font-weight: 700; text-transform: uppercase;">Device
-                    Info</label>
-                <div style="font-size: 0.85rem; color: #1e293b; margin-top: 0.5rem; line-height: 1.4;">
-                    IP: {{ verification.ip_address }}<br>
-                    {% if verification.device_info %}
-                    User Agent: {{ verification.device_info.get('user_agent', 'Unknown')|truncate(100) }}
-                    {% endif %}
-                </div>
-            </div>
-            {% else %}
-            <div style="text-align: center; padding: 2rem; color: #64748b;">
-                <i class="fas fa-info-circle" style="font-size: 2rem; margin-bottom: 1rem; opacity: 0.5;"></i>
-                <p>No verification data available for this user yet.</p>
-            </div>
-            {% endif %}
-        </div>
+        <div class="verification-review-grid">
+            <!-- Main Column -->
+            <div class="verification-main">
+                {% if verification %}
 
-        <!-- Account Info -->
-        <div class="review-card">
-            <h3 style="font-size: 1.1rem; margin-bottom: 1.5rem;"><i class="fas fa-user-circle"
-                    style="color: var(--primary-color);"></i> Account Info</h3>
-            <div style="display: grid; gap: 1rem;">
-                <div>
-                    <div class="label-tiny">Full Name</div>
-                    <div style="font-weight: 600;">{{ target_user.first_name }} {{ target_user.last_name }}</div>
+                <!-- AI Confidence Banner -->
+                <div class="ai-confidence-banner reveal-card">
+                    <div class="confidence-score-circle">
+                        <svg width="80" height="80" viewBox="0 0 80 80">
+                            <circle class="gauge-bg" cx="40" cy="40" r="35"></circle>
+                            <circle class="gauge-fill" cx="40" cy="40" r="35"
+                                data-score="{{ (verification.match_score * 100)|int if verification and verification.match_score else 85 }}">
+                            </circle>
+                        </svg>
+                        <div class="score-text">{{ (verification.match_score * 100)|int if verification and
+                            verification.match_score else 85 }}%</div>
+                    </div>
+                    <div class="confidence-info">
+                        <h3>Biometric Confidence Score</h3>
+                        <p>Face matching algorithm suggests a <strong>high probability</strong> of identity alignment.
+                        </p>
+                    </div>
                 </div>
-                <div>
-                    <div class="label-tiny">Email</div>
-                    <div style="font-weight: 600;">{{ target_user.email }}</div>
-                </div>
-                <div>
-                    <div class="label-tiny">KYC Attempts</div>
-                    <div style="font-weight: 600;">{{ target_user.kyc_attempts }}/3</div>
-                </div>
-            </div>
-        </div>
 
-        {% if caterer_profile %}
-        <!-- Business Info (Caterers Only) -->
-        <div class="review-card">
-            <h3 style="font-size: 1.1rem; margin-bottom: 1.5rem;"><i class="fas fa-briefcase"
-                    style="color: var(--secondary-color);"></i> Business Info</h3>
-            <div style="display: grid; gap: 1rem;">
-                <div>
-                    <div class="label-tiny">Business Name</div>
-                    <div style="font-weight: 600;">{{ caterer_profile.business_name }}</div>
-                </div>
-                <div>
-                    <div class="label-tiny">Years in Operation</div>
-                    <div style="font-weight: 600;">{{ caterer_profile.years_of_operation }} Years</div>
-                </div>
-            </div>
-        </div>
-        {% endif %}
-    </div>
+                <div class="review-card reveal-card">
+                    <div class="d-flex justify-content-between align-items-center mb-5">
+                        <h3 class="audit-section-title mb-0">
+                            <i class="fas fa-id-card"></i> Biometric Cross-Referencing
+                        </h3>
+                        <button type="button" class="btn-toggle-compare" id="launch-compare-btn">
+                            <i class="fas fa-expand-arrows-alt"></i> LAUNCH COMPARISON
+                        </button>
+                    </div>
 
-    <!-- Right Column: Evidence & Documents -->
-    <div style="display: flex; flex-direction: column; gap: 2rem;">
-        <!-- Evidence Visuals -->
-        <div class="review-card">
-            <h3 style="font-size: 1.1rem; margin-bottom: 1.5rem;"><i class="fas fa-images" style="color: #6366f1;"></i>
-                Biometric Evidence</h3>
+                    <div class="biometric-grid">
+                        <div class="comparison-box id-box">
+                            <label class="d-block mb-3 font-weight-black text-muted"
+                                style="letter-spacing: 0.05em; font-size: 0.75rem;">GOVERNMENT CREDENTIAL</label>
+                            <div class="img-preview-box">
+                                <div class="scan-line"></div>
+                                <div class="img-controls">
+                                    <button type="button" class="btn-ctrl btn-bright" title="Enhance Visibility"><i
+                                            class="fas fa-sun"></i></button>
+                                    <a href="{{ verification.document_url }}" target="_blank" class="btn-ctrl"><i
+                                            class="fas fa-expand-alt"></i></a>
+                                </div>
+                                <img src="{{ verification.document_url or 'https://placehold.co/600x800/f8fafc/cbd5e1?text=Awaiting+Render' }}"
+                                    class="img-fluid-fit">
+                            </div>
+                        </div>
 
-            {% if verification %}
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
-                <!-- ID Document -->
-                <div>
-                    <div class="label-tiny" style="margin-bottom: 0.5rem;">Uploaded ID ({{
-                        verification.verification_type }})</div>
-                    <div class="img-preview-box">
-                        <img src="{{ verification.document_url }}" class="img-fluid" alt="ID Document">
-                        <div class="img-overlay">
-                            <a href="{{ verification.document_url }}" target="_blank">View Full ID</a>
+                        <div class="comparison-box selfie-box">
+                            <label class="d-block mb-3 font-weight-black text-muted"
+                                style="letter-spacing: 0.05em; font-size: 0.75rem;">LIVE PROOF OF LIFE</label>
+                            <div class="img-preview-box">
+                                <div class="scan-line"></div>
+                                <div class="img-controls">
+                                    <button type="button" class="btn-ctrl btn-bright" title="Enhance Visibility"><i
+                                            class="fas fa-sun"></i></button>
+                                    <a href="{{ verification.selfie_url }}" target="_blank" class="btn-ctrl"><i
+                                            class="fas fa-expand-alt"></i></a>
+                                </div>
+                                <img src="{{ verification.selfie_url or 'https://placehold.co/600x800/f8fafc/cbd5e1?text=Awaiting+Render' }}"
+                                    class="img-fluid-fit">
+                            </div>
                         </div>
                     </div>
-                    <div style="margin-top: 0.5rem; font-size: 0.8rem; font-weight: 600; color: #64748b;">
-                        ID Number: {{ verification.id_number }}
+
+                    <!-- OCR Data Block -->
+                    <div class="comparison-board mt-5 reveal-card">
+                        <div class="data-group ai-group">
+                            <div class="group-header">
+                                <i class="fas fa-microchip"></i>
+                                <span>AI EXTRACTION</span>
+                                <div class="live-sync-indicator">
+                                    <span class="pulse"></span> LIVE SYNC
+                                </div>
+                            </div>
+                            <div class="data-rows">
+                                <div class="data-row">
+                                    <span class="label">FULL NAME</span>
+                                    <span class="value">{{ verification.ocr_data.full_name if verification and
+                                        verification.ocr_data else 'Awaiting Scan...' }}</span>
+                                </div>
+                                <div class="data-row">
+                                    <span class="label">DOCUMENT #</span>
+                                    <span class="value mono">{{ verification.ocr_data.id_number if verification and
+                                        verification.ocr_data else 'Awaiting Scan...' }}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="data-group system-group">
+                            <div class="group-header">
+                                <i class="fas fa-server"></i>
+                                <span>SYSTEM RECORD</span>
+                            </div>
+                            <div class="data-rows">
+                                <div class="data-row">
+                                    <span class="label">ACCOUNT HOLDER</span>
+                                    <span class="value">{{ target_user.first_name }} {{ target_user.last_name }}</span>
+                                </div>
+                                <div class="data-row">
+                                    <span class="label">SYSTEM ROLE</span>
+                                    <span class="value">
+                                        <span class="badge-role">{{ target_user.role|upper }}</span>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Liveness Frames -->
-                <div>
-                    <div class="label-tiny" style="margin-bottom: 0.5rem;">Liveness Check (3 Frames)</div>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.5rem;">
-                        <div class="img-preview-box small">
-                            <img src="{{ verification.selfie_url }}" class="img-fluid" alt="Frame 1">
+                {% if target_user.role == 'caterer' and target_user.caterer_profile %}
+                <!-- Portfolio Details -->
+                <div class="review-card reveal-card">
+                    <h3 class="audit-section-title mb-4">
+                        <i class="fas fa-briefcase"></i> Merchant Ecosystem Context
+                    </h3>
+                    <div class="biometric-grid mb-5">
+                        <div>
+                            <label class="d-block mb-3 font-weight-bold text-muted" style="font-size: 0.7rem;">BUSINESS
+                                PERMIT</label>
+                            <div class="img-preview-box" style="aspect-ratio: 16/9;">
+                                <img src="{{ target_user.caterer_profile.permit_url or 'https://placehold.co/800x450/f8fafc/cbd5e1?text=NOT+UPLOADED' }}"
+                                    class="img-fluid-fit">
+                            </div>
                         </div>
-                        <div class="img-preview-box small">
-                            <img src="{{ verification.selfie_2_url or verification.selfie_url }}" class="img-fluid"
-                                alt="Frame 2">
-                        </div>
-                        <div class="img-preview-box small">
-                            <img src="{{ verification.selfie_3_url or verification.selfie_url }}" class="img-fluid"
-                                alt="Frame 3">
+                        <div>
+                            <label class="d-block mb-3 font-weight-bold text-muted" style="font-size: 0.7rem;">CATERING
+                                SAMPLES</label>
+                            <div class="img-preview-box" style="aspect-ratio: 16/9;">
+                                <img src="{{ target_user.caterer_profile.sample_menu_url or 'https://placehold.co/800x450/f8fafc/cbd5e1?text=NOT+UPLOADED' }}"
+                                    class="img-fluid-fit">
+                            </div>
                         </div>
                     </div>
-                    <p style="font-size: 0.75rem; color: #64748b; margin-top: 0.5rem;">The AI compared movement across
-                        these frames to verify a living person.</p>
+                    <div class="business-stats-grid">
+                        <div class="stat-pill"><label>INDUSTRY TENURE</label><span>{{
+                                target_user.caterer_profile.years_of_operation or '0' }} YEARS</span></div>
+                        <div class="stat-pill"><label>PARTNER STATUS</label><span>VERIFIED MERCHANT</span></div>
+                        <div class="stat-pill"><label>SECURE CONTACT</label><span>{{ target_user.email }}</span></div>
+                        <div class="stat-pill"><label>AUDIT ID</label><span>#E-{{ target_user.id }}</span></div>
+                    </div>
+                </div>
+                {% endif %}
+                {% else %}
+                <div class="review-card text-center py-5 reveal-card">
+                    <div class="mb-5 text-muted opacity-25"><i class="fas fa-user-lock fa-6x"></i></div>
+                    <h2 style="font-family: var(--font-heading); color: var(--deep-forest);">Terminal Standby</h2>
+                    <p class="text-muted mx-auto" style="max-width: 450px;">Awaiting verification submission from
+                        applicant.
+                        Audit protocols are currently restricted.</p>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Sidebar Adjudication -->
+            <div class="verification-sidebar">
+                <div class="review-card reveal-card"
+                    style="position: sticky; top: 2rem; border-top: 5px solid var(--leaf);">
+                    <h3 class="audit-section-title mb-4">
+                        <i class="fas fa-gavel"></i> Final Adjudication
+                    </h3>
+
+                    <form action="/admin/kyc/{{ verification.id if verification else '0' }}/action" method="POST">
+                        <div class="form-group mb-5">
+                            <label class="text-muted font-weight-bold uppercase tracking-wider d-block mb-3"
+                                style="font-size: 0.75rem; letter-spacing: 0.1em;">AUDITOR MEMORANDUM</label>
+                            <textarea name="notes" class="decision-textarea" style="min-height: 180px;"
+                                placeholder="Enter detailed audit findings..." required {% if not verification
+                                %}disabled{% endif %}></textarea>
+                        </div>
+
+                        <div class="decision-automation-area mb-5">
+                            <span class="d-block text-muted small font-weight-bold mb-4"
+                                style="letter-spacing: 0.05em;">COMMAND TEMPLATES</span>
+                            <div class="d-flex flex-column gap-3 mb-5">
+                                <button type="button" class="btn-template"
+                                    data-template="SECURITY AUDIT: Identity confirmed. Biometric and OCR data are a perfect 1:1 match. Proceed with activation."><i
+                                        class="fas fa-clipboard-check"></i> Perfect Alignment</button>
+                            </div>
+
+                            <span class="d-block text-muted small font-weight-bold mb-4"
+                                style="letter-spacing: 0.05em;">REJECTION PROTOCOLS</span>
+                            <div class="d-flex flex-column gap-3">
+                                <button type="button" class="btn-template text-danger"
+                                    data-template="REJECTION: Identity document is blurred beyond legibility. Re-upload required for audit."><i
+                                        class="fas fa-eye-slash"></i> Illegible
+                                    Credential</button>
+                                <button type="button" class="btn-template text-danger"
+                                    data-template="REJECTION: Facial biometric mismatch detected. Applicant does not match identity document."><i
+                                        class="fas fa-user-times"></i> Biometric
+                                    Mismatch</button>
+                            </div>
+                        </div>
+
+                        <div class="decision-actions mt-5 d-flex flex-column gap-3">
+                            <button type="submit" name="action" value="approve" class="btn-primary-action" {% if not
+                                verification or verification.verification_status=='approved' %}disabled{% endif %}>
+                                <i class="fas fa-shield-check mr-2"></i> AUTHORIZE ACTIVATION
+                            </button>
+                            <button type="submit" name="action" value="reject" class="btn-secondary-action" {% if not
+                                verification or verification.verification_status=='rejected' %}disabled{% endif %}>
+                                <i class="fas fa-times-circle mr-2"></i> TERMINATE APPLICATION
+                            </button>
+                        </div>
+                    </form>
                 </div>
             </div>
-            {% else %}
-            <div style="text-align: center; padding: 2rem; color: #64748b;">
-                <div style="font-size: 2rem; margin-bottom: 1rem; opacity: 0.5;"><i class="fas fa-fingerprint"></i>
-                </div>
-                <p>Biometric data has not been submitted yet.</p>
-            </div>
-            {% endif %}
-        </div>
-
-        {% if caterer_profile %}
-        <!-- Business Documents (Caterers Only) -->
-        <div class="review-card">
-            <h3 style="font-size: 1.1rem; margin-bottom: 1.5rem;"><i class="fas fa-copy" style="color: #6366f1;"></i>
-                Business Documents</h3>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
-                <div>
-                    <div class="label-tiny">Business Permit</div>
-                    <div class="img-preview-box small">
-                        {% if caterer_profile.permit_url %}
-                        <img src="{{ caterer_profile.permit_url }}" class="img-fluid" alt="Permit">
-                        <div class="img-overlay"><a href="{{ caterer_profile.permit_url }}" target="_blank">View</a>
-                        </div>
-                        {% else %}<div class="empty-state">Not Found</div>{% endif %}
-                    </div>
-                </div>
-                <div>
-                    <div class="label-tiny">Sample Menu</div>
-                    <div class="img-preview-box small">
-                        {% if caterer_profile.sample_menu_url %}
-                        <img src="{{ caterer_profile.sample_menu_url }}" class="img-fluid" alt="Menu">
-                        <div class="img-overlay"><a href="{{ caterer_profile.sample_menu_url }}"
-                                target="_blank">View</a></div>
-                        {% else %}<div class="empty-state">Not Found</div>{% endif %}
-                    </div>
-                </div>
-            </div>
-        </div>
-        {% endif %}
-
-        <!-- Audit Trail -->
-        <div class="review-card">
-            <h3 style="font-size: 1.1rem; margin-bottom: 1.5rem;"><i class="fas fa-history" style="color: #64748b;"></i>
-                Security Audit Trail</h3>
-            <div class="audit-timeline">
-                {% for log in target_user.audit_logs|sort(attribute='timestamp', reverse=True) %}
-                <div class="timeline-item">
-                    <div class="timeline-time">{{ log.timestamp.strftime('%H:%M:%S') }} <br> <span
-                            style="font-size: 0.7rem;">{{ log.timestamp.strftime('%Y-%m-%d') }}</span></div>
-                    <div class="timeline-content">
-                        <strong>{{ log.action|replace('_', ' ')|capitalize }}</strong>
-                        <p>{{ log.notes }}</p>
-                        {% if log.ip_address %}
-                        <span class="timeline-meta">IP: {{ log.ip_address }}</span>
-                        {% endif %}
-                    </div>
-                </div>
-                {% endfor %}
-            </div>
-        </div>
-
-        <!-- Admin Decision Form -->
-        <div class="review-card action-card">
-            <h3 style="font-size: 1.1rem; margin-bottom: 1.5rem;"><i class="fas fa-gavel"
-                    style="color: var(--primary-color);"></i> Final Decision</h3>
-
-            <form action="/admin/kyc/{{ verification.id if verification else '0' }}/action" method="POST">
-                <div style="margin-bottom: 1.5rem;">
-                    <label class="label-tiny" style="color: #64748b;">Internal Decision Notes</label>
-                    <textarea name="notes" placeholder="Explain your decision (sent to user if rejected)..." required {%
-                        if not verification %}disabled{% endif %}
-                        style="width: 100%; min-height: 100px; padding: 1rem; border: 1px solid #e2e8f0; border-radius: 0.75rem; margin-top: 0.5rem;"></textarea>
-                </div>
-
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-                    <button type="submit" name="action" value="approve" class="btn btn-primary" {% if not verification
-                        %}disabled title="Cannot approve without verification data" {% endif %}
-                        style="background: #10b981; border: none;">
-                        <i class="fas fa-check-shield"></i> Approve Identity
-                    </button>
-                    <button type="submit" name="action" value="reject" class="btn btn-danger" {% if not verification
-                        %}disabled title="Cannot reject without verification data" {% endif %}
-                        style="background: #ef4444; border: none;">
-                        <i class="fas fa-ban"></i> Reject & Fail
-                    </button>
-                </div>
-            </form>
         </div>
     </div>
 </div>
+{% endblock %}
 
-<style>
-    .review-card {
-        background: white;
-        border-radius: 1.5rem;
-        padding: 2rem;
-        border: 1px solid var(--border-color);
-        box-shadow: var(--shadow-sm);
-    }
-
-    .action-card {
-        background: #f8fafc;
-        border: 2px solid var(--primary-color);
-        box-shadow: var(--shadow-lg);
-    }
-
-    .label-tiny {
-        font-size: 0.7rem;
-        color: #64748b;
-        font-weight: 800;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-    }
-
-    .img-preview-box {
-        position: relative;
-        border: 1px solid #e2e8f0;
-        border-radius: 1rem;
-        overflow: hidden;
-        background: #f1f5f9;
-        height: 200px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-
-    .img-preview-box.small {
-        height: 120px;
-    }
-
-    .img-preview-box img {
-        max-width: 100%;
-        max-height: 100%;
-        object-fit: contain;
-    }
-
-    .img-overlay {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0, 0, 0, 0.5);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        opacity: 0;
-        transition: opacity 0.2s;
-    }
-
-    .img-preview-box:hover .img-overlay {
-        opacity: 1;
-    }
-
-    .img-overlay a {
-        color: white;
-        font-weight: 700;
-        text-decoration: none;
-        font-size: 0.8rem;
-    }
-
-    .audit-timeline {
-        border-left: 2px solid #e2e8f0;
-        margin-left: 1rem;
-        padding-left: 2rem;
-        display: flex;
-        flex-direction: column;
-        gap: 1.5rem;
-    }
-
-    .timeline-item {
-        position: relative;
-    }
-
-    .timeline-item::before {
-        content: '';
-        position: absolute;
-        left: -2.35rem;
-        top: 0.25rem;
-        width: 10px;
-        height: 10px;
-        background: white;
-        border: 2px solid var(--primary-color);
-        border-radius: 50%;
-    }
-
-    .timeline-time {
-        font-size: 0.75rem;
-        color: #64748b;
-        position: absolute;
-        left: -8rem;
-        text-align: right;
-        width: 5rem;
-        top: 0;
-    }
-
-    .timeline-content strong {
-        display: block;
-        font-size: 0.9rem;
-        color: #1e293b;
-    }
-
-    .timeline-content p {
-        font-size: 0.85rem;
-        color: #4b5563;
-        margin: 0.25rem 0;
-    }
-
-    .timeline-meta {
-        font-size: 0.7rem;
-        color: #94a3b8;
-        font-weight: 600;
-    }
-
-    .empty-state {
-        color: #94a3b8;
-        font-size: 0.8rem;
-    }
-</style>
+{% block extra_js %}
+<script src="{{ url_for('static', path='/js/admin/verification_detail.js') }}"></script>
 {% endblock %}

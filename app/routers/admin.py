@@ -132,20 +132,7 @@ async def platform_payments(
         "active_page": "payments"
     })
 
-@router.get("/reviews", response_class=HTMLResponse)
-async def platform_reviews(
-    request: Request, 
-    db: Session = Depends(database.get_db),
-    user: models.User = Depends(admin_only)
-):
-    
-    reviews = db.query(models.Review).all()
-    return templates.TemplateResponse("admin/reviews.html", {
-        "request": request,
-        "user": user,
-        "reviews": reviews,
-        "active_page": "reviews"
-    })
+
 
 @router.get("/reports", response_class=HTMLResponse)
 async def admin_reports(
@@ -244,6 +231,29 @@ def toggle_customer_status(customer_id: int, db: Session = Depends(database.get_
     db.commit()
     return RedirectResponse(url="/admin/customers", status_code=status.HTTP_303_SEE_OTHER)
 
+@router.post("/customers/{customer_id}/delete")
+def delete_customer(customer_id: int, db: Session = Depends(database.get_db), user: models.User = Depends(admin_only)):
+    # Find the user as a customer only to be safe
+    customer = db.query(models.User).filter(models.User.id == customer_id, models.User.role == "customer").first()
+    if not customer:
+        raise HTTPException(status_code=404, detail="Customer not found")
+    
+    # Manually delete related data that doesn't have cascade-delete or might cause issues
+    db.query(models.RefreshToken).filter(models.RefreshToken.user_id == customer_id).delete()
+    db.query(models.IdentityVerification).filter(models.IdentityVerification.user_id == customer_id).delete()
+    db.query(models.AuditLog).filter(models.AuditLog.user_id == customer_id).delete()
+    db.query(models.Notification).filter(models.Notification.user_id == customer_id).delete()
+    db.query(models.VerificationAttempt).filter(models.VerificationAttempt.user_id == customer_id).delete()
+    db.query(models.Review).filter(models.Review.user_id == customer_id).delete()
+    db.query(models.Inquiry).filter(models.Inquiry.user_id == customer_id).delete()
+    db.query(models.OCRVerification).filter(models.OCRVerification.user_id == customer_id).delete()
+    
+    # Finally delete the user
+    db.delete(customer)
+    db.commit()
+    
+    return RedirectResponse(url="/admin/customers", status_code=status.HTTP_303_SEE_OTHER)
+
 @router.post("/customers/{customer_id}/verify")
 def verify_customer(customer_id: int, action: str = Form(...), db: Session = Depends(database.get_db), user: models.User = Depends(admin_only)):
     customer = db.query(models.User).filter(models.User.id == customer_id, models.User.role == "customer").first()
@@ -259,6 +269,31 @@ def verify_customer(customer_id: int, action: str = Form(...), db: Session = Dep
     
     db.commit()
     return RedirectResponse(url="/admin/customers", status_code=status.HTTP_303_SEE_OTHER)
+
+@router.post("/bookings/{booking_id}/manual_confirm")
+def manual_confirm_booking_payment(
+    booking_id: int, 
+    db: Session = Depends(database.get_db), 
+    user: models.User = Depends(admin_only)
+):
+    booking = db.query(models.Booking).get(booking_id)
+    if not booking:
+        raise HTTPException(status_code=404, detail="Booking not found")
+        
+    booking.payment_status = "paid"
+    booking.status = "confirmed"
+    booking.payment_reference = "MANUAL_ADMIN_OVERRIDE"
+    
+    # Add history log
+    log = models.BookingHistory(
+        booking_id=booking.id,
+        status="confirmed",
+        notes=f"Payment manually confirmed by Admin {user.first_name} {user.last_name}."
+    )
+    db.add(log)
+    db.commit()
+    
+    return RedirectResponse(url="/admin/bookings", status_code=status.HTTP_303_SEE_OTHER)
 
 @router.get("/verify/{user_id}", response_class=HTMLResponse)
 async def view_verification(
@@ -390,6 +425,110 @@ async def flag_booking(
     db.commit()
     return RedirectResponse(url=f"/admin/bookings/{booking_id}/kyc", status_code=303)
 
+@router.get("/payouts", response_class=HTMLResponse)
+async def admin_payouts(
+    request: Request,
+    db: Session = Depends(database.get_db),
+    user: models.User = Depends(admin_only)
+):
+    # Get all un-payout-ed paid bookings to group them by Caterer
+    holding_bookings = db.query(models.Booking).filter(
+        models.Booking.payment_status == "paid",
+        models.Booking.payout_id == None,
+        models.Booking.status.in_(["completed", "confirmed"]) # Typically paid and event done or verified
+    ).all()
+    
+    # Calculate holding by Caterer
+    caterer_holdings = {}
+    for b in holding_bookings:
+        if b.caterer_id not in caterer_holdings:
+            caterer_holdings[b.caterer_id] = {
+                "caterer": b.caterer,
+                "total_held": 0.0,
+                "booking_count": 0,
+                "booking_ids": []
+            }
+        
+        # Calculate caterer's cut (assuming 10% platform fee)
+        net_amount = float(b.reservation_fee or 0.0) * 0.90
+        
+        caterer_holdings[b.caterer_id]["total_held"] += float(net_amount)
+        caterer_holdings[b.caterer_id]["booking_count"] += 1
+        caterer_holdings[b.caterer_id]["booking_ids"].append(b.id)
+        
+    # Get all existing payout records
+    payout_history = db.query(models.Payout).order_by(models.Payout.created_at.desc()).all()
+    
+    return templates.TemplateResponse("admin/payouts.html", {
+        "request": request,
+        "user": user,
+        "caterer_holdings": caterer_holdings.values(),
+        "payout_history": payout_history,
+        "active_page": "financials"
+    })
+
+@router.post("/payouts/create")
+async def create_payout(
+    caterer_id: int = Form(...),
+    db: Session = Depends(database.get_db),
+    user: models.User = Depends(admin_only)
+):
+    # Get all eligible holdings for this caterer
+    bookings = db.query(models.Booking).filter(
+        models.Booking.caterer_id == caterer_id,
+        models.Booking.payment_status == "paid",
+        models.Booking.payout_id == None,
+        models.Booking.status.in_(["completed", "confirmed"])
+    ).all()
+    
+    if not bookings:
+        raise HTTPException(status_code=400, detail="No eligible bookings found for payout")
+        
+    total_net = 0.0
+    for b in bookings:
+        total_net += float(b.reservation_fee or 0.0) * 0.90
+        
+    new_payout = models.Payout(
+        caterer_id=caterer_id,
+        amount=total_net,
+        status="processing",
+        notes="Generated automatically by Admin."
+    )
+    db.add(new_payout)
+    db.flush() # get ID
+    
+    # Link bookings
+    for b in bookings:
+        item = models.PayoutItem(
+            payout_id=new_payout.id,
+            booking_id=b.id,
+            amount=float(b.reservation_fee or 0.0) * 0.90
+        )
+        db.add(item)
+        b.payout_id = new_payout.id
+        
+    db.commit()
+    return RedirectResponse(url="/admin/payouts", status_code=303)
+
+@router.post("/payouts/{payout_id}/mark_paid")
+async def mark_payout_paid(
+    payout_id: int,
+    reference_number: str = Form(...),
+    db: Session = Depends(database.get_db),
+    user: models.User = Depends(admin_only)
+):
+    payout = db.query(models.Payout).get(payout_id)
+    if not payout:
+        raise HTTPException(status_code=404, detail="Payout not found")
+        
+    from datetime import datetime, timezone
+    payout.status = "completed"
+    payout.reference_number = reference_number
+    payout.completed_at = datetime.now(timezone.utc)
+    
+    db.commit()
+    return RedirectResponse(url="/admin/payouts", status_code=303)
+
 @router.get("/api/reports/export")
 async def export_reports(
     db: Session = Depends(database.get_db),
@@ -398,3 +537,44 @@ async def export_reports(
     # Mock CSV export
     return {"message": "Export started. You will receive an email shortly."}
 
+@router.get("/reviews", response_class=HTMLResponse)
+async def admin_reviews(
+    request: Request,
+    db: Session = Depends(database.get_db),
+    user: models.User = Depends(admin_only)
+):
+    reviews = db.query(models.Review).order_by(models.Review.created_at.desc()).all()
+    return templates.TemplateResponse("admin/reviews.html", {
+        "request": request,
+        "user": user,
+        "reviews": reviews,
+        "active_page": "reviews"
+    })
+
+@router.post("/reviews/{review_id}/highlight")
+async def toggle_review_highlight(
+    review_id: int,
+    db: Session = Depends(database.get_db),
+    user: models.User = Depends(admin_only)
+):
+    review = db.query(models.Review).get(review_id)
+    if not review:
+        raise HTTPException(status_code=404, detail="Review not found")
+    
+    review.is_highlighted = not review.is_highlighted
+    db.commit()
+    return RedirectResponse(url="/admin/reviews", status_code=303)
+
+@router.post("/reviews/{review_id}/delete")
+async def delete_review(
+    review_id: int,
+    db: Session = Depends(database.get_db),
+    user: models.User = Depends(admin_only)
+):
+    review = db.query(models.Review).get(review_id)
+    if not review:
+        raise HTTPException(status_code=404, detail="Review not found")
+    
+    db.delete(review)
+    db.commit()
+    return RedirectResponse(url="/admin/reviews", status_code=303)

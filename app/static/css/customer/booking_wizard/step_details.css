@@ -1,0 +1,125 @@
+.details-grid {
+    display: grid;
+    grid-template-columns: 1fr 320px;
+    gap: 3rem;
+    align-items: flex-start;
+}
+
+.form-section-title {
+    font-family: 'Outfit', sans-serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--secondary-color);
+    margin-bottom: 2rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.form-section-title i {
+    color: var(--primary-color);
+}
+
+.calculator-card {
+    background: #f8fafc;
+    border-radius: 1.5rem;
+    padding: 2rem;
+    border: 1px solid var(--border-color);
+    position: sticky;
+    top: 2rem;
+}
+
+.calc-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+    font-size: 0.95rem;
+    color: #64748b;
+}
+
+.calc-row-value {
+    font-weight: 700;
+}
+
+.calc-total {
+    border-top: 1.5px dashed #e2e8f0;
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    font-weight: 800;
+    font-size: 1.25rem;
+    color: var(--secondary-color);
+}
+
+.calc-info {
+    margin-top: 1.5rem;
+    font-size: 0.85rem;
+    color: #94a3b8;
+    line-height: 1.4;
+}
+
+.availability-chip {
+    padding: 0.6rem 1.25rem;
+    border-radius: 1rem;
+    font-size: 0.85rem;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin-top: 1rem;
+    display: none;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+}
+
+.chip-booked {
+    background: #fee2e2;
+    color: #991b1b;
+    border: 1px solid #fecaca;
+}
+
+.chip-available {
+    background: #ecfdf5;
+    color: #065f46;
+    border: 1px solid #d1fae5;
+}
+
+/* Step Specific Layout */
+.form-group-spaced {
+    margin-bottom: 1.5rem;
+}
+
+.grid-2-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.grid-2-col-wide {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.form-group-extra-spaced {
+    margin-bottom: 2rem;
+}
+
+.wizard-actions-footer {
+    border-top: 1px solid #e2e8f0;
+    padding-top: 2rem;
+    margin-top: 3rem;
+}
+
+.btn-wizard-next-wide {
+    padding: 1.25rem 3rem;
+    border-radius: 1.25rem;
+    font-weight: 800;
+}
+
+.btn-wizard-next-wide i {
+    margin-left: 0.5rem;
+}

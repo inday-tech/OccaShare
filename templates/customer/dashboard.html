@@ -3,102 +3,11 @@
 {% block title %}Overview - OccaServe Dashboard{% endblock %}
 
 {% block extra_js %}
-<script>
-    // Dashboard-specific WebSocket client for booking updates
-    const dashboardClientId = "{{ client_id }}";
-    if (dashboardClientId) {
-        const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-        const dashWs = new WebSocket(`${protocol}//${window.location.host}/ws/${dashboardClientId}`);
-
-        dashWs.onmessage = function (event) {
-            const data = JSON.parse(event.data);
-            if (data.type === 'booking_update') {
-                alert("Real-time Update: " + data.message);
-                setTimeout(() => window.location.reload(), 2000);
-            }
-        };
-    }
-</script>
+<script src="{{ url_for('static', path='/js/customer/dashboard.js') }}"></script>
 {% endblock %}
 
 {% block extra_css %}
-<style>
-    .dashboard-hero {
-        background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
-        border-radius: 2.5rem;
-        padding: 4rem 3rem;
-        margin-bottom: 3rem;
-        position: relative;
-        overflow: hidden;
-    }
-
-    .dashboard-hero h1 {
-        font-family: 'Playfair Display', serif;
-        font-size: 3rem;
-        color: var(--secondary-color);
-        margin-bottom: 0.5rem;
-    }
-
-    .dashboard-hero p {
-        color: var(--text-light);
-        font-size: 1.15rem;
-    }
-
-    .stats-container {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-        gap: 2rem;
-        margin-bottom: 3.5rem;
-    }
-
-    .stat-card {
-        background: var(--white);
-        padding: 2.5rem 2rem;
-        border-radius: 2rem;
-        border: 1px solid var(--border-color);
-        position: relative;
-        overflow: hidden;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-        transition: all 0.3s ease;
-    }
-
-    .stat-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
-        border-color: var(--primary-color);
-    }
-
-    .stat-icon {
-        position: absolute;
-        top: 1.5rem;
-        right: 1.5rem;
-        font-size: 2.5rem;
-        opacity: 0.15;
-        color: var(--primary-color);
-        transition: transform 0.3s ease;
-    }
-
-    .stat-card:hover .stat-icon {
-        transform: scale(1.2) rotate(-10deg);
-        opacity: 0.3;
-    }
-
-    .stat-label {
-        color: var(--text-light);
-        font-size: 0.85rem;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 0.1em;
-        margin-bottom: 0.5rem;
-    }
-
-    .stat-value {
-        font-size: 3rem;
-        font-weight: 800;
-        color: var(--secondary-color);
-        line-height: 1;
-    }
-</style>
+<link rel="stylesheet" href="{{ url_for('static', path='/css/customer/dashboard.css') }}">
 {% endblock %}
 
 {% block content %}
@@ -109,22 +18,17 @@
 
 {% if not user.is_verified %}
 <!-- Unverified Alert -->
-<div
-    style="background: #fffbeb; border: 1px solid #fef3c7; border-radius: 2rem; padding: 1.5rem 2rem; margin-bottom: 3rem; display: flex; align-items: center; justify-content: space-between; gap: 1.5rem; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);">
-    <div style="display: flex; align-items: center; gap: 1.5rem;">
-        <div
-            style="width: 56px; height: 56px; border-radius: 50%; background: #fef3c7; display: flex; align-items: center; justify-content: center; color: #d97706; font-size: 1.5rem;">
+<div class="verification-alert">
+    <div class="verification-alert-content">
+        <div class="verification-icon-box">
             <i class="fas fa-id-card"></i>
         </div>
-        <div>
-            <h4 style="margin: 0; color: #92400e; font-size: 1.1rem;">Account Verification Required</h4>
-            <p style="margin: 0; font-size: 0.95rem; color: #b45309;">Complete your one-time identity verification to
-                start booking caterers.</p>
+        <div class="verification-text">
+            <h4>Account Verification Required</h4>
+            <p>Complete your one-time identity verification to start booking caterers.</p>
         </div>
     </div>
-    <a href="/customer/verification" class="btn-primary"
-        style="white-space: nowrap; padding: 1rem 2rem; background: #d97706; border-color: #d97706; border-radius: 1.25rem;">Verify
-        Now</a>
+    <a href="/customer/verification" class="btn-primary btn-verify-now">Verify Now</a>
 </div>
 {% endif %}
 
@@ -150,103 +54,73 @@
 </div>
 
 <!-- Recent Activity -->
-<div
-    style="background: var(--white); border-radius: 2rem; padding: 2.5rem; box-shadow: var(--shadow-md); border: 1px solid var(--border-color);">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
-        <h3 style="font-size: 1.5rem; display: flex; align-items: center; gap: 0.75rem;"><i class="fas fa-clock"></i>
-            Recent Events</h3>
+<div class="activity-card">
+    <div class="activity-header">
+        <h3><i class="fas fa-clock"></i> Recent Events</h3>
         <a href="/customer/bookings" class="btn-text-arrow">View All <i class="fas fa-arrow-right"></i></a>
     </div>
 
     {% if bookings %}
-    <div style="overflow-x: auto;">
-        <table style="width: 100%; border-collapse: separate; border-spacing: 0 1rem;">
+    <div class="activity-table-wrapper">
+        <table class="activity-table">
             <thead>
-                <tr
-                    style="text-align: left; color: var(--text-light); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.05em;">
-                    <th style="padding: 0 1.5rem;">Caterer</th>
-                    <th style="padding: 0 1.5rem;">Date</th>
-                    <th style="padding: 0 1.5rem;">Amount</th>
-                    <th style="padding: 0 1.5rem;">Status</th>
-                    <th style="padding: 0 1.5rem; text-align: right;">Actions</th>
+                <tr>
+                    <th>Caterer</th>
+                    <th>Date</th>
+                    <th>Amount</th>
+                    <th>Status</th>
+                    <th style="text-align: right;">Actions</th>
                 </tr>
             </thead>
             <tbody>
                 {% for booking in bookings %}
-                <tr style="background: var(--background-light); border-radius: 1rem; transition: all 0.3s ease;"
-                    onmouseover="this.style.background='var(--background-soft)'"
-                    onmouseout="this.style.background='var(--background-light)'">
-                    <td style="padding: 1.5rem; border-radius: 1rem 0 0 1rem;">
-                        <div style="display: flex; align-items: center; gap: 1.25rem;">
-                            <div
-                                style="width: 40px; height: 40px; border-radius: 12px; background: var(--background-soft); display: flex; align-items: center; justify-content: center; color: var(--primary-color);">
+                <tr class="activity-row">
+                    <td class="activity-cell" style="border-radius: 1rem 0 0 1rem;">
+                        <div class="activity-caterer-info">
+                            <div class="activity-caterer-icon">
                                 <i class="fas fa-magic"></i>
                             </div>
                             <div>
-                                <h4 style="margin: 0; font-size: 1.05rem; color: var(--secondary-color);">{{
-                                    booking.event_name }}</h4>
-                                <span style="font-size: 0.8rem; color: var(--text-light);">with {{ booking.caterer_name
-                                    }}</span>
+                                <h4 class="activity-event-name">{{ booking.event_name }}</h4>
+                                <span class="activity-caterer-name">with {{ booking.caterer_name }}</span>
                             </div>
                         </div>
                     </td>
-                    <td style="padding: 1.5rem; color: var(--text-light);">
-                        <div style="font-size: 0.95rem; font-weight: 600; color: var(--secondary-color);">
-                            {{ booking.display_date }}
-                        </div>
-                        <div style="font-size: 0.8rem; opacity: 0.7;">
-                            {{ booking.display_time }}
-                        </div>
+                    <td class="activity-cell">
+                        <div class="activity-date-primary">{{ booking.display_date }}</div>
+                        <div class="activity-time-secondary">{{ booking.display_time }}</div>
                     </td>
-                    <td style="padding: 1.5rem;">
-                        <div style="font-weight: 700; color: var(--secondary-color);">
-                            {{ booking.display_amount }}
-                        </div>
-                        <div style="font-size: 0.75rem; color: var(--text-light);">
-                            {{ booking.payment_method }}
-                        </div>
+                    <td class="activity-cell">
+                        <div class="activity-amount">{{ booking.display_amount }}</div>
+                        <div class="activity-payment-method">{{ booking.payment_method }}</div>
                     </td>
-                    <td style="padding: 1.5rem;">
+                    <td class="activity-cell">
                         <!-- Booking Status -->
-                        {% set status_colors = {
-                        'pending': 'background: #fef3c7; color: #92400e;',
-                        'confirmed': 'background: #dcfce7; color: #166534;',
-                        'completed': 'background: #dbeafe; color: #1e40af;',
-                        'cancelled': 'background: #fee2e2; color: #991b1b;'
-                        } %}
-                        <div
-                            style="padding: 0.4rem 0.8rem; border-radius: 2rem; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; display: inline-block; margin-bottom: 0.4rem; {{ status_colors.get(booking.status or 'pending', 'background: #f1f5f9; color: #475569;') }}">
+                        <div class="status-badge status-{{ booking.status or 'pending' }}">
                             {{ booking.status or 'pending' }}
                         </div>
                         <br>
                         <!-- Payment Status -->
-                        {% set pay_colors = {
-                        'pending': 'color: #f59e0b;',
-                        'paid': 'color: #10b981;',
-                        'deposit_paid': 'color: #3b82f6;'
-                        } %}
                         <span
-                            style="font-size: 0.7rem; font-weight: 600; {{ pay_colors.get(booking.payment_status, 'color: #64748b;') }}">
-                            <i class="fas fa-circle" style="font-size: 0.5rem; margin-right: 0.25rem;"></i>
-                            {{ (booking.payment_status or 'pending')|replace('_', ' ')|upper }}
+                            class="payment-status-badge pay-{{ (booking.payment_status or 'pending')|replace('_', '-') }}">
+                            <i class="fas fa-circle"></i> {{ (booking.payment_status or 'pending')|replace('_', '
+                            ')|upper }}
                         </span>
                     </td>
-                    <td style="padding: 1.5rem; border-radius: 0 1rem 1rem 0; text-align: right;">
-                        <div style="display: flex; gap: 0.5rem; justify-content: flex-end;">
-                            <a href="#" class="btn-icon"
-                                style="width: 35px; height: 35px; border-radius: 0.5rem; display: flex; align-items: center; justify-content: center; background: white; border: 1px solid var(--border-color); color: var(--text-light); transition: all 0.2s;"
-                                onmouseover="this.style.color='var(--primary-color)'; this.style.borderColor='var(--primary-color)'"
-                                onmouseout="this.style.color='var(--text-light)'; this.style.borderColor='var(--border-color)'"><i
-                                    class="fas fa-eye"></i></a>
-                            <a href="#" class="btn-icon"
-                                style="width: 35px; height: 35px; border-radius: 0.5rem; display: flex; align-items: center; justify-content: center; background: white; border: 1px solid var(--border-color); color: var(--text-light); transition: all 0.2s;"
-                                onmouseover="this.style.color='var(--primary-color)'; this.style.borderColor='var(--primary-color)'"
-                                onmouseout="this.style.color='var(--text-light)'; this.style.borderColor='var(--border-color)'"><i
-                                    class="fas fa-comment"></i></a>
+                    <td class="activity-cell" style="border-radius: 0 1rem 1rem 0; text-align: right;">
+                        <div class="activity-actions">
+                            {% if booking.status == 'draft' %}
+                            <a href="/bookings/continue/{{ booking.id }}" class="btn-primary btn-status-action">Continue
+                                Booking</a>
+                            <a href="/bookings/step/details" class="btn-icon-action" title="Edit Booking Info"><i
+                                    class="fas fa-edit"></i></a>
+                            {% else %}
+                            <a href="/customer/bookings/manage/{{ booking.id }}" class="btn-icon-action"
+                                title="View Details"><i class="fas fa-eye"></i></a>
                             {% if booking.status == 'completed' and not booking.has_review %}
-                            <a href="/customer/feedback/{{ booking.id }}" class="btn-primary"
-                                style="padding: 0.4rem 0.8rem; font-size: 0.75rem; border-radius: 0.5rem; white-space: nowrap;">Rate
+                            <a href="/customer/feedback/{{ booking.id }}" class="btn-primary btn-status-action">Rate
                                 Service</a>
+                            {% endif %}
                             {% endif %}
                         </div>
                     </td>
@@ -256,13 +130,14 @@
         </table>
     </div>
     {% else %}
-    <div style="text-align: center; padding: 4rem;">
-        <img src="https://illustrations.popsy.co/gray/calendar.svg" alt="Empty"
-            style="width: 180px; margin-bottom: 2rem; opacity: 0.5;">
-        <h3 style="color: var(--text-light); margin-bottom: 0.5rem;">No bookings found</h3>
-        <p style="color: var(--text-light); margin-bottom: 2rem;">Host your first event with OccaServe!</p>
+    <div class="empty-state">
+        <img src="https://illustrations.popsy.co/gray/calendar.svg" alt="Empty">
+        <h3>No bookings found</h3>
+        <p>Host your first event with OccaServe!</p>
         <a href="/customer/marketplace" class="btn-primary">Browse Caterers</a>
     </div>
     {% endif %}
 </div>
 {% endblock %}
+
+{% block body_attributes %}data-client-id="{{ client_id }}"{% endblock %}

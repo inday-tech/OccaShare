@@ -1,0 +1,30 @@
+document.addEventListener('DOMContentLoaded', function () {
+    const calendarEl = document.getElementById('availabilityCalendar');
+    if (calendarEl) {
+        const catererId = calendarEl.dataset.catererId;
+        const calendar = new FullCalendar.Calendar(calendarEl, {
+            initialView: 'dayGridMonth',
+            headerToolbar: {
+                left: 'prev,next today',
+                center: 'title',
+                right: ''
+            },
+            events: `/caterer/api/events?caterer_id=${catererId}`,
+            height: 'auto',
+            dayMaxEvents: true,
+            eventDidMount: function (info) {
+                if (info.event.title === 'BLOCKED') {
+                    info.el.classList.add('blocked-date');
+                }
+            }
+        });
+        calendar.render();
+    }
+});
+
+function startBooking(catererId) {
+    window.location.href = `/bookings/start/${catererId}`;
+}
+
+// Global exposure for potential onclick attributes while transitioning
+window.startBooking = startBooking;

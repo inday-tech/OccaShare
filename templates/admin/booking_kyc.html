@@ -2,6 +2,10 @@
 
 {% block title %}Booking KYC Detail - OccaServe{% endblock %}
 
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', path='/css/admin/booking_kyc.css') }}">
+{% endblock %}
+
 {% block content %}
 <div class="page-header">
     <div style="display: flex; justify-content: space-between; align-items: center;">
@@ -15,162 +19,104 @@
     </div>
 </div>
 
-<div class="kyc-review-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+<div class="kyc-review-grid">
     <!-- Left: Identity Documents -->
-    <div class="review-card">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+    <div class="kyc-review-card">
+        <div class="kyc-card-header-flex">
             <h3>Biometric Evidence</h3>
-            <span class="badge"
-                style="background: var(--slate-100); color: var(--slate-700); padding: 0.25rem 0.75rem; border-radius: 1rem; font-size: 0.75rem; font-weight: 600;">
+            <span class="kyc-type-badge">
                 ID: {{ kyc.verification_type or 'Government ID' }}
             </span>
         </div>
 
-        <div class="doc-comparison" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-            <div class="doc-item">
-                <p class="label-tiny">Government ID</p>
-                <div class="img-container"
-                    style="border-radius: 0.75rem; overflow: hidden; border: 1px solid var(--border-color); height: 180px;">
-                    <img src="{{ kyc.document_url }}" style="width: 100%; height: 100%; object-fit: contain;"
-                        alt="ID Document">
+        <div class="doc-comparison-layout">
+            <div class="doc-item-container">
+                <p class="label-tiny-caps">Government ID</p>
+                <div class="id-document-preview">
+                    <img src="{{ kyc.document_url }}" alt="ID Document">
                 </div>
-                <div style="margin-top: 0.5rem; font-size: 0.75rem; font-weight: 700; color: #64748b;">NUM: {{
-                    kyc.id_number }}</div>
+                <div class="id-number-display">NUM: {{ kyc.id_number }}</div>
             </div>
-            <div class="doc-item">
-                <p class="label-tiny">Liveness Check</p>
-                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.25rem;">
-                    <div class="img-container small"
-                        style="height: 60px; border-radius: 0.25rem; overflow: hidden; border: 1px solid #e2e8f0;">
-                        <img src="{{ kyc.selfie_url }}" style="width: 100%; height: 100%; object-fit: cover;">
+            <div class="doc-item-container">
+                <p class="label-tiny-caps">Liveness Check</p>
+                <div class="liveness-thumbs-grid">
+                    <div class="liveness-img-wrapper">
+                        <img src="{{ kyc.selfie_url }}">
                     </div>
-                    <div class="img-container small"
-                        style="height: 60px; border-radius: 0.25rem; overflow: hidden; border: 1px solid #e2e8f0;">
-                        <img src="{{ kyc.selfie_2_url or kyc.selfie_url }}"
-                            style="width: 100%; height: 100%; object-fit: cover;">
+                    <div class="liveness-img-wrapper">
+                        <img src="{{ kyc.selfie_2_url or kyc.selfie_url }}">
                     </div>
-                    <div class="img-container small"
-                        style="height: 60px; border-radius: 0.25rem; overflow: hidden; border: 1px solid #e2e8f0;">
-                        <img src="{{ kyc.selfie_3_url or kyc.selfie_url }}"
-                            style="width: 100%; height: 100%; object-fit: cover;">
+                    <div class="liveness-img-wrapper">
+                        <img src="{{ kyc.selfie_3_url or kyc.selfie_url }}">
                     </div>
                 </div>
-                <div class="badge {% if kyc.liveness_status == 'passed' %}badge-success{% else %}badge-danger{% endif %}"
-                    style="margin-top: 0.5rem; display: inline-block;">
+                <div
+                    class="status-pill-indicator {% if kyc.liveness_status == 'passed' %}success{% else %}danger{% endif %}">
                     Liveness: {{ kyc.liveness_status|capitalize }}
                 </div>
             </div>
         </div>
 
-        <div class="match-score"
-            style="margin-top: 1.5rem; padding: 1rem; background: #f8fafc; border-radius: 0.75rem; display: flex; justify-content: space-between; align-items: center;">
-            <span style="font-weight: 600; color: #4b5563;">AI Fraud Score:</span>
-            <span class="score-value"
-                style="font-size: 1.25rem; font-weight: 800; color: {% if kyc.fraud_score >= 75 %}#10b981{% elif kyc.fraud_score >= 60 %}#f59e0b{% else %}#ef4444{% endif %};">
+        <div class="fraud-score-summary-box">
+            <span class="score-label-text">AI Fraud Score:</span>
+            <span
+                class="score-value-highlight {% if kyc.fraud_score >= 75 %}score-high{% elif kyc.fraud_score >= 60 %}score-medium{% else %}score-low{% endif %}">
                 {{ kyc.fraud_score }}/100
             </span>
         </div>
     </div>
 
     <!-- Right: OCR & Actions -->
-    <div class="review-card">
+    <div class="kyc-review-card">
         <h3>Compliance & Actions</h3>
 
-        <div class="ocr-data-list"
-            style="margin: 1.5rem 0; background: #f1f5f9; padding: 1rem; border-radius: 0.75rem;">
-            <div style="font-size: 0.7rem; font-weight: 800; color: #64748b; text-transform: uppercase;">System Notes
-            </div>
-            <p style="font-size: 0.85rem; color: #1e293b; margin-top: 0.5rem;">
+        <div class="system-notes-container">
+            <div class="notes-label-tiny">System Notes</div>
+            <p class="system-notes-text">
                 {{ kyc.failure_reason or 'No critical flags detected by automated scan.' }}
             </p>
         </div>
 
-        <div style="margin-top: 2rem;">
+        <div class="audit-action-form">
             <h3>Manual Audit Action</h3>
             <form action="/admin/kyc/{{ kyc.id }}/action" method="POST" class="fraud-form">
                 <div class="form-group" style="margin-bottom: 1rem;">
-                    <label style="font-size: 0.8rem; font-weight: 700;">Decision Notes</label>
-                    <textarea name="notes" class="form-control" placeholder="Add manual review findings here..."
-                        style="width: 100%; min-height: 80px; padding: 0.75rem; border-radius: 0.5rem; border: 1px solid #e2e8f0;"></textarea>
+                    <label class="label-tiny-caps">Decision Notes</label>
+                    <textarea name="notes" class="audit-notes-textarea"
+                        placeholder="Add manual review findings here..."></textarea>
                 </div>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-                    <button type="submit" name="action" value="approve" class="btn btn-primary"
-                        style="background: #10b981; border: none;">Approve KYC</button>
-                    <button type="submit" name="action" value="reject" class="btn btn-danger"
-                        style="background: #ef4444; border: none;">Flag/Reject</button>
+                <div class="audit-decision-grid">
+                    <button type="submit" name="action" value="approve" class="btn-audit approve">Approve KYC</button>
+                    <button type="submit" name="action" value="reject" class="btn-audit reject">Flag/Reject</button>
                 </div>
             </form>
         </div>
     </div>
 </div>
 
-<div class="audit-trail mt-4">
-    <div class="review-card">
+<div class="audit-trail-wrapper">
+    <div class="kyc-review-card">
         <h3>Security Audit Trail (User History)</h3>
-        <table class="audit-table" style="width: 100%; border-collapse: collapse; margin-top: 1rem;">
+        <table class="audit-history-table">
             <thead>
-                <tr style="text-align: left; border-bottom: 2px solid #f1f5f9;">
-                    <th style="padding: 1rem;">Timestamp</th>
-                    <th style="padding: 1rem;">Action</th>
-                    <th style="padding: 1rem;">IP Address</th>
-                    <th style="padding: 1rem;">Notes</th>
+                <tr>
+                    <th>Timestamp</th>
+                    <th>Action</th>
+                    <th>IP Address</th>
+                    <th>Notes</th>
                 </tr>
             </thead>
             <tbody>
                 {% for log in audit_trail %}
-                <tr style="border-bottom: 1px solid #f1f5f9; font-size: 0.85rem;">
-                    <td style="padding: 1rem;">{{ log.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</td>
-                    <td style="padding: 1rem;"><strong>{{ log.action|replace('_', ' ')|capitalize }}</strong></td>
-                    <td style="padding: 1rem;">{{ log.ip_address }}</td>
-                    <td style="padding: 1rem;">{{ log.notes }}</td>
+                <tr class="audit-txn-row">
+                    <td>{{ log.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                    <td><strong>{{ log.action|replace('_', ' ')|capitalize }}</strong></td>
+                    <td>{{ log.ip_address }}</td>
+                    <td>{{ log.notes }}</td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
     </div>
 </div>
-
-<style>
-    .review-card {
-        background: #fff;
-        padding: 2rem;
-        border-radius: 1.25rem;
-        border: 1px solid var(--border-color);
-        box-shadow: var(--shadow-sm);
-    }
-
-    .label-tiny {
-        font-size: 0.7rem;
-        color: #64748b;
-        font-weight: 800;
-        text-transform: uppercase;
-        margin-bottom: 0.5rem;
-    }
-
-    .badge {
-        font-size: 0.7rem;
-        padding: 0.2rem 0.6rem;
-        border-radius: 0.5rem;
-        font-weight: 700;
-    }
-
-    .badge-success {
-        background: #dcfce7;
-        color: #166534;
-    }
-
-    .badge-danger {
-        background: #fee2e2;
-        color: #991b1b;
-    }
-
-    .btn {
-        padding: 0.75rem 1rem;
-        border-radius: 0.5rem;
-        font-weight: 700;
-        cursor: pointer;
-        color: white;
-    }
-</style>
-{% endblock %}
 {% endblock %}

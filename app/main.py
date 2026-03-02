@@ -1,4 +1,6 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request, HTTPException
+# Trigger reload for DB schema sync
+from fastapi.responses import RedirectResponse, JSONResponse
 import os
 from fastapi.staticfiles import StaticFiles
 from .db.database import engine, Base
@@ -14,6 +16,28 @@ from .core.config import settings
 from uvicorn.middleware.proxy_headers import ProxyHeadersMiddleware
 
 app = FastAPI()
+
+@app.exception_handler(HTTPException)
+async def custom_http_exception_handler(request: Request, exc: HTTPException):
+    # Check if the error is 401 Unauthorized
+    if exc.status_code == 401:
+        accept_header = request.headers.get("accept", "")
+        # If it's a browser requesting HTML, redirect to login
+        if "text/html" in accept_header:
+            return RedirectResponse(url="/auth/login?reason=session_expired", status_code=303)
+        # Otherwise, for APIs/fetch requests, return standard JSON
+        return JSONResponse(
+            status_code=exc.status_code,
+            content={"detail": exc.detail},
+            headers=getattr(exc, "headers", None)
+        )
+    
+    # For all other HTTPExceptions
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={"detail": exc.detail},
+        headers=getattr(exc, "headers", None)
+    )
 
 # Add SessionMiddleware - Using lax and secure if behind HTTPS proxy
 app.add_middleware(

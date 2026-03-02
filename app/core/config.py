@@ -27,4 +27,7 @@ class Settings:
     INSTAGRAM_CLIENT_ID = os.getenv("INSTAGRAM_CLIENT_ID", "")
     INSTAGRAM_CLIENT_SECRET = os.getenv("INSTAGRAM_CLIENT_SECRET", "")
 
+    # KYC CONFIG
+    KYC_ENCRYPTION_KEY = os.getenv("KYC_ENCRYPTION_KEY", "")
+
 settings = Settings()

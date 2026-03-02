@@ -10,10 +10,33 @@ class QuotationService:
         """
         package = booking.package
         if not package:
-            raise ValueError("Booking must have a package to generate a quotation.")
-
-        # Base calculation: price * guest_count
-        base_amount = Decimal(str(package.price)) * Decimal(str(booking.guest_count))
+            # Fallback for custom bookings without a unified package
+            base_amount = Decimal(str(booking.total_amount or 0.0))
+            if booking.guest_count and booking.guest_count > 0:
+                unit_price = float(base_amount / Decimal(str(booking.guest_count)))
+            else:
+                unit_price = float(base_amount)
+                
+            package_details = {
+                "name": "Custom Menu",
+                "description": "Customized catering menu.",
+                "unit_price": unit_price,
+                "guest_count": booking.guest_count,
+                "base_amount": float(base_amount)
+            }
+        else:
+            # Determine actual package price (prioritize price_per_head over legacy price)
+            actual_unit_price = package.price_per_head if hasattr(package, 'price_per_head') and package.price_per_head else package.price
+            
+            # Base calculation: actual_unit_price * guest_count
+            base_amount = Decimal(str(actual_unit_price)) * Decimal(str(booking.guest_count))
+            package_details = {
+                "name": package.name,
+                "description": package.description,
+                "unit_price": float(actual_unit_price),
+                "guest_count": booking.guest_count,
+                "base_amount": float(base_amount)
+            }
         
         # Calculate add-ons from BookingMenuItem
         addons = []
@@ -42,13 +65,7 @@ class QuotationService:
 
         quotation = models.Quotation(
             booking_id=booking.id,
-            package_details={
-                "name": package.name,
-                "description": package.description,
-                "unit_price": float(package.price),
-                "guest_count": booking.guest_count,
-                "base_amount": float(base_amount)
-            },
+            package_details=package_details,
             addons=addons,
             total_amount=float(total_amount),
             downpayment_percent=downpayment_percent,

@@ -1,0 +1,62 @@
+{% if caterers %}
+{% for caterer in caterers %}
+<div class="caterer-card-premium animate-up">
+    <!-- Status Badges -->
+    {% if caterer.rating >= 4.8 %}
+    <div class="price-overlay" style="left: 1.25rem; right: auto; background: var(--p-gold); color: black;">
+        <i class="fas fa-fire"></i> TOP RATED
+    </div>
+    {% endif %}
+    <div class="price-overlay">₱{{ "{:,.0f}".format(caterer.min_package_price or 0) }}+</div>
+
+    <div class="caterer-banner-premium">
+        {% if caterer.cover_image_url %}
+        <img src="{{ caterer.cover_image_url }}" class="banner-img" alt="{{ caterer.business_name }}" loading="lazy">
+        {% elif caterer.banner_url %}
+        <img src="{{ caterer.banner_url }}" class="banner-img" alt="{{ caterer.business_name }}" loading="lazy">
+        {% else %}
+        <img src="{{ url_for('static', path='/images/default_banner.jpg') }}" class="banner-img"
+            alt="{{ caterer.business_name }}" loading="lazy">
+        {% endif %}
+    </div>
+
+    <div class="caterer-info-premium">
+        <div class="info-header-row">
+            <div class="rating-badge-pill">
+                <i class="fas fa-star" style="color: #f59e0b;"></i> {{ "%.1f"|format(caterer.rating or 0) }}
+            </div>
+        </div>
+
+        <h3 class="caterer-business-name">
+            {{ caterer.business_name }}
+            {% if caterer.is_verified %}
+            <i class="fas fa-check-circle verified-badge-inline" title="Verified Partner"></i>
+            {% endif %}
+        </h3>
+
+        <p class="caterer-tagline">{{ (caterer.description or "Professional catering services tailored for your special
+            events and corporate gatherings.")|truncate(110) }}</p>
+
+        <div class="caterer-meta-pills">
+            <span><i class="fas fa-map-marker-alt"></i> {{ caterer.city or "Manila" }}</span>
+            <span><i class="fas fa-users"></i> {{ caterer.max_capacity or 100 }}+ pax</span>
+        </div>
+
+        <a href="/customer/marketplace/{{ caterer.id }}" class="btn-premium-action">
+            View Details <i class="fas fa-arrow-right" style="font-size: 0.8rem;"></i>
+        </a>
+    </div>
+</div>
+{% endfor %}
+{% else %}
+<div class="empty-results-premium text-center w-100 py-5">
+    <div class="empty-state-visual mb-4" style="opacity: 0.5;">
+        <i class="fas fa-utensils fa-4x text-muted mb-3"></i>
+    </div>
+    <h2 class="h3 fw-bold outfit-font">No caterers found</h2>
+    <p class="text-muted">Try searching for a different name, cuisine, or city.</p>
+    <button onclick="window.location.reload()" class="btn-text mt-3" style="color: var(--p-emerald); font-weight: 700;">
+        Clear Search
+    </button>
+</div>
+{% endif %}

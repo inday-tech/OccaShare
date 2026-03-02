@@ -1,77 +1,177 @@
 {% extends "admin/layout.html" %}
 
-{% block title %}Website Settings - Admin Dashboard{% endblock %}
+{% block title %}Website Settings - OccaShare Admin{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', path='/css/admin/settings.css') }}">
+{% endblock %}
 
 {% block content %}
 <div class="page-header">
-    <h1>Website Settings</h1>
-    <p>Configure platform-wide preferences, security, and global parameters.</p>
+    <h1>Platform Configuration</h1>
+    <p>Manage global website settings, appearances, and system behavior.</p>
 </div>
 
-<div
-    style="background: var(--white); border-radius: 2.5rem; border: 1px solid var(--border-color); box-shadow: var(--shadow-md); overflow: hidden;">
-    <div style="padding: 3rem;">
-        <h3 style="font-size: 1.5rem; margin-bottom: 2.5rem;"><i class="fas fa-sliders-h"></i> General Configuration
-        </h3>
+<div class="settings-container-grid">
+    <!-- Side Tabs -->
+    <aside class="settings-tabs-nav">
+        <button class="settings-tab-btn active" onclick="switchTab(event, 'general')">
+            <i class="fas fa-cog"></i> General Info
+        </button>
+        <button class="settings-tab-btn" onclick="switchTab(event, 'appearance')">
+            <i class="fas fa-palette"></i> Appearance
+        </button>
+        <button class="settings-tab-btn" onclick="switchTab(event, 'social')">
+            <i class="fas fa-share-alt"></i> Social Media
+        </button>
+        <button class="settings-tab-btn" onclick="switchTab(event, 'system')">
+            <i class="fas fa-server"></i> System Settings
+        </button>
+        <button class="settings-tab-btn" onclick="switchTab(event, 'maintenance')">
+            <i class="fas fa-tools"></i> Maintenance
+        </button>
+    </aside>
 
-        <form style="display: grid; gap: 2.5rem;">
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2.5rem;">
-                <div>
-                    <label
-                        style="display: block; font-weight: 700; margin-bottom: 0.75rem; color: var(--secondary-color);">Platform
-                        Name</label>
-                    <input type="text" value="OccaServe"
-                        style="width: 100%; padding: 1rem 1.25rem; border: 1px solid var(--border-color); border-radius: 0.75rem; background: #f8fafc;">
+    <!-- Content Area -->
+    <form class="settings-content-area" action="/admin/settings/update" method="POST">
+        <!-- General Panel -->
+        <div id="general" class="settings-panel active">
+            <div class="panel-header">
+                <h2>General Configuration</h2>
+                <p>Basic platform details and contact information.</p>
+            </div>
+            <div class="settings-grid-2">
+                <div class="settings-group">
+                    <label class="settings-label">Website Name</label>
+                    <input type="text" name="site_name" class="settings-control" value="OccaShare">
                 </div>
-                <div>
-                    <label
-                        style="display: block; font-weight: 700; margin-bottom: 0.75rem; color: var(--secondary-color);">Platform
-                        Commission (%)</label>
-                    <input type="number" value="10"
-                        style="width: 100%; padding: 1rem 1.25rem; border: 1px solid var(--border-color); border-radius: 0.75rem; background: #f8fafc;">
+                <div class="settings-group">
+                    <label class="settings-label">Support Email</label>
+                    <input type="email" name="support_email" class="settings-control" value="support@occashare.com">
                 </div>
             </div>
+            <div class="settings-group">
+                <label class="settings-label">SEO Description</label>
+                <textarea name="seo_desc" class="settings-control"
+                    rows="3">The premium marketplace for catering services in the Philippines.</textarea>
+            </div>
+        </div>
 
-            <div
-                style="display: flex; justify-content: space-between; align-items: center; padding: 2rem; background: #f8fafc; border-radius: 1.5rem;">
-                <div>
-                    <div style="font-weight: 700; color: var(--secondary-color); font-size: 1.1rem;">Maintenance Mode
-                    </div>
-                    <div style="font-size: 0.9rem; color: var(--text-light);">Temporarily disable public access to the
-                        platform for updates.</div>
-                </div>
-                <div
-                    style="width: 60px; height: 32px; background: #cbd5e1; border-radius: 20px; position: relative; cursor: pointer;">
-                    <div
-                        style="width: 24px; height: 24px; background: white; border-radius: 50%; position: absolute; top: 4px; left: 4px; transition: 0.3s;">
-                    </div>
+        <!-- Appearance Panel -->
+        <div id="appearance" class="settings-panel">
+            <div class="panel-header">
+                <h2>Visual Appearance</h2>
+                <p>Customize how the platform looks to users.</p>
+            </div>
+            <div class="settings-group">
+                <label class="settings-label">Platform Logo (URL)</label>
+                <div class="visual-upload-box">
+                    <img src="{{ url_for('static', path='/images/logo.png') }}" class="preview-img" id="logo-preview">
+                    <input type="text" name="logo_url" class="settings-control" placeholder="https://..."
+                        onchange="updatePreview('logo-preview', this.value)">
                 </div>
             </div>
-
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2.5rem;">
-                <div>
-                    <label
-                        style="display: block; font-weight: 700; margin-bottom: 0.75rem; color: var(--secondary-color);">Support
-                        Email</label>
-                    <input type="email" value="support@occaserve.com"
-                        style="width: 100%; padding: 1rem 1.25rem; border: 1px solid var(--border-color); border-radius: 0.75rem; background: #f8fafc;">
-                </div>
-                <div>
-                    <label
-                        style="display: block; font-weight: 700; margin-bottom: 0.75rem; color: var(--secondary-color);">Max
-                        Upload Size (MB)</label>
-                    <input type="number" value="5"
-                        style="width: 100%; padding: 1rem 1.25rem; border: 1px solid var(--border-color); border-radius: 0.75rem; background: #f8fafc;">
+            <div class="settings-group">
+                <label class="settings-label">Favicon (URL)</label>
+                <div class="visual-upload-box">
+                    <img src="{{ url_for('static', path='/favicon.ico') }}" class="preview-img" id="favicon-preview">
+                    <input type="text" name="favicon_url" class="settings-control" placeholder="https://..."
+                        onchange="updatePreview('favicon-preview', this.value)">
                 </div>
             </div>
+        </div>
 
-            <div
-                style="display: flex; gap: 1.5rem; margin-top: 2rem; pt: 2.5rem; border-top: 1px solid var(--border-color);">
-                <button type="submit" class="btn-primary" style="padding: 1.25rem 3rem; font-weight: 700;">Save System
-                    Changes</button>
-                <button type="button" class="btn-outline" style="padding: 1.25rem 2rem;">Reset to Defaults</button>
+        <!-- Social Media Panel -->
+        <div id="social" class="settings-panel">
+            <div class="panel-header">
+                <h2>Social Integration</h2>
+                <p>Connect your platform's social handles.</p>
             </div>
-        </form>
-    </div>
+            <div class="social-input-group">
+                <div class="social-icon-circle facebook-bg"><i class="fab fa-facebook-f"></i></div>
+                <input type="text" name="fb_link" class="settings-control" placeholder="Facebook Profile URL">
+            </div>
+            <div class="social-input-group">
+                <div class="social-icon-circle instagram-bg"><i class="fab fa-instagram"></i></div>
+                <input type="text" name="ig_link" class="settings-control" placeholder="Instagram Profile URL">
+            </div>
+            <div class="social-input-group">
+                <div class="social-icon-circle twitter-bg"><i class="fab fa-twitter"></i></div>
+                <input type="text" name="tw_link" class="settings-control" placeholder="Twitter Profile URL">
+            </div>
+        </div>
+
+        <!-- System Settings Panel -->
+        <div id="system" class="settings-panel">
+            <div class="panel-header">
+                <h2>System Constraints</h2>
+                <p>Configure platform limits and business rules.</p>
+            </div>
+            <div class="settings-grid-2">
+                <div class="settings-group">
+                    <label class="settings-label">Commission Rate (%)</label>
+                    <input type="number" name="commission" class="settings-control" value="10">
+                </div>
+                <div class="settings-group">
+                    <label class="settings-label">Max File Upload (MB)</label>
+                    <input type="number" name="max_upload" class="settings-control" value="5">
+                </div>
+            </div>
+        </div>
+
+        <!-- Maintenance Panel -->
+        <div id="maintenance" class="settings-panel">
+            <div class="panel-header">
+                <h2>System Status</h2>
+                <p>Control platform availability for maintenance.</p>
+            </div>
+            <div class="maintenance-toggle">
+                <div class="maintenance-info">
+                    <h4>Maintenance Mode</h4>
+                    <p>Toggle to restrict user access during updates.</p>
+                </div>
+                <div class="switch-box" id="maintenance-switch" onclick="toggleSwitch(this)">
+                    <input type="hidden" name="maintenance_mode" id="maintenance_val" value="off">
+                    <div class="switch-circle"></div>
+                </div>
+            </div>
+            <div class="settings-group">
+                <label class="settings-label">Custom Maintenance Message</label>
+                <textarea name="maint_msg" class="settings-control"
+                    rows="4">OccaShare is currently undergoing scheduled maintenance. We'll be back online shortly!</textarea>
+            </div>
+        </div>
+
+        <div class="settings-footer">
+            <button type="reset" class="btn-outline">Reset Changes</button>
+            <button type="submit" class="btn-primary btn-premium-save">Save Configurations</button>
+        </div>
+    </form>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function switchTab(evt, tabId) {
+        // Toggle Buttons
+        document.querySelectorAll('.settings-tab-btn').forEach(btn => btn.classList.remove('active'));
+        evt.currentTarget.classList.add('active');
+
+        // Toggle Panels
+        document.querySelectorAll('.settings-panel').forEach(panel => panel.classList.remove('active'));
+        document.getElementById(tabId).classList.add('active');
+    }
+
+    function toggleSwitch(el) {
+        el.classList.toggle('active');
+        const hiddenInput = el.querySelector('input');
+        hiddenInput.value = el.classList.contains('active') ? 'on' : 'off';
+    }
+
+    function updatePreview(imgId, url) {
+        if (url) {
+            document.getElementById(imgId).src = url;
+        }
+    }
+</script>
 {% endblock %}

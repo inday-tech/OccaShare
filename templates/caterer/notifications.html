@@ -1,83 +1,135 @@
+{% set nav_page = 'notifications' %}
 {% extends "caterer/layout.html" %}
 
-{% block title %}Notifications - Caterer Dashboard{% endblock %}
+{% block title %}Notifications - OccaShare Caterer{% endblock %}
 
 {% block extra_css %}
-<style>
-    .notif-icon {
-        width: 48px;
-        height: 48px;
-        border-radius: 1rem;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.2rem;
-        flex-shrink: 0;
-    }
-
-    .notif-success {
-        background: #dcfce7;
-        color: #16a34a;
-    }
-
-    .notif-warning {
-        background: #fef9c3;
-        color: #ca8a04;
-    }
-
-    .notif-reminder {
-        background: #e0e7ff;
-        color: #4f46e5;
-    }
-
-    .notif-info {
-        background: #f1f5f9;
-        color: #64748b;
-    }
-</style>
+<link rel="stylesheet" href="{{ url_for('static', path='/css/caterer/notifications.css') }}">
 {% endblock %}
 
 {% block content %}
-<div class="page-header">
-    <h1>Notifications</h1>
-    <p>Stay updated with your bookings, payments, and reminders.</p>
-</div>
+<div class="notifications-container-premium">
+    <div class="notifications-header-row">
+        <div>
+            <h1>Notifications</h1>
+            <p>Stay updated on your bookings and account activity.</p>
+        </div>
+        <div class="header-actions">
+            <button class="btn-outline" onclick="markAllAsRead()">Mark all as read</button>
+        </div>
+    </div>
 
-<div
-    style="background: var(--white); border-radius: 2rem; border: 1px solid var(--border-color); box-shadow: var(--shadow-md); overflow: hidden;">
     {% if notifications %}
-    <div style="display: grid;">
+    <div class="notifications-list">
         {% for notif in notifications %}
-        <div style="padding: 2rem; border-bottom: 1px solid var(--border-color); display: flex; gap: 1.5rem; transition: background 0.2s;"
-            onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='white'">
-            <div
-                class="notif-icon notif-{% if notif.type == 'success' %}success{% elif notif.type == 'warning' %}warning{% elif notif.type == 'reminder' %}reminder{% else %}info{% endif %}">
-                <i
-                    class="fas {% if notif.type == 'success' %}fa-check-circle{% elif notif.type == 'warning' %}fa-exclamation-triangle{% elif notif.type == 'reminder' %}fa-clock{% else %}fa-info-circle{% endif %}"></i>
-            </div>
-            <div style="flex: 1;">
-                <div
-                    style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem;">
-                    <h4 style="margin: 0; font-size: 1.1rem; color: var(--secondary-color);">{{ notif.title }}</h4>
-                    <span style="font-size: 0.8rem; color: var(--text-light);">{{ notif.created_at.strftime('%b %d,
-                        %H:%M') }}</span>
-                </div>
-                <p style="margin: 0; color: var(--text-light); line-height: 1.5;">{{ notif.message }}</p>
-            </div>
+        <div class="notification-item-card {{ 'unread' if not notif.is_read else '' }}" id="notif-{{ notif.id }}"
+            onclick="toggleRead({{ notif.id }})">
             {% if not notif.is_read %}
-            <div
-                style="width: 10px; height: 10px; border-radius: 50%; background: var(--primary-color); align-self: center;">
-            </div>
+            <div class="unread-dot"></div>
             {% endif %}
+
+            <div class="notification-icon-box {{ 'icon-' ~ notif.type|lower }}">
+                {% if notif.type == 'Booking' %}
+                <i class="fas fa-calendar-check"></i>
+                {% elif notif.type == 'Payment' %}
+                <i class="fas fa-wallet"></i>
+                {% elif notif.type == 'Verification' %}
+                <i class="fas fa-user-shield"></i>
+                {% else %}
+                <i class="fas fa-bell"></i>
+                {% endif %}
+            </div>
+
+            <div class="notification-body">
+                <div class="notif-title-row">
+                    <h3 class="notif-title">{{ notif.title }}</h3>
+                    <span class="notif-time">{{ notif.created_at.strftime('%b %d, %H:%M') }}</span>
+                </div>
+                <p class="notif-message">{{ notif.message }}</p>
+
+                <div class="notif-actions">
+                    {% if notif.action_url %}
+                    <a href="{{ notif.action_url }}" class="btn-primary btn-notif-action">View Details</a>
+                    {% endif %}
+                    {% if not notif.is_read %}
+                    <button class="btn-outline btn-notif-action"
+                        onclick="event.stopPropagation(); markAsRead({{ notif.id }})">Mark Read</button>
+                    {% endif %}
+                </div>
+            </div>
         </div>
         {% endfor %}
     </div>
     {% else %}
-    <div style="padding: 6rem 2rem; text-align: center;">
-        <i class="fas fa-bell-slash" style="font-size: 4rem; color: #f1f5f9; margin-bottom: 1.5rem;"></i>
-        <h3 style="color: var(--secondary-color); margin-bottom: 0.5rem;">No notifications yet</h3>
-        <p style="color: var(--text-light);">We'll notify you when something important happens.</p>
+    <div class="notif-empty">
+        <i class="fas fa-bell-slash"></i>
+        <h2>All Caught Up!</h2>
+        <p>No new notifications at the moment. We'll let you know when something important happens.</p>
     </div>
     {% endif %}
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    async function markAsRead(id) {
+        try {
+            const response = await fetch(`/caterer/notifications/${id}/read`, { method: 'POST' });
+            if (response.ok) {
+                const card = document.getElementById(`notif-${id}`);
+                card.classList.remove('unread');
+                const dot = card.querySelector('.unread-dot');
+                if (dot) dot.remove();
+                const btn = card.querySelector('.btn-outline');
+                if (btn) btn.remove();
+            }
+        } catch (e) {
+            console.error('Failed to mark as read', e);
+        }
+    }
+
+    async function markAllAsRead() {
+        try {
+            const response = await fetch('/caterer/notifications/read-all', { method: 'POST' });
+            if (response.ok) {
+                location.reload();
+            }
+        } catch (e) {
+            console.error('Failed to mark all as read', e);
+        }
+    }
+
+    function toggleRead(id) {
+        // Optional: navigate to target URL or just mark as read
+        const card = document.getElementById(`notif-${id}`);
+        if (card.classList.contains('unread')) {
+            markAsRead(id);
+        }
+    }
+
+    // AJAX Polling for Real-time Updates
+    async function pollNotifications() {
+        try {
+            const response = await fetch('/caterer/notifications/poll');
+            if (response.ok) {
+                const data = await response.json();
+                const badge = document.getElementById('nav-notif-badge');
+                if (badge) {
+                    if (data.unread_count > 0) {
+                        badge.textContent = data.unread_count;
+                        badge.style.display = 'inline-flex';
+                    } else {
+                        badge.style.display = 'none';
+                    }
+                }
+            }
+        } catch (e) {
+            console.error('Polling error', e);
+        }
+    }
+
+    // Poll every 10 seconds
+    setInterval(pollNotifications, 10000);
+    pollNotifications(); // Initial poll
+</script>
 {% endblock %}

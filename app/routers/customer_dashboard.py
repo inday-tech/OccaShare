@@ -128,6 +128,60 @@ async def customer_bookings(
         "active_page": "bookings"
     })
 
+@router.get("/bookings/manage/{booking_id}", response_class=HTMLResponse)
+async def manage_booking(
+    booking_id: int,
+    request: Request,
+    db: Session = Depends(database.get_db),
+    user: models.User = Depends(customer_only)
+):
+    booking = db.query(models.Booking).get(booking_id)
+    if not booking or booking.user_id != user.id:
+        raise HTTPException(status_code=404, detail="Booking not found")
+    
+    # Calculate status progress for timeline
+    status_steps = ["draft", "pending", "confirmed", "completed"]
+    current_status = booking.status or "pending"
+    try:
+        current_step_idx = status_steps.index(current_status)
+    except ValueError:
+        current_step_idx = 1 # Default to pending
+        
+    return templates.TemplateResponse("customer/booking_manage.html", {
+        "request": request,
+        "user": user,
+        "booking": booking,
+        "status_steps": status_steps,
+        "current_step_idx": current_step_idx,
+        "active_page": "bookings"
+    })
+
+@router.post("/bookings/manage/{booking_id}/cancel")
+async def cancel_booking(
+    booking_id: int,
+    request: Request,
+    db: Session = Depends(database.get_db),
+    user: models.User = Depends(customer_only)
+):
+    booking = db.query(models.Booking).get(booking_id)
+    if not booking or booking.user_id != user.id:
+        raise HTTPException(status_code=404, detail="Booking not found")
+    
+    # Only allow cancelling drafts or unpaid pending bookings
+    if booking.status in ['draft', 'pending', 'pending_payment'] and booking.payment_status not in ['paid', 'deposit_paid']:
+        if booking.status == 'draft':
+            # Physical delete for drafts to prevent database bloat
+            db.delete(booking)
+            db.commit()
+            return RedirectResponse(url="/customer/bookings?msg=draft_deleted", status_code=303)
+        else:
+            # Soft cancel for submitted but unpaid bookings
+            booking.status = 'cancelled'
+            db.commit()
+            return RedirectResponse(url=f"/customer/bookings/manage/{booking_id}?msg=cancelled", status_code=303)
+    else:
+        return RedirectResponse(url=f"/customer/bookings/manage/{booking_id}?error=cannot_cancel", status_code=303)
+
 @router.get("/payments", response_class=HTMLResponse)
 async def customer_payments(
     request: Request, 
@@ -194,63 +248,119 @@ async def customer_marketplace(
     db: Session = Depends(database.get_db),
     user: models.User = Depends(customer_only)
 ):
-    # Only show verified caterers
-    query = db.query(models.CatererProfile).filter(models.CatererProfile.verification_status == "Verified")
+    from sqlalchemy import func
 
+    # Subquery to get minimum price and maximum capacity per caterer
+    stats_subquery = db.query(
+        models.CateringPackage.caterer_id,
+        func.min(models.CateringPackage.price).label("min_price"),
+        func.max(models.CateringPackage.max_guests).label("max_capacity")
+    ).group_by(models.CateringPackage.caterer_id).subquery()
+
+    # Base query for verified caterers
+    query = db.query(
+        models.CatererProfile,
+        stats_subquery.c.min_price,
+        stats_subquery.c.max_capacity
+    ).outerjoin(stats_subquery, models.CatererProfile.id == stats_subquery.c.caterer_id)\
+     .filter(models.CatererProfile.verification_status == "Verified")
+
+    # Search filter
     if q:
+        search_filter = f"%{q}%"
         query = query.filter(
-            (models.CatererProfile.business_name.ilike(f"%{q}%")) |
-            (models.CatererProfile.description.ilike(f"%{q}%"))
+            (models.CatererProfile.business_name.ilike(search_filter)) |
+            (models.CatererProfile.description.ilike(search_filter)) |
+            (models.CatererProfile.city.ilike(search_filter))
         )
     
+    # Category filter
     if event_type:
         query = query.filter(models.CatererProfile.business_type == event_type)
     
+    # Rating filter
     if rating:
         query = query.filter(models.CatererProfile.rating >= rating)
     
+    # City filter
     if city:
         query = query.filter(models.CatererProfile.city == city)
 
-    # Note: Filtering by package price requires a join
-    if min_price is not None or max_price is not None:
-        query = query.join(models.CateringPackage)
-        if min_price is not None:
-            query = query.filter(models.CateringPackage.price >= min_price)
-        if max_price is not None:
-            query = query.filter(models.CateringPackage.price <= max_price)
-        query = query.distinct()
+    # Price range filter (on the calculated min_price)
+    if min_price is not None:
+        query = query.filter(stats_subquery.c.min_price >= min_price)
+    if max_price is not None:
+        query = query.filter(stats_subquery.c.min_price <= max_price)
 
+    # Sorting
     if sort == "rating":
         query = query.order_by(models.CatererProfile.rating.desc())
     elif sort == "price_low":
-        # Simplified sort by first package price
-        query = query.join(models.CateringPackage).order_by(models.CateringPackage.price.asc())
+        query = query.order_by(stats_subquery.c.min_price.asc())
+    elif sort == "price_high":
+        query = query.order_by(stats_subquery.c.min_price.desc())
+    else:
+        query = query.order_by(models.CatererProfile.created_at.desc())
 
-    # Execute query
-    caterers = query.all()
+    # Execute
+    results = query.all()
+    
+    # Map results to objects with computed attributes for the template
+    caterers = []
+    for profile, min_p, max_c in results:
+        profile.min_package_price = min_p or profile.starting_price or 0
+        profile.max_capacity = max_c or 0
+        caterers.append(profile)
 
-    # Get unique cities and types for filters
-    cities = db.query(models.CatererProfile.city).distinct().all()
-    types = db.query(models.CatererProfile.business_type).distinct().all()
+    # Dynamic filter options
+    cities = db.query(models.CatererProfile.city).filter(models.CatererProfile.city != None).distinct().all()
+    types = db.query(models.CatererProfile.business_type).filter(models.CatererProfile.business_type != None).distinct().all()
+
+    # Check for AJAX request
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return templates.TemplateResponse("customer/marketplace_partial.html", {
+            "request": request,
+            "caterers": caterers
+        })
 
     return templates.TemplateResponse("customer/marketplace.html", {
         "request": request,
         "user": user,
         "caterers": caterers,
-        "cities": [c[0] for c in cities if c[0]],
-        "types": [t[0] for t in types if t[0]],
+        "cities": sorted([c[0] for c in cities]),
+        "types": sorted([t[0] for t in types]),
         "active_page": "marketplace",
-        "current_step": 1,
         "filters": {
-            "q": q,
-            "event_type": event_type,
+            "q": q or "",
+            "event_type": event_type or "",
             "min_price": min_price,
             "max_price": max_price,
-            "rating": rating,
-            "city": city,
+            "rating": rating or 0,
+            "city": city or "",
             "sort": sort
         }
+    })
+
+@router.get("/marketplace/{caterer_id}", response_class=HTMLResponse)
+async def caterer_detail(
+    caterer_id: int,
+    request: Request,
+    db: Session = Depends(database.get_db),
+    user: models.User = Depends(customer_only)
+):
+    from ..db import crud
+    caterer = crud.get_caterer(db, caterer_id=caterer_id)
+    if not caterer:
+        raise HTTPException(status_code=404, detail="Caterer not found")
+    
+    return templates.TemplateResponse("customer/caterer_profile_view.html", {
+        "request": request, 
+        "caterer": caterer,
+        "packages": caterer.packages,
+        "gallery_items": caterer.gallery_items,
+        "reviews": caterer.reviews,
+        "user": user,
+        "active_page": "marketplace"
     })
 
 @router.post("/profile/update")

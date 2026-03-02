@@ -1,0 +1,340 @@
+/* Marketplace - Professional Simplified UI (Phase 13) */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@500;600;700;800;900&display=swap');
+
+:root {
+    --p-emerald: #059669;
+    --p-emerald-light: #ecfdf5;
+    --p-gold: #b59410;
+    --p-slate: #0f172a;
+    --p-gray: #64748b;
+    --p-bg: #f8fafc;
+    --p-white: #ffffff;
+    --radius-md: 1rem;
+    --radius-lg: 1.5rem;
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+    --shadow-premium: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+    --tr-smooth: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+body {
+    background-color: var(--p-bg);
+    color: var(--p-slate);
+    font-family: 'Inter', sans-serif;
+}
+
+h1,
+h2,
+h3,
+.outfit-font {
+    font-family: 'Outfit', sans-serif;
+}
+
+/* --- Hero --- */
+.marketplace-hero-premium {
+    padding: 6rem 0 5rem;
+    background: linear-gradient(135deg, var(--p-white) 0%, #f1f5f9 100%);
+    text-align: center;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.hero-content h1 {
+    font-size: clamp(2.5rem, 5vw, 4rem);
+    font-weight: 900;
+    letter-spacing: -0.04em;
+    margin-bottom: 1rem;
+}
+
+.hero-content h1 span {
+    color: var(--p-emerald);
+}
+
+.hero-content p {
+    font-size: 1.15rem;
+    color: var(--p-gray);
+    margin-bottom: 2.5rem;
+}
+
+/* --- Search Bar Centered --- */
+.search-wrapper-center {
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.search-bar-premium {
+    background: var(--p-white);
+    border: 1px solid #e2e8f0;
+    border-radius: var(--radius-lg);
+    display: flex;
+    align-items: center;
+    padding: 0.5rem 1.5rem;
+    box-shadow: var(--shadow-md);
+    transition: var(--tr-smooth);
+}
+
+.search-bar-premium:focus-within {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-premium);
+    border-color: var(--p-emerald);
+}
+
+.search-bar-premium i {
+    color: var(--p-emerald);
+    margin-right: 1.25rem;
+    font-size: 1.1rem;
+}
+
+.search-bar-premium input {
+    flex: 1;
+    border: none;
+    padding: 1rem 0;
+    font-size: 1.1rem;
+    font-weight: 500;
+    outline: none;
+}
+
+/* --- Layout Container --- */
+.marketplace-container-full {
+    max-width: 1400px;
+    margin: 3rem auto;
+    padding: 0 2rem;
+}
+
+.marketplace-grid-pro {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 2.5rem;
+}
+
+/* --- Caterer Card (Elite) --- */
+.caterer-card-premium {
+    background: var(--p-white);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    border: 1px solid #e2e8f0;
+    display: flex;
+    flex-direction: column;
+    transition: var(--tr-smooth);
+    position: relative;
+    box-shadow: var(--shadow-md);
+}
+
+.caterer-card-premium:hover {
+    transform: translateY(-8px);
+    box-shadow: var(--shadow-premium);
+}
+
+.caterer-banner-premium {
+    height: 220px;
+    overflow: hidden;
+    position: relative;
+}
+
+.banner-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: var(--tr-smooth);
+}
+
+.caterer-card-premium:hover .banner-img {
+    transform: scale(1.08);
+}
+
+.price-overlay {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: rgba(15, 23, 42, 0.85);
+    backdrop-filter: blur(8px);
+    color: white;
+    padding: 0.4rem 0.9rem;
+    border-radius: 0.75rem;
+    font-weight: 800;
+    font-size: 0.85rem;
+    z-index: 5;
+}
+
+.caterer-info-premium {
+    padding: 1.75rem;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.info-header-row {
+    margin-bottom: 0.75rem;
+}
+
+.rating-badge-pill {
+    background: #fffbeb;
+    color: #92400e;
+    padding: 0.35rem 0.75rem;
+    border-radius: 999px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.caterer-business-name {
+    font-size: 1.6rem;
+    font-weight: 800;
+    margin-bottom: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    color: var(--p-slate);
+}
+
+.verified-badge-inline {
+    color: var(--p-emerald);
+    font-size: 1.15rem;
+}
+
+.caterer-tagline {
+    font-size: 0.95rem;
+    color: var(--p-gray);
+    line-height: 1.6;
+    margin-bottom: 1.75rem;
+    flex: 1;
+}
+
+.caterer-meta-pills {
+    display: flex;
+    gap: 1.25rem;
+    margin-bottom: 1.75rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid #f1f5f9;
+}
+
+.caterer-meta-pill,
+.caterer-meta-pills span {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--p-gray);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.caterer-meta-pills i {
+    color: var(--p-emerald);
+}
+
+.btn-premium-action {
+    background: var(--p-slate);
+    color: white;
+    padding: 1.15rem;
+    border-radius: var(--radius-md);
+    text-align: center;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    transition: var(--tr-smooth);
+    text-decoration: none;
+}
+
+.btn-premium-action:hover {
+    background: var(--p-emerald);
+    box-shadow: 0 10px 20px rgba(5, 150, 105, 0.2);
+}
+
+/* Animations */
+.animate-up {
+    animation: fadeInUp 0.7s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    opacity: 0;
+}
+
+.delay-1 {
+    animation-delay: 0.2s;
+}
+
+.delay-2 {
+    animation-delay: 0.4s;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* --- Skeleton --- */
+.skeleton-card {
+    background: white;
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    height: 480px;
+    border: 1px solid #f1f5f9;
+    position: relative;
+}
+
+.skeleton-banner {
+    height: 220px;
+    background: #f1f5f9;
+    position: relative;
+    overflow: hidden;
+}
+
+.skeleton-info {
+    padding: 1.75rem;
+}
+
+.skeleton-line {
+    height: 18px;
+    background: #f1f5f9;
+    margin-bottom: 1rem;
+    border-radius: 4px;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Shimmer Animation */
+.skeleton-banner::after,
+.skeleton-line::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    transform: translateX(-100%);
+    background-image: linear-gradient(90deg,
+            rgba(255, 255, 255, 0) 0,
+            rgba(255, 255, 255, 0.2) 20%,
+            rgba(255, 255, 255, 0.5) 60%,
+            rgba(255, 255, 255, 0));
+    animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+    100% {
+        transform: translateX(100%);
+    }
+}
+
+/* --- Responsive --- */
+@media (max-width: 768px) {
+    .marketplace-container-full {
+        padding: 0 1rem;
+        margin: 2rem auto;
+    }
+
+    .hero-content h1 {
+        font-size: 2.25rem;
+    }
+
+    .marketplace-grid-pro {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+    }
+}

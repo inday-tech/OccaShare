@@ -3,79 +3,7 @@
 {% block wizard_title %}Event Details - Phase 1{% endblock %}
 
 {% block step_css %}
-<style>
-    .details-grid {
-        display: grid;
-        grid-template-columns: 1fr 320px;
-        gap: 3rem;
-        align-items: flex-start;
-    }
-
-    .form-section-title {
-        font-family: 'Outfit', sans-serif;
-        font-size: 1.5rem;
-        font-weight: 700;
-        color: var(--secondary-color);
-        margin-bottom: 2rem;
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-    }
-
-    .calculator-card {
-        background: #f8fafc;
-        border-radius: 1.5rem;
-        padding: 2rem;
-        border: 1px solid var(--border-color);
-        position: sticky;
-        top: 2rem;
-    }
-
-    .calc-row {
-        display: flex;
-        justify-content: space-between;
-        margin-bottom: 1rem;
-        font-size: 0.95rem;
-        color: #64748b;
-    }
-
-    .calc-total {
-        border-top: 1.5px dashed #e2e8f0;
-        margin-top: 1.5rem;
-        padding-top: 1.5rem;
-        display: flex;
-        justify-content: space-between;
-        font-weight: 800;
-        font-size: 1.25rem;
-        color: var(--secondary-color);
-    }
-
-    .availability-chip {
-        padding: 0.6rem 1.25rem;
-        border-radius: 1rem;
-        font-size: 0.85rem;
-        font-weight: 700;
-        display: inline-flex;
-        align-items: center;
-        gap: 0.6rem;
-        margin-top: 1rem;
-        display: none;
-        letter-spacing: 0.02em;
-        text-transform: uppercase;
-    }
-
-    .chip-booked {
-        background: #fee2e2;
-        color: #991b1b;
-        border: 1px solid #fecaca;
-    }
-
-    .chip-available {
-        background: #ecfdf5;
-        color: #065f46;
-        border: 1px solid #d1fae5;
-    }
-</style>
+<link rel="stylesheet" href="{{ url_for('static', path='/css/customer/booking_wizard/step_details.css') }}">
 {% endblock %}
 
 {% block wizard_content %}
@@ -92,15 +20,15 @@
 
     <div class="details-grid">
         <div class="form-area">
-            <h3 class="form-section-title"><i class="fas fa-calendar-star" style="color: var(--primary-color);"></i>
+            <h3 class="form-section-title"><i class="fas fa-calendar-star"></i>
                 Essential Info</h3>
 
-            <div class="form-group" style="margin-bottom: 1.5rem;">
+            <div class="form-group form-group-spaced">
                 <label class="form-label">Event Name</label>
                 <input type="text" name="event_name" class="form-input" placeholder="e.g., Rodriguez Wedding" required>
             </div>
 
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
+            <div class="grid-2-col">
                 <div class="form-group">
                     <label class="form-label">Event Type</label>
                     <select name="event_type" class="form-input" required>
@@ -118,7 +46,7 @@
                 </div>
             </div>
 
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2rem;">
+            <div class="grid-2-col-wide">
                 <div class="form-group">
                     <label class="form-label">Event Date</label>
                     <input type="date" name="event_date" id="event_date" class="form-input" required
@@ -131,9 +59,9 @@
                 </div>
             </div>
 
-            <h3 class="form-section-title"><i class="fas fa-map-pin" style="color: var(--primary-color);"></i> Logistics
+            <h3 class="form-section-title"><i class="fas fa-map-pin"></i> Logistics
             </h3>
-            <div class="form-group" style="margin-bottom: 2rem;">
+            <div class="form-group form-group-extra-spaced">
                 <label class="form-label">Venue Location</label>
                 <textarea name="venue_address" class="form-input" rows="3"
                     placeholder="Provide complete address for logistics planning..." required></textarea>
@@ -148,18 +76,17 @@
 
         <div class="calculator-area">
             <div class="calculator-card">
-                <h4
-                    style="font-family: 'Outfit', sans-serif; font-weight: 700; margin-bottom: 1.5rem; color: var(--secondary-color);">
+                <h4 class="wizard-title" style="font-size: 1.25rem; text-align: left; margin-bottom: 1.5rem;">
                     Cost Projection</h4>
 
                 <div class="calc-row">
                     <span>Base Price per Head</span>
-                    <span style="font-weight: 700;">₱{{ "{:,.2f}".format(package.price_per_head or package.price or 0)
+                    <span class="calc-row-value">₱{{ "{:,.2f}".format(package.price_per_head or package.price or 0)
                         }}</span>
                 </div>
                 <div class="calc-row">
                     <span>Estimated Guests</span>
-                    <span id="calc-guests" style="font-weight: 700;">{{ package.min_guests or 50 }}</span>
+                    <span id="calc-guests" class="calc-row-value">{{ package.min_guests or 50 }}</span>
                 </div>
 
                 <div class="calc-total">
@@ -167,20 +94,19 @@
                     <span id="calc-grand-total">₱0.00</span>
                 </div>
 
-                <div style="margin-top: 1.5rem; font-size: 0.85rem; color: #94a3b8; line-height: 1.4;">
+                <div class="calc-info">
                     <i class="fas fa-info-circle"></i> Reservation requires a 20-30% downpayment after verification.
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="wizard-actions" style="border-top: 1px solid #e2e8f0; padding-top: 2rem; margin-top: 3rem;">
+    <div class="wizard-actions wizard-actions-footer">
         <a href="/caterers/{{ caterer.id }}" class="btn-prev">
             <i class="fas fa-times"></i> Cancel Booking
         </a>
-        <button type="submit" id="submitBtn" class="btn-primary"
-            style="padding: 1.25rem 3rem; border-radius: 1.25rem; font-weight: 800;">
-            Next: Verify Identity <i class="fas fa-shield-check" style="margin-left: 0.5rem;"></i>
+        <button type="submit" id="submitBtn" class="btn-primary btn-wizard-next-wide">
+            Next: Verify Identity <i class="fas fa-shield-check"></i>
         </button>
     </div>
 </form>
@@ -188,54 +114,9 @@
 
 {% block step_js %}
 <script>
-    const pricePerHead = Number("{{ package.price_per_head or package.price or 0 }}");
-    const catererId = Number("{{ caterer.id }}");
-
-    function updateCalculator() {
-        const guests = parseInt(document.getElementById('guest_count').value) || 0;
-        document.getElementById('calc-guests').innerText = guests;
-
-        const total = guests * pricePerHead;
-        document.getElementById('calc-grand-total').innerText = '₱' + total.toLocaleString(undefined, { minimumFractionDigits: 2 });
-        document.getElementById('total_price_input').value = total;
-        document.getElementById('reservation_fee_input').value = total * 0.3; // Default 30% for estimate
-    }
-
-    async function checkAvailability() {
-        const date = document.getElementById('event_date').value;
-        const chip = document.getElementById('availability-chip');
-        const submitBtn = document.getElementById('submitBtn');
-
-        if (!date) return;
-
-        chip.style.display = 'inline-flex';
-        chip.style.background = '#f1f5f9';
-        chip.style.color = '#64748b';
-        chip.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Checking...';
-
-        try {
-            const response = await fetch(`/packages/api/check-availability?caterer_id=${catererId}&date_str=${date}`);
-            const data = await response.json();
-
-            if (data.available) {
-                chip.style.background = '#dcfce7';
-                chip.style.color = '#166534';
-                chip.innerHTML = '<i class="fas fa-check-circle"></i> Date Available';
-                submitBtn.disabled = false;
-                submitBtn.style.opacity = '1';
-            } else {
-                chip.style.background = '#fee2e2';
-                chip.style.color = '#991b1b';
-                chip.innerHTML = '<i class="fas fa-times-circle"></i> Fully Booked';
-                submitBtn.disabled = true;
-                submitBtn.style.opacity = '0.5';
-            }
-        } catch (error) {
-            chip.innerHTML = 'Error checking date';
-        }
-    }
-
-    // Initial run
-    updateCalculator();
+    // Set dynamic values for the external script
+    window.pricePerHead = "{{ package.price_per_head or package.price or 0 }}";
+    window.catererId = "{{ caterer.id }}";
 </script>
+<script src="{{ url_for('static', path='/js/customer/booking_wizard/step_details.js') }}"></script>
 {% endblock %}

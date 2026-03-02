@@ -5,63 +5,36 @@
 {% block extra_css %}
 <!-- FullCalendar CSS -->
 <link href='https://cdn.jsdelivr.net/npm/fullcalendar@5.10.1/main.min.css' rel='stylesheet' />
-<style>
-    .fc-event.blocked-date {
-        background-color: #fee2e2 !important;
-        border-color: #fecaca !important;
-        color: #ef4444 !important;
-        cursor: not-allowed;
-    }
-
-    .fc-daygrid-day.fc-day-disabled {
-        background-color: #f1f5f9 !important;
-        cursor: not-allowed;
-    }
-
-    .fc-daygrid-day:hover {
-        background-color: #f8fafc;
-        cursor: pointer;
-    }
-</style>
+<link rel="stylesheet" href="{{ url_for('static', path='/css/customer/booking_wizard/step_date.css') }}">
 {% endblock %}
 
 {% block content %}
-<div class="wizard-header-content">
+<div class="wizard-header-content" data-caterer-id="{{ caterer_id }}">
     <h2 class="wizard-title font-playfair">When is your event?</h2>
     <p class="wizard-subtitle">Provide your event details to help the caterer prepare a perfect experience.</p>
 </div>
 
-<form action="/bookings/step/date" method="POST" style="max-width: 600px; margin: 0 auto;">
-    <div style="margin-bottom: 2.5rem;">
-        <label style="display: block; font-weight: 600; margin-bottom: 1rem; color: var(--secondary-color);">Select
-            Available Date</label>
-        <div id="bookingCalendar"
-            style="background: white; padding: 1rem; border-radius: 1.5rem; border: 1px solid var(--border-color); box-shadow: var(--shadow-sm);">
-        </div>
+<form action="/bookings/step/date" method="POST" class="date-selection-form">
+    <div class="calendar-wrapper">
+        <label class="calendar-label">Select Available Date</label>
+        <div id="bookingCalendar" class="calendar-container"></div>
         <input type="hidden" name="event_date" id="selectedDate" required>
     </div>
 
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 2rem;">
+    <div class="form-grid-row">
         <div class="form-group">
-            <label
-                style="display: block; font-weight: 600; margin-bottom: 0.75rem; color: var(--secondary-color);">Event
-                Time</label>
-            <div style="position: relative;">
-                <i class="far fa-clock"
-                    style="position: absolute; left: 1.25rem; top: 50%; transform: translateY(-50%); color: var(--primary-color);"></i>
-                <input type="time" name="event_time" required class="form-input"
-                    style="width: 100%; padding: 1rem 1rem 1rem 3rem; border-radius: 1rem; border: 1px solid var(--border-color); font-family: inherit;">
+            <label class="calendar-label">Event Time</label>
+            <div class="input-icon-wrapper">
+                <i class="far fa-clock input-icon"></i>
+                <input type="time" name="event_time" required class="form-input wizard-input-with-icon">
             </div>
         </div>
         <div class="form-group">
-            <label
-                style="display: block; font-weight: 600; margin-bottom: 0.75rem; color: var(--secondary-color);">Initial
-                Guest Count</label>
-            <div style="position: relative;">
-                <i class="fas fa-users"
-                    style="position: absolute; left: 1.25rem; top: 50%; transform: translateY(-50%); color: var(--primary-color);"></i>
-                <input type="number" name="guest_count" required min="10" class="form-input" value="50"
-                    style="width: 100%; padding: 1rem 1rem 1rem 3rem; border-radius: 1rem; border: 1px solid var(--border-color); font-family: inherit;">
+            <label class="calendar-label">Initial Guest Count</label>
+            <div class="input-icon-wrapper">
+                <i class="fas fa-users input-icon"></i>
+                <input type="number" name="guest_count" required min="10" class="form-input wizard-input-with-icon"
+                    value="50">
             </div>
         </div>
     </div>
@@ -70,9 +43,8 @@
         <a href="/bookings/step/menu" class="btn-prev">
             <i class="fas fa-arrow-left"></i> Back to Menu
         </a>
-        <button type="submit" class="btn-primary"
-            style="padding: 1.25rem 2.5rem; border-radius: 1rem; font-weight: 700;">
-            Next: Booking Details <i class="fas fa-chevron-right" style="margin-left: 0.5rem; font-size: 0.8rem;"></i>
+        <button type="submit" class="btn-primary btn-wizard-next">
+            Next: Booking Details <i class="fas fa-chevron-right"></i>
         </button>
     </div>
 </form>
@@ -82,48 +54,8 @@
 <!-- FullCalendar JS -->
 <script src='https://cdn.jsdelivr.net/npm/fullcalendar@5.10.1/main.min.js'></script>
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        var calendarEl = document.getElementById('bookingCalendar');
-        var selectedDateInput = document.getElementById('selectedDate');
-        var blockedDates = [];
-
-        var calendar = new FullCalendar.Calendar(calendarEl, {
-            initialView: 'dayGridMonth',
-            headerToolbar: {
-                left: 'prev,next today',
-                center: 'title',
-                right: ''
-            },
-            selectable: true,
-            unselectAuto: false,
-            events: '/caterer/api/events?caterer_id={{ caterer_id }}',
-            validRange: {
-                start: new Date().toISOString().split('T')[0]
-            },
-            dateClick: function (info) {
-                // Check if date is blocked
-                const isBlocked = blockedDates.some(d => d === info.dateStr);
-                if (isBlocked) {
-                    alert('This date is unfortunately already booked or unavailable.');
-                    return;
-                }
-
-                // Highlight selection
-                document.querySelectorAll('.fc-daygrid-day').forEach(el => {
-                    el.style.backgroundColor = '';
-                });
-                info.dayEl.style.backgroundColor = '#e0e7ff';
-
-                selectedDateInput.value = info.dateStr;
-            },
-            eventDidMount: function (info) {
-                if (info.event.title === 'BLOCKED' || info.event.title === 'BOOKED') {
-                    blockedDates.push(info.event.startStr.split('T')[0]);
-                    info.el.classList.add('blocked-date');
-                }
-            }
-        });
-        calendar.render();
-    });
+    // Set catererId for the external script
+    window.catererId = "{{ caterer_id }}";
 </script>
+<script src="{{ url_for('static', path='/js/customer/booking_wizard/step_date.js') }}"></script>
 {% endblock %}

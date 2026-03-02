@@ -1,668 +1,305 @@
+{% set nav_page = 'packages' %}
 {% extends "caterer/layout.html" %}
 
-{% block title %}My Packages - Caterer Dashboard{% endblock %}
+{% block title %}Manage Packages - OccaShare Caterer{% endblock %}
 
 {% block extra_css %}
-<style>
-    .package-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
-        gap: 2rem;
-        margin-top: 2rem;
-    }
-
-    .package-card {
-        background: var(--white);
-        padding: 2rem;
-        border-radius: 1.5rem;
-        box-shadow: var(--shadow-sm);
-        border: 1px solid var(--border-color);
-        transition: all 0.3s ease;
-        display: flex;
-        flex-direction: column;
-    }
-
-    .package-card:hover {
-        transform: translateY(-5px);
-        box-shadow: var(--shadow-md);
-        border-color: var(--primary-color);
-    }
-
-    .package-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: flex-start;
-        margin-bottom: 1rem;
-    }
-
-    .package-card h4 {
-        font-size: 1.35rem;
-        color: var(--secondary-color);
-        margin: 0;
-    }
-
-    .service-badge {
-        font-size: 0.75rem;
-        background: var(--slate-100);
-        color: var(--slate-700);
-        padding: 0.25rem 0.75rem;
-        border-radius: 2rem;
-        font-weight: 600;
-    }
-
-    .price-section {
-        margin-bottom: 1.5rem;
-    }
-
-    .price-main {
-        font-size: 1.75rem;
-        font-weight: 700;
-        color: var(--primary-color);
-    }
-
-    .price-sub {
-        font-size: 0.9rem;
-        color: var(--text-light);
-    }
-
-    .package-meta {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 1rem;
-        margin-bottom: 1.5rem;
-        padding: 1rem;
-        background: var(--slate-50);
-        border-radius: 1rem;
-        font-size: 0.85rem;
-    }
-
-    .meta-item {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        color: var(--text-color);
-    }
-
-    .meta-item i {
-        color: var(--primary-color);
-        width: 16px;
-    }
-
-    .modal {
-        display: none;
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(15, 23, 42, 0.6);
-        backdrop-filter: blur(8px);
-        z-index: 2000;
-        align-items: center;
-        justify-content: center;
-        padding: 2rem;
-    }
-
-    .modal-content {
-        background: var(--white);
-        border-radius: 2rem;
-        max-width: 800px;
-        width: 100%;
-        max-height: 90vh;
-        overflow-y: auto;
-        box-shadow: var(--shadow-lg);
-        position: relative;
-    }
-
-    .modal-header {
-        padding: 2rem 3rem;
-        border-bottom: 1px solid var(--border-color);
-        position: sticky;
-        top: 0;
-        background: white;
-        z-index: 10;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
-
-    .modal-body {
-        padding: 2rem 3rem;
-    }
-
-    .form-grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 1.5rem;
-    }
-
-    .form-group {
-        margin-bottom: 1.5rem;
-    }
-
-    .form-group.full-width {
-        grid-column: span 2;
-    }
-
-    .form-label {
-        display: block;
-        font-weight: 600;
-        margin-bottom: 0.5rem;
-        color: var(--secondary-color);
-        font-size: 0.95rem;
-    }
-
-    .form-control {
-        width: 100%;
-        padding: 0.75rem 1rem;
-        border: 1px solid var(--border-color);
-        border-radius: 0.75rem;
-        font-family: inherit;
-        transition: border-color 0.3s;
-    }
-
-    .form-control:focus {
-        outline: none;
-        border-color: var(--primary-color);
-    }
-
-    .tabs-nav {
-        display: flex;
-        gap: 1.5rem;
-        margin-bottom: 2rem;
-        border-bottom: 1px solid var(--border-color);
-        padding-bottom: 0.5rem;
-    }
-
-    .tab-btn {
-        background: none;
-        border: none;
-        padding: 0.5rem 0;
-        font-weight: 600;
-        color: var(--text-light);
-        cursor: pointer;
-        position: relative;
-    }
-
-    .tab-btn.active {
-        color: var(--primary-color);
-    }
-
-    .tab-btn.active::after {
-        content: '';
-        position: absolute;
-        bottom: -0.6rem;
-        left: 0;
-        width: 100%;
-        height: 2px;
-        background: var(--primary-color);
-    }
-
-    .inclusion-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-        gap: 0.75rem;
-    }
-
-    .inclusion-item {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        padding: 0.75rem;
-        background: var(--slate-50);
-        border-radius: 0.75rem;
-        cursor: pointer;
-        transition: background 0.3s;
-    }
-
-    .inclusion-item:hover {
-        background: var(--slate-100);
-    }
-
-    .inclusion-item input {
-        width: 18px;
-        height: 18px;
-    }
-
-    /* Menu Item List Styles */
-    .menu-item-list {
-        margin-bottom: 2rem;
-        border: 1px solid var(--border-color);
-        border-radius: 1rem;
-        overflow: hidden;
-    }
-
-    .menu-item-row {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 1rem;
-        border-bottom: 1px solid var(--border-color);
-    }
-
-    .menu-item-row:last-child {
-        border-bottom: none;
-    }
-
-    .menu-item-info h5 {
-        margin: 0;
-        font-size: 1rem;
-        color: var(--secondary-color);
-    }
-
-    .menu-item-info p {
-        margin: 0.25rem 0 0;
-        font-size: 0.8rem;
-        color: var(--text-light);
-    }
-
-    .menu-item-actions {
-        display: flex;
-        gap: 0.5rem;
-    }
-</style>
+<link rel="stylesheet" href="{{ url_for('static', path='/css/caterer/packages.css') }}">
 {% endblock %}
 
 {% block content %}
-<div class="page-header" style="display: flex; justify-content: space-between; align-items: flex-end;">
+<div class="package-management-header animate-up">
     <div>
-        <h1>My Catering Packages</h1>
-        <p>Manage the menus and pricing you offer to customers.</p>
+        <h1 class="h2 mb-1 fw-bold">Service Packages</h1>
+        <p class="text-muted">High-impact menu offerings and professional pricing tiers.</p>
     </div>
-    <button class="btn-primary" onclick="showModal()" style="padding: 1rem 2rem;">
-        <i class="fas fa-plus" style="margin-right: 0.5rem;"></i> Add New Package
+    <button class="btn-primary-pro" onclick="openAddPackageModal()">
+        <i class="fas fa-plus"></i> Create New Package
     </button>
 </div>
 
-<div class="package-grid">
-    {% for pkg in packages %}
-    <div class="package-card">
-        <div class="package-header">
-            <h4>{{ pkg.name }}</h4>
-            <span class="service-badge">{{ pkg.service_type }}</span>
+{% if packages %}
+<div class="packages-grid-pro animate-up delay-1">
+    {% for package in packages %}
+    <div class="package-card-pro" id="package-{{ package.id }}">
+        <div class="package-media-pro">
+            {% if package.image_url %}
+            <img src="{{ package.image_url }}" alt="{{ package.name }}" loading="lazy">
+            {% else %}
+            <div class="no-image-placeholder">
+                <i class="fas fa-concierge-bell"></i>
+                <span>No Photo</span>
+            </div>
+            {% endif %}
+            <div class="status-overlay-pro">
+                <div class="status-pill {% if package.is_active %}active{% endif %}"
+                    onclick="togglePackageStatus({{ package.id }}, this)">
+                    <span class="indicator"></span>
+                    <span class="label">{{ 'Available' if package.is_active else 'Hidden' }}</span>
+                </div>
+            </div>
+            <div class="price-tag-pro">₱{{ "{:,.0f}".format(package.price_per_head or package.price)
+                }}<span>/head</span></div>
         </div>
 
-        <div class="price-section">
-            <div class="price-main">
-                {% if pkg.price_per_head %}
-                ₱{{ "{:,.2f}".format(pkg.price_per_head) }} <span class="price-sub">/ head</span>
-                {% else %}
-                ₱{{ "{:,.2f}".format(pkg.price) }} <span class="price-sub">/ package</span>
+        <div class="package-body-pro">
+            <div class="pkg-header-row">
+                <h3 class="package-name-pro">{{ package.name }}</h3>
+                <span class="badge-type-pro">{{ package.service_type }}</span>
+            </div>
+
+            <p class="package-desc-pro">
+                {{ package.description|truncate(110) }}
+            </p>
+
+            <div class="package-specs-pro">
+                <div class="spec-item"><i class="fas fa-users-cog"></i> Min. {{ package.min_guests }} pax</div>
+                <div class="spec-item"><i class="fas fa-history"></i> {{ package.service_duration }}h Service</div>
+                {% if package.course_count %}
+                <div class="spec-item"><i class="fas fa-utensils"></i> {{ package.course_count }} Courses</div>
                 {% endif %}
             </div>
-            {% if pkg.min_contract_amount %}
-            <div class="price-sub" style="margin-top: 0.25rem;">Min. Contract: ₱{{
-                "{:,.2f}".format(pkg.min_contract_amount) }}</div>
-            {% endif %}
-        </div>
 
-        <p
-            style="font-size: 0.95rem; color: var(--text-light); margin-bottom: 1.5rem; line-height: 1.6; height: 3.2em; overflow: hidden;">
-            {{ pkg.description }}
-        </p>
-
-        <div class="package-meta">
-            <div class="meta-item">
-                <i class="fas fa-users"></i>
-                {{ pkg.min_guests }} - {{ pkg.max_guests or '∞' }} guests
+            <div class="package-footer-pro">
+                <button class="btn-action-pro edit" onclick="editPackage({{ package.id }})">
+                    <i class="fas fa-pen-nib"></i> Edit
+                </button>
+                <button class="btn-action-pro menu" onclick="showMenuModal({{ package.id }}, '{{ package.name }}')">
+                    <i class="fas fa-list-ul"></i> Menu Items
+                </button>
+                <button class="btn-action-pro delete" onclick="deletePackage({{ package.id }})">
+                    <i class="fas fa-trash-alt"></i>
+                </button>
             </div>
-            <div class="meta-item">
-                <i class="fas fa-clock"></i>
-                {{ pkg.service_duration }} Hours
-            </div>
-            <div class="meta-item">
-                <i class="fas fa-map-marker-alt"></i>
-                {{ pkg.location_coverage or 'Nationwide' }}
-            </div>
-            <div class="meta-item">
-                <i class="fas fa-utensils"></i>
-                {{ pkg.menu_items|length }} Items
-            </div>
-        </div>
-
-        <div
-            style="display: flex; gap: 0.75rem; margin-top: auto; padding-top: 1.5rem; border-top: 1px solid var(--border-color);">
-            <button class="btn-outline" style="flex: 1; padding: 0.6rem; font-size: 0.85rem;"
-                onclick="showMenuModal({{ pkg.id }}, '{{ pkg.name }}')">Manage Menu</button>
-            <button class="btn-outline" style="padding: 0.6rem; color: #ef4444; border-color: #fee2e2;"
-                onclick="deletePackage({{ pkg.id }})"><i class="fas fa-trash"></i></button>
         </div>
     </div>
     {% endfor %}
 </div>
+{% else %}
+<div class="packages-empty-pro animate-up delay-1">
+    <div class="empty-icon-pro">
+        <i class="fas fa-layer-group"></i>
+    </div>
+    <h2>No Packages Available</h2>
+    <p>Your menu offerings drive your bookings. Start creating your first professional package now.</p>
+    <button class="btn-primary-pro mt-4" onclick="openAddPackageModal()">Get Started</button>
+</div>
+{% endif %}
 
-<!-- Add Package Modal -->
-<div id="addModal" class="modal">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h3 style="font-size: 1.5rem; margin: 0;">Create New Package</h3>
-            <button onclick="hideModal()"
-                style="background: none; border: none; font-size: 1.5rem; cursor: pointer;">&times;</button>
+<!-- Create/Edit Package Modal -->
+<div id="packageModal" class="modal-pro">
+    <div class="modal-content-pro">
+        <div class="modal-header-pro">
+            <div>
+                <h3 id="modalTitle">Create New Package</h3>
+                <p class="text-muted small mb-0">Define your service logistics and pricing.</p>
+            </div>
+            <button onclick="hideModal()" class="btn-close-pro">&times;</button>
         </div>
-        <form action="/caterer/packages/add" method="POST">
-            <div class="modal-body">
-                <div class="tabs-nav">
-                    <button type="button" class="tab-btn active" onclick="switchPackageTab(event, 'basic')">1. Basic
-                        Info</button>
-                    <button type="button" class="tab-btn" onclick="switchPackageTab(event, 'pricing')">2.
-                        Pricing</button>
-                    <button type="button" class="tab-btn" onclick="switchPackageTab(event, 'inclusions')">3.
-                        Inclusions</button>
+
+        <form id="packageForm" action="/caterer/packages/add" method="POST" enctype="multipart/form-data">
+            <div class="modal-body-pro">
+                <div class="modal-tabs-pro">
+                    <button type="button" class="mtab-btn active"
+                        onclick="switchPackageTab(event, 'basic')">Logistics</button>
+                    <button type="button" class="mtab-btn" onclick="switchPackageTab(event, 'pricing')">Pricing</button>
+                    <button type="button" class="mtab-btn"
+                        onclick="switchPackageTab(event, 'details')">Features</button>
                 </div>
 
-                <div id="tab-basic" class="tab-content">
-                    <div class="form-group">
-                        <label class="form-label">Package Name</label>
-                        <input type="text" name="name" class="form-control" placeholder="e.g. Wedding Platinum Buffet"
+                <!-- Logistics Tab -->
+                <div id="tab-basic" class="tab-pane-pro active">
+                    <div class="form-group-pro">
+                        <label>Package Title</label>
+                        <input type="text" name="name" class="control-pro" placeholder="e.g. Royal Wedding Tier"
                             required>
                     </div>
-                    <div class="form-group">
-                        <label class="form-label">Service Type</label>
-                        <select name="service_type" class="form-control" style="background: white;">
-                            <option value="Wedding">Wedding</option>
-                            <option value="Birthday">Birthday</option>
-                            <option value="Corporate">Corporate</option>
-                            <option value="Debut">Debut</option>
-                            <option value="Baptism">Baptism</option>
-                            <option value="Private Party">Private Party</option>
-                            <option value="General">General</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Description</label>
-                        <textarea name="description" rows="3" class="form-control"
-                            placeholder="Describe what's included in this package..." required></textarea>
-                    </div>
-                    <div class="form-grid">
-                        <div class="form-group">
-                            <label class="form-label">Service Duration (Hours)</label>
-                            <input type="number" name="service_duration" class="form-control" value="4" required>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="form-group-pro">
+                                <label>Event Category</label>
+                                <select name="service_type" class="control-pro">
+                                    <option value="Wedding">Wedding Celebration</option>
+                                    <option value="Birthday">Birthday Party</option>
+                                    <option value="Corporate">Corporate Event</option>
+                                    <option value="Debut">Debut/Engagement</option>
+                                    <option value="General">Custom Gathering</option>
+                                </select>
+                            </div>
                         </div>
-                        <div class="form-group">
-                            <label class="form-label">Location Coverage</label>
-                            <input type="text" name="location_coverage" class="form-control"
-                                placeholder="e.g. Metro Manila">
+                        <div class="col-md-6">
+                            <div class="form-group-pro">
+                                <label>Service Hours</label>
+                                <input type="number" name="service_duration" class="control-pro" value="4">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group-pro">
+                        <label>Description</label>
+                        <textarea name="description" rows="3" class="control-pro"
+                            placeholder="Tell the story of this dining experience..." required></textarea>
+                    </div>
+                    <!-- Package Photo Upload -->
+                    <div class="form-group-pro">
+                        <label>Package Photo</label>
+                        <div class="photo-upload-area" id="photoUploadArea">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                            <span>Click to upload a package cover photo</span>
+                            <input type="file" name="image" accept="image/*" id="packageImageInput"
+                                onchange="previewPackageImage(event)">
+                        </div>
+                        <img id="packageImagePreview" class="photo-preview-img" style="display:none;" alt="Preview">
+                    </div>
+                </div>
+
+                <!-- Pricing Tab -->
+                <div id="tab-pricing" class="tab-pane-pro">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="form-group-pro">
+                                <label>Price Per Guest (₱)</label>
+                                <input type="number" name="price_per_head" step="0.01" class="control-pro"
+                                    placeholder="0.00" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group-pro">
+                                <label>Min. Investment (₱)</label>
+                                <input type="number" name="min_contract_amount" step="0.01" class="control-pro"
+                                    placeholder="0.00">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="form-group-pro">
+                                <label>Min. Guest Count</label>
+                                <input type="number" name="min_guests" class="control-pro" value="50" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group-pro">
+                                <label>Max. Guest Count</label>
+                                <input type="number" name="max_guests" class="control-pro" placeholder="Unlimited">
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <div id="tab-pricing" class="tab-content" style="display: none;">
-                    <div class="form-grid">
-                        <div class="form-group">
-                            <label class="form-label">Price per Head (₱)</label>
-                            <input type="number" name="price_per_head" step="0.01" class="form-control"
-                                placeholder="0.00">
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Minimum Contract (₱)</label>
-                            <input type="number" name="min_contract_amount" step="0.01" class="form-control"
-                                placeholder="Optional">
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Min Guests</label>
-                            <input type="number" name="min_guests" class="form-control" value="50" required>
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Max Guests</label>
-                            <input type="number" name="max_guests" class="form-control" placeholder="Optional">
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Additional Guest Price (₱)</label>
-                            <input type="number" name="additional_guest_price" step="0.01" class="form-control"
-                                placeholder="0.00">
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Overtime Fee / Hour (₱)</label>
-                            <input type="number" name="overtime_fee" step="0.01" class="form-control" value="0.00">
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Payment Policy (e.g. 50% reservation fee)</label>
-                        <input type="text" name="payment_terms" class="form-control" placeholder="Standard terms...">
+                <!-- Features Tab -->
+                <div id="tab-details" class="tab-pane-pro">
+                    <label class="d-block mb-3 fw-bold">Inclusions & Logistics:</label>
+                    <div class="inclusion-matrix">
+                        <label class="matrix-item"><input type="checkbox" name="inclusions" value="Full Setup"> Full
+                            Venue Setup</label>
+                        <label class="matrix-item"><input type="checkbox" name="inclusions" value="Wait Staff">
+                            Professional Staff</label>
+                        <label class="matrix-item"><input type="checkbox" name="inclusions" value="Styling"> Event
+                            Styling</label>
+                        <label class="matrix-item"><input type="checkbox" name="inclusions" value="Equipment"> Service
+                            Equipment</label>
+                        <label class="matrix-item"><input type="checkbox" name="inclusions" value="Lights/Sounds">
+                            Lights & Sounds</label>
+                        <label class="matrix-item"><input type="checkbox" name="inclusions" value="Mobile Bar"> Mobile
+                            Bar</label>
                     </div>
                 </div>
+            </div>
 
-                <div id="tab-inclusions" class="tab-content" style="display: none;">
-                    <label class="form-label" style="margin-bottom: 1rem;">Select Included Services:</label>
-                    <div class="inclusion-grid">
-                        <label class="inclusion-item"><input type="checkbox" name="inclusions" value="Buffet setup">
-                            Buffet setup</label>
-                        <label class="inclusion-item"><input type="checkbox" name="inclusions"
-                                value="Table & chair setup"> Table & chair setup</label>
-                        <label class="inclusion-item"><input type="checkbox" name="inclusions" value="Table skirting">
-                            Table skirting</label>
-                        <label class="inclusion-item"><input type="checkbox" name="inclusions" value="Waiters / staff">
-                            Waiters / staff</label>
-                        <label class="inclusion-item"><input type="checkbox" name="inclusions"
-                                value="Catering equipment"> Catering equipment</label>
-                        <label class="inclusion-item"><input type="checkbox" name="inclusions" value="Basic styling">
-                            Basic styling</label>
-                        <label class="inclusion-item"><input type="checkbox" name="inclusions" value="Sound system">
-                            Sound system</label>
-                        <label class="inclusion-item"><input type="checkbox" name="inclusions" value="Lights">
-                            Lights</label>
-                        <label class="inclusion-item"><input type="checkbox" name="inclusions" value="Cake table"> Cake
-                            table</label>
-                        <label class="inclusion-item"><input type="checkbox" name="inclusions" value="Gift table"> Gift
-                            table</label>
-                        <label class="inclusion-item"><input type="checkbox" name="inclusions" value="Mobile bar">
-                            Mobile bar</label>
-                        <label class="inclusion-item"><input type="checkbox" name="inclusions" value="Food tasting">
-                            Free food tasting</label>
-                    </div>
-                </div>
-
-                <div
-                    style="display: flex; gap: 1rem; margin-top: 2.5rem; padding-top: 1.5rem; border-top: 1px solid var(--border-color);">
-                    <button type="submit" class="btn-primary" style="flex: 2; padding: 1rem;">Create Package</button>
-                    <button type="button" class="btn-outline" onclick="hideModal()"
-                        style="flex: 1; padding: 1rem;">Cancel</button>
+            <div class="modal-footer-pro">
+                <div class="d-flex gap-3 w-100">
+                    <button type="submit" class="btn-primary-pro flex-grow-1">Save Package</button>
+                    <button type="button" class="btn-secondary-pro" onclick="hideModal()">Cancel</button>
                 </div>
             </div>
         </form>
     </div>
 </div>
 
-<!-- Manage Menu Modal -->
-<div id="menuModal" class="modal">
-    <div class="modal-content" style="max-width: 800px;">
-        <div class="modal-header">
+<!-- Menu Management Modal -->
+<div id="menuModal" class="modal-pro">
+    <div class="modal-content-pro modal-content-menu">
+        <div class="modal-header-pro glass">
             <div>
-                <h3 style="font-size: 1.5rem; margin: 0;">Manage Menu Items</h3>
-                <p id="targetPkgDisplay" style="font-size: 0.9rem; color: var(--text-light); margin-top: 0.25rem;"></p>
+                <h3>Manage Menu Items</h3>
+                <p id="targetPkgDisplay" class="text-muted small mb-0"></p>
             </div>
-            <button onclick="hideMenuModal()"
-                style="background: none; border: none; font-size: 1.5rem; cursor: pointer;">&times;</button>
+            <button onclick="hideMenuModal()" class="btn-close-pro">&times;</button>
         </div>
 
-        <div class="modal-body">
-            <h4 style="margin-bottom: 1rem;">Current Items</h4>
-            <div id="menuItemsList" class="menu-item-list">
-                <!-- Items will be populated by JS -->
+        <div class="modal-body-pro">
+            <h5 class="fw-bold mb-3 section-label">Current Menu</h5>
+            <div id="menuItemsContainer" class="menu-items-scroll">
+                <!-- Dynamically populated -->
             </div>
 
-            <hr style="margin: 2rem 0; border: none; border-top: 1px solid var(--border-color);">
-
-            <h4 style="margin-bottom: 1.5rem;">Add New Item</h4>
-            <form id="menuForm" method="POST" enctype="multipart/form-data">
-                <div class="form-group">
-                    <label class="form-label">Dish Name</label>
-                    <input type="text" name="name" class="form-control" placeholder="e.g. Creamy Garlic Butter Shrimp"
-                        required>
-                </div>
-
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label class="form-label">Category</label>
-                        <select name="category" class="form-control" style="background: white;">
-                            <optgroup label="Starters">
-                                <option>Starter</option>
-                                <option>Soup</option>
-                                <option>Salad</option>
-                            </optgroup>
-                            <optgroup label="Main Courses">
-                                <option>Main Dish (Beef)</option>
-                                <option>Main Dish (Chicken)</option>
-                                <option>Main Dish (Pork)</option>
-                                <option>Seafood</option>
-                                <option>Pasta</option>
-                            </optgroup>
-                            <optgroup label="Others">
-                                <option>Dessert</option>
-                                <option>Beverage</option>
-                                <option>Add-on</option>
-                            </optgroup>
-                        </select>
+            <div class="add-dish-section mt-4">
+                <h5 class="fw-bold mb-3 section-label">Add New Dish</h5>
+                <form id="menuForm" method="POST" enctype="multipart/form-data">
+                    <input type="hidden" name="package_id" id="modalMenuPackageId">
+                    <div class="form-group-pro">
+                        <label>Dish Name</label>
+                        <input type="text" name="name" class="control-pro" placeholder="e.g. Slow-Roasted Angus Beef"
+                            required>
                     </div>
-                    <div class="form-group">
-                        <label class="form-label">Serving Size</label>
-                        <input type="text" name="serving_size" class="form-control"
-                            placeholder="e.g. Per head / Tray of 10">
-                    </div>
-                </div>
 
-                <div class="form-group">
-                    <label class="form-label">Short Description</label>
-                    <textarea name="description" rows="2" class="form-control"
-                        placeholder="Delicious shrimps with herbs..."></textarea>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">Dish Photo</label>
-                    <input type="file" name="image" class="form-control" accept="image/*">
-                </div>
-
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label class="form-label">Dietary Tags</label>
-                        <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
-                            <label style="font-size: 0.85rem; display: flex; align-items: center; gap: 0.25rem;"><input
-                                    type="checkbox" name="dietary_tags" value="Vegetarian"> Veggie</label>
-                            <label style="font-size: 0.85rem; display: flex; align-items: center; gap: 0.25rem;"><input
-                                    type="checkbox" name="dietary_tags" value="Vegan"> Vegan</label>
-                            <label style="font-size: 0.85rem; display: flex; align-items: center; gap: 0.25rem;"><input
-                                    type="checkbox" name="dietary_tags" value="Halal"> Halal</label>
-                            <label style="font-size: 0.85rem; display: flex; align-items: center; gap: 0.25rem;"><input
-                                    type="checkbox" name="dietary_tags" value="Gluten-free"> No Gluten</label>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="form-group-pro">
+                                <label>Category</label>
+                                <select name="category" class="control-pro">
+                                    <option>Main Course</option>
+                                    <option>Appetizer</option>
+                                    <option>Soup / Salad</option>
+                                    <option>Dessert</option>
+                                    <option>Beverage</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group-pro">
+                                <label>Dish Photo</label>
+                                <input type="file" name="image" class="control-pro p-1" accept="image/*">
+                            </div>
                         </div>
                     </div>
-                    <div class="form-group">
-                        <label class="form-label">Allergen Info</label>
-                        <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
-                            <label style="font-size: 0.85rem; display: flex; align-items: center; gap: 0.25rem;"><input
-                                    type="checkbox" name="allergen_info" value="Nuts"> Nuts</label>
-                            <label style="font-size: 0.85rem; display: flex; align-items: center; gap: 0.25rem;"><input
-                                    type="checkbox" name="allergen_info" value="Dairy"> Dairy</label>
-                            <label style="font-size: 0.85rem; display: flex; align-items: center; gap: 0.25rem;"><input
-                                    type="checkbox" name="allergen_info" value="Seafood"> Seafood</label>
+
+                    <div class="addon-toggle-pro">
+                        <div class="form-check form-switch d-flex align-items-center gap-3">
+                            <input class="form-check-input" type="checkbox" name="is_addon" id="is_addon">
+                            <label class="form-check-label fw-bold" for="is_addon">Premium Add-on (optional)</label>
+                        </div>
+                        <div id="addonPriceGroup" class="mt-2" style="display: none;">
+                            <input type="number" name="addon_price" step="0.01" class="control-pro"
+                                placeholder="Add-on price ₱">
                         </div>
                     </div>
-                </div>
 
-                <div
-                    style="display: flex; align-items: center; gap: 0.75rem; margin: 1rem 0 2rem 0; padding: 1rem; background: var(--slate-50); border-radius: 0.75rem;">
-                    <input type="checkbox" name="is_addon" id="is_addon"
-                        style="width: 18px; height: 18px; cursor: pointer;">
-                    <label for="is_addon" style="cursor: pointer; font-weight: 600;">Optional Add-on?</label>
-                    <input type="number" name="addon_price" step="0.01" class="form-control"
-                        placeholder="Add-on price ₱" style="width: 150px; margin-left: auto;">
-                </div>
-
-                <div style="display: flex; gap: 1rem;">
-                    <button type="submit" class="btn-primary" style="flex: 2; padding: 1rem;">Add Item</button>
-                    <button type="button" class="btn-outline" onclick="hideMenuModal()"
-                        style="flex: 1; padding: 1rem;">Cancel</button>
-                </div>
-            </form>
+                    <div class="mt-3">
+                        <button type="submit" class="btn-primary-pro w-100">Add to Menu</button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 </div>
 {% endblock %}
 
 {% block extra_js %}
+<script src="{{ url_for('static', path='/js/caterer/packages.js') }}"></script>
 <script>
-    function showModal() { document.getElementById('addModal').style.display = 'flex'; }
-    function hideModal() { document.getElementById('addModal').style.display = 'none'; }
-
-    function switchPackageTab(event, tabName) {
-        document.querySelectorAll('.tab-content').forEach(c => c.style.display = 'none');
-        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-        document.getElementById('tab-' + tabName).style.display = 'block';
-        event.currentTarget.classList.add('active');
-    }
-
-    async function showMenuModal(pkgId, pkgName) {
-        document.getElementById('menuForm').action = '/caterer/packages/' + pkgId + '/menu/add';
-        document.getElementById('targetPkgDisplay').innerText = 'Package: ' + pkgName;
-
-        const listContainer = document.getElementById('menuItemsList');
-        listContainer.innerHTML = '<div style="padding: 2rem; text-align: center; color: var(--text-light);">Loading items...</div>';
-        document.getElementById('menuModal').style.display = 'flex';
-
-        try {
-            const response = await fetch(`/caterer/packages/${pkgId}/menu`);
-            if (response.ok) {
-                const items = await response.json();
-                listContainer.innerHTML = '';
-                if (!items || items.length === 0) {
-                    listContainer.innerHTML = '<div style="padding: 2rem; text-align: center; color: var(--text-light);">No items yet. Add your first dish below!</div>';
-                } else {
-                    items.forEach(item => {
-                        const row = document.createElement('div');
-                        row.className = 'menu-item-row';
-                        row.innerHTML = `
-                            <div class="menu-item-info">
-                                <h5>${item.name} <span class="service-badge" style="font-size: 0.65rem;">${item.category}</span></h5>
-                                <p>${item.description || 'No description'}</p>
-                            </div>
-                            <div class="menu-item-actions">
-                                <button class="btn-outline" style="padding: 0.4rem; color: #ef4444; border-color: #fee2e2;" onclick="deleteMenuItem(${item.id})">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            </div>
-                        `;
-                        listContainer.appendChild(row);
-                    });
-                }
-            } else {
-                listContainer.innerHTML = '<div style="padding: 2rem; text-align: center; color: #ef4444;">Failed to load items.</div>';
-            }
-        } catch (error) {
-            console.error('Error:', error);
-            listContainer.innerHTML = '<div style="padding: 2rem; text-align: center; color: #ef4444;">An error occurred.</div>';
-        }
-    }
-
-    function hideMenuModal() { document.getElementById('menuModal').style.display = 'none'; }
-
-    async function deletePackage(pkgId) {
-        if (!confirm('Are you sure you want to delete this package? This will also remove associated menu items.')) return;
-        try {
-            const response = await fetch(`/caterer/packages/${pkgId}/delete`, { method: 'POST' });
-            if (response.ok) location.reload();
-            else alert('Failed to delete package.');
-        } catch (error) {
-            console.error('Error:', error);
-            alert('An error occurred.');
-        }
-    }
-
-    async function deleteMenuItem(itemId) {
-        if (!confirm('Are you sure you want to delete this menu item?')) return;
-        try {
-            const response = await fetch(`/caterer/packages/menu/${itemId}/delete`, { method: 'POST' });
-            if (response.ok) location.reload();
-            else alert('Failed to delete menu item.');
-        } catch (error) {
-            console.error('Error:', error);
-            alert('An error occurred.');
-        }
-    }
-
-    window.onclick = function (event) {
-        if (event.target.className === 'modal') {
-            hideModal();
-            hideMenuModal();
+    function previewPackageImage(event) {
+        const preview = document.getElementById('packageImagePreview');
+        const area = document.getElementById('photoUploadArea');
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                preview.src = e.target.result;
+                preview.style.display = 'block';
+                area.style.display = 'none';
+            };
+            reader.readAsDataURL(file);
         }
     }
 </script>

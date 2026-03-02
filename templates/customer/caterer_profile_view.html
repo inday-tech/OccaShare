@@ -5,164 +5,7 @@
 {% block extra_css %}
 <!-- FullCalendar CSS -->
 <link href='https://cdn.jsdelivr.net/npm/fullcalendar@5.10.1/main.min.css' rel='stylesheet' />
-<style>
-    /* Profile Specific Styles */
-    .profile-header-premium {
-        position: relative;
-        border-radius: 2rem;
-        overflow: hidden;
-        margin-bottom: 2.5rem;
-        box-shadow: var(--shadow-md);
-        background: var(--white);
-    }
-
-    .profile-cover-img {
-        height: 300px;
-        background-size: cover;
-        background-position: center;
-        background-color: var(--slate-100);
-    }
-
-    .profile-info-overlay {
-        padding: 0 3rem 2.5rem;
-        margin-top: -60px;
-        display: flex;
-        align-items: flex-end;
-        gap: 2.5rem;
-    }
-
-    .profile-avatar-premium {
-        width: 160px;
-        height: 160px;
-        border-radius: 2rem;
-        border: 6px solid var(--white);
-        box-shadow: var(--shadow-lg);
-        background: var(--white);
-        overflow: hidden;
-        flex-shrink: 0;
-    }
-
-    .profile-avatar-premium img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-    }
-
-    .profile-main-info {
-        flex: 1;
-        padding-bottom: 0.5rem;
-    }
-
-    .profile-main-info h1 {
-        font-family: 'Playfair Display', serif;
-        font-size: 2.5rem;
-        color: var(--secondary-color);
-        margin-bottom: 0.5rem;
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-    }
-
-    .verified-badge-large {
-        color: var(--primary-color);
-        font-size: 1.5rem;
-    }
-
-    .info-pills {
-        display: flex;
-        gap: 1rem;
-        flex-wrap: wrap;
-        margin-top: 1rem;
-    }
-
-    .info-pill {
-        background: var(--background-soft);
-        padding: 0.5rem 1rem;
-        border-radius: 0.75rem;
-        font-size: 0.85rem;
-        font-weight: 600;
-        color: var(--text-color);
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
-
-    .profile-grid-dashboard {
-        display: grid;
-        grid-template-columns: 1fr 340px;
-        gap: 2.5rem;
-    }
-
-    .profile-section-card {
-        background: var(--white);
-        border-radius: 2rem;
-        padding: 2.5rem;
-        border: 1px solid var(--border-color);
-        box-shadow: var(--shadow-sm);
-        margin-bottom: 2.5rem;
-    }
-
-    .section-title-premium {
-        font-family: 'Playfair Display', serif;
-        font-size: 1.6rem;
-        color: var(--secondary-color);
-        margin-bottom: 2rem;
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-    }
-
-    .section-title-premium i {
-        color: var(--primary-color);
-    }
-
-    /* FullCalendar Customization */
-    .fc-event.blocked-date {
-        background-color: #fee2e2 !important;
-        border-color: #fecaca !important;
-        color: #ef4444 !important;
-        cursor: not-allowed;
-    }
-
-    .fc-day-past {
-        background-color: #f8fafc !important;
-    }
-
-    /* Booking Widget Sidebar */
-    .booking-card-dashboard {
-        position: sticky;
-        top: 2rem;
-        background: var(--white);
-        border-radius: 2rem;
-        padding: 2.5rem;
-        border: 1px solid var(--border-color);
-        box-shadow: var(--shadow-md);
-        text-align: center;
-    }
-
-    .booking-card-dashboard h3 {
-        font-family: 'Playfair Display', serif;
-        font-size: 1.4rem;
-        margin-bottom: 1.5rem;
-        color: var(--secondary-color);
-    }
-
-    .booking-card-dashboard p {
-        color: var(--text-light);
-        font-size: 0.95rem;
-        line-height: 1.6;
-        margin-bottom: 2rem;
-    }
-
-    .btn-block-premium {
-        width: 100%;
-        padding: 1.25rem;
-        border-radius: 1rem;
-        font-size: 1.1rem;
-        font-weight: 700;
-        margin-bottom: 1rem;
-    }
-</style>
+<link rel="stylesheet" href="{{ url_for('static', path='/css/customer/caterer_profile_view.css') }}">
 {% endblock %}
 
 {% block content %}
@@ -183,14 +26,13 @@
             <h1>
                 {{ caterer.business_name }}
                 {% if caterer.is_verified %}
-                <i class="fas fa-check-circle verified-badge-large" title="Verified Caterer"
-                    style="color: var(--primary-color);"></i>
+                <i class="fas fa-check-circle verified-badge-large" title="Verified Caterer"></i>
                 {% endif %}
             </h1>
 
             <div class="info-pills">
                 <div class="info-pill">
-                    <i class="fas fa-star" style="color: #f59e0b;"></i>
+                    <i class="fas fa-star"></i>
                     {{ "%.1f"|format(caterer.rating) }} ({{ caterer.review_count }} Reviews)
                 </div>
                 <div class="info-pill">
@@ -205,7 +47,7 @@
                     <i class="fas fa-users"></i>
                     Min {{ caterer.min_pax }} pax
                 </div>
-                <div class="info-pill" style="background: var(--primary-soft); color: var(--primary-color);">
+                <div class="info-pill info-pill-highlight">
                     <i class="fas fa-tag"></i>
                     From ₱{{ "{:,.0f}".format(caterer.starting_price) }} / guest
                 </div>
@@ -219,44 +61,34 @@
         <!-- About Section -->
         <section class="profile-section-card">
             <h3 class="section-title-premium"><i class="fas fa-info-circle"></i> About {{ caterer.business_name }}</h3>
-            <p style="color: var(--text-color); font-size: 1.05rem; line-height: 1.8; margin-bottom: 2rem;">{{
-                caterer.description }}</p>
+            <p class="profile-about-text">{{ caterer.description }}</p>
 
-            <div
-                style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-top: 2rem; padding-top: 2rem; border-top: 1px solid #f1f5f9;">
+            <div class="expertise-grid">
                 <div>
-                    <h4
-                        style="font-size: 0.9rem; font-weight: 700; color: #64748b; text-transform: uppercase; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
-                        <i class="fas fa-utensils" style="color: var(--primary-color);"></i> Cuisine Specialties
+                    <h4 class="expertise-label">
+                        <i class="fas fa-utensils"></i> Cuisine Specialties
                     </h4>
-                    <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
+                    <div class="expertise-tags">
                         {% if caterer.cuisine_types %}
                         {% for cuisine in caterer.cuisine_types %}
-                        <span
-                            style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 0.4rem 0.8rem; border-radius: 0.5rem; font-size: 0.85rem; font-weight: 600;">{{
-                            cuisine }}</span>
+                        <span class="expertise-tag">{{ cuisine }}</span>
                         {% endfor %}
                         {% else %}
-                        <span style="color: var(--text-light); font-size: 0.85rem; font-style: italic;">Inquire for
-                            specialties</span>
+                        <span class="no-tags-placeholder">Inquire for specialties</span>
                         {% endif %}
                     </div>
                 </div>
                 <div>
-                    <h4
-                        style="font-size: 0.9rem; font-weight: 700; color: #64748b; text-transform: uppercase; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
-                        <i class="fas fa-calendar-check" style="color: var(--secondary-color);"></i> Event Expertise
+                    <h4 class="expertise-label">
+                        <i class="fas fa-calendar-check"></i> Event Expertise
                     </h4>
-                    <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
+                    <div class="expertise-tags">
                         {% if caterer.event_types %}
                         {% for event in caterer.event_types %}
-                        <span
-                            style="background: #fdf2f8; border: 1px solid #fce7f3; padding: 0.4rem 0.8rem; border-radius: 0.5rem; font-size: 0.85rem; font-weight: 600; color: #be185d;">{{
-                            event }}</span>
+                        <span class="expertise-tag expertise-tag-alt">{{ event }}</span>
                         {% endfor %}
                         {% else %}
-                        <span style="color: var(--text-light); font-size: 0.85rem; font-style: italic;">All types of
-                            events</span>
+                        <span class="no-tags-placeholder">All types of events</span>
                         {% endif %}
                     </div>
                 </div>
@@ -265,18 +97,13 @@
 
         <!-- Resources Section -->
         {% if caterer.sample_menu_url %}
-        <section class="profile-section-card"
-            style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); color: white; border: none;">
-            <div style="display: flex; justify-content: space-between; align-items: center;">
+        <section class="profile-section-card digital-menu-section">
+            <div class="digital-menu-flex">
                 <div>
-                    <h3
-                        style="color: white; font-family: 'Playfair Display', serif; font-size: 1.5rem; margin-bottom: 0.5rem;">
-                        Digital Menu & Packages</h3>
-                    <p style="color: #94a3b8; font-size: 0.9rem;">Download our comprehensive menu and service
-                        inclusions.</p>
+                    <h3 class="digital-menu-title">Digital Menu & Packages</h3>
+                    <p class="digital-menu-desc">Download our comprehensive menu and service inclusions.</p>
                 </div>
-                <a href="{{ caterer.sample_menu_url }}" target="_blank" class="btn-primary"
-                    style="background: white; color: #0f172a; border: none; padding: 1rem 1.5rem; border-radius: 1rem; display: flex; align-items: center; gap: 0.75rem; text-decoration: none; font-weight: 700;">
+                <a href="{{ caterer.sample_menu_url }}" target="_blank" class="btn-download-menu">
                     <i class="fas fa-file-pdf"></i> View Sample Menu
                 </a>
             </div>
@@ -286,31 +113,24 @@
         <!-- Packages Section -->
         <section class="profile-section-card">
             <h3 class="section-title-premium"><i class="fas fa-concierge-bell"></i> Available Packages</h3>
-            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem;">
+            <div class="packages-grid-profile">
                 {% for pkg in packages %}
-                <div
-                    style="border: 1px solid var(--border-color); border-radius: 1.5rem; overflow: hidden; display: flex; flex-direction: column; transition: all 0.3s; background: var(--white); height: 100%;">
-                    <div
-                        style="height: 160px; background-image: url('{{ pkg.image_url if pkg.image_url else 'https://images.unsplash.com/photo-1555244162-803834f70033?q=80&w=2070&auto=format&fit=crop' }}'); background-size: cover; background-position: center;">
+                <div class="package-card-premium">
+                    <div class="package-img-profile"
+                        style="background-image: url('{{ pkg.image_url if pkg.image_url else 'https://images.unsplash.com/photo-1555244162-803834f70033?q=80&w=2070&auto=format&fit=crop' }}');">
                     </div>
-                    <div style="padding: 1.5rem; flex: 1; display: flex; flex-direction: column;">
-                        <h4 style="font-size: 1.2rem; margin-bottom: 0.5rem; color: var(--secondary-color);">{{ pkg.name
-                            }}</h4>
-                        <p
-                            style="font-size: 0.85rem; color: var(--text-light); line-height: 1.5; margin-bottom: 1.5rem; flex: 1;">
-                            {{ pkg.description|truncate(100) }}</p>
+                    <div class="package-content-profile">
+                        <h4 class="package-title-profile">{{ pkg.name }}</h4>
+                        <p class="package-desc-profile">{{ pkg.description|truncate(100) }}</p>
 
-                        <div style="display: flex; justify-content: space-between; align-items: flex-end;">
+                        <div class="package-footer-profile">
                             <div>
-                                <span style="display: block; font-size: 0.75rem; color: var(--text-light);">Starting
-                                    at</span>
-                                <span style="font-weight: 800; font-size: 1.25rem; color: var(--primary-color);">₱{{
-                                    "{:,.0f}".format(pkg.price_per_head or pkg.price) }}</span>
-                                <span style="font-size: 0.7rem; color: var(--text-light);"> / guest</span>
+                                <span class="package-price-label">Starting at</span>
+                                <span class="package-price-value">₱{{ "{:,.0f}".format(pkg.price_per_head or pkg.price)
+                                    }}</span>
+                                <span class="package-price-unit"> / guest</span>
                             </div>
-                            <a href="/packages/{{ pkg.id }}" class="btn-primary"
-                                style="padding: 0.6rem 1.2rem; border-radius: 0.75rem; font-size: 0.85rem; text-decoration: none;">View
-                                Details</a>
+                            <a href="/packages/{{ pkg.id }}" class="btn-primary btn-package-view">View Details</a>
                         </div>
                     </div>
                 </div>
@@ -321,17 +141,13 @@
         <!-- Gallery Section -->
         <section class="profile-section-card">
             <h3 class="section-title-premium"><i class="far fa-images"></i> Event Gallery</h3>
-            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 1rem;">
+            <div class="gallery-grid-profile">
                 {% for item in gallery_items[:8] %}
-                <div
-                    style="border-radius: 1rem; overflow: hidden; height: 160px; border: 1px solid var(--border-color);">
-                    <img src="{{ item.media_url }}" alt="Gallery"
-                        style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease;"
-                        onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
+                <div class="gallery-item-profile">
+                    <img src="{{ item.media_url }}" alt="Gallery">
                 </div>
                 {% else %}
-                <div style="grid-column: 1/-1; padding: 3rem; text-align: center; color: var(--text-light);">No gallery
-                    photos yet.</div>
+                <div class="gallery-empty">No gallery photos yet.</div>
                 {% endfor %}
             </div>
         </section>
@@ -339,18 +155,16 @@
         <!-- Availability Section -->
         <section class="profile-section-card">
             <h3 class="section-title-premium"><i class="far fa-calendar-alt"></i> Availability</h3>
-            <div id="availabilityCalendar"></div>
+            <div id="availabilityCalendar" data-caterer-id="{{ caterer.id }}"></div>
         </section>
 
         <!-- Policies Section -->
         <section class="profile-section-card">
             <h3 class="section-title-premium"><i class="fas fa-shield-alt"></i> Policies & Terms</h3>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2.5rem;">
+            <div class="policies-grid">
                 <div>
-                    <h4
-                        style="font-size: 1rem; color: var(--secondary-color); margin-bottom: 1rem; border-bottom: 2px solid #fee2e2; padding-bottom: 0.5rem; width: fit-content;">
-                        Cancellation Policy</h4>
-                    <p style="font-size: 0.95rem; line-height: 1.6; color: var(--text-color);">
+                    <h4 class="policy-label policy-label-cancellation">Cancellation Policy</h4>
+                    <p class="policy-text">
                         {% if packages[0] and packages[0].policies and packages[0].policies.cancellation %}
                         {{ packages[0].policies.cancellation }}
                         {% else %}
@@ -360,10 +174,8 @@
                     </p>
                 </div>
                 <div>
-                    <h4
-                        style="font-size: 1rem; color: var(--secondary-color); margin-bottom: 1rem; border-bottom: 2px solid #dcfce7; padding-bottom: 0.5rem; width: fit-content;">
-                        Payment Terms</h4>
-                    <p style="font-size: 0.95rem; line-height: 1.6; color: var(--text-color);">
+                    <h4 class="policy-label policy-label-payment">Payment Terms</h4>
+                    <p class="policy-text">
                         {% if packages[0] and packages[0].policies and packages[0].policies.payment %}
                         {{ packages[0].policies.payment }}
                         {% else %}
@@ -378,32 +190,29 @@
         <!-- Reviews Section -->
         <section class="profile-section-card">
             <h3 class="section-title-premium"><i class="far fa-comments"></i> Guest Reviews</h3>
-            <div style="display: flex; flex-direction: column; gap: 2rem;">
+            <div class="reviews-flex-profile">
                 {% for review in reviews %}
-                <div style="border-bottom: 1px solid var(--border-color); padding-bottom: 1.5rem;">
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 0.75rem;">
-                        <div style="display: flex; align-items: center; gap: 0.75rem;">
+                <div class="review-item-profile">
+                    <div class="review-header-profile">
+                        <div class="review-user-info">
                             <img src="https://ui-avatars.com/api/?name={{ review.user.first_name }}+{{ review.user.last_name }}&background=random"
-                                width="40" height="40" style="border-radius: 50%;">
+                                width="40" height="40" class="review-user-avatar">
                             <div>
-                                <h5 style="margin: 0; font-size: 0.95rem;">{{ review.user.first_name }} {{
-                                    review.user.last_name }}</h5>
-                                <div style="color: #f59e0b; font-size: 0.7rem;">
+                                <h5 class="review-user-name">{{ review.user.first_name }} {{ review.user.last_name }}
+                                </h5>
+                                <div class="review-rating-stars">
                                     {% for i in range(5) %}
                                     <i class="{% if i < review.rating %}fas{% else %}far{% endif %} fa-star"></i>
                                     {% endfor %}
                                 </div>
                             </div>
                         </div>
-                        <span style="font-size: 0.8rem; color: var(--text-light);">{{ review.created_at.strftime('%b %d,
-                            %Y') }}</span>
+                        <span class="review-date">{{ review.created_at.strftime('%b %d, %Y') }}</span>
                     </div>
-                    <p
-                        style="color: var(--text-color); font-size: 0.95rem; line-height: 1.6; margin: 0; padding-left: 3rem;">
-                        "{{ review.comment }}"</p>
+                    <p class="review-comment-profile">"{{ review.comment }}"</p>
                 </div>
                 {% else %}
-                <p style="text-align: center; color: var(--text-light);">No reviews yet.</p>
+                <p class="no-reviews-placeholder">No reviews yet.</p>
                 {% endfor %}
             </div>
         </section>
@@ -412,8 +221,7 @@
     <!-- Booking Sidebar -->
     <div class="sidebar-side">
         <div class="booking-card-dashboard">
-            <div
-                style="width: 60px; height: 60px; background: var(--background-soft); color: var(--primary-color); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; margin: 0 auto 1.5rem;">
+            <div class="booking-icon-wrapper">
                 <i class="fas fa-calendar-check"></i>
             </div>
             <h3>Reserve Your Date</h3>
@@ -422,13 +230,12 @@
             <button onclick="startBooking('{{ caterer.id }}')" class="btn-primary btn-block-premium">
                 Book This Caterer
             </button>
-            <button class="btn-outline btn-block-premium" style="margin-bottom: 0;">
+            <button class="btn-outline btn-block-premium">
                 Send Message
             </button>
 
-            <div
-                style="margin-top: 1.5rem; font-size: 0.8rem; color: var(--text-light); display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
-                <i class="fas fa-shield-alt" style="color: #10b981;"></i> Secure Booking Protocol
+            <div class="booking-card-footer">
+                <i class="fas fa-shield-alt"></i> Secure Booking Protocol
             </div>
         </div>
     </div>
@@ -438,30 +245,5 @@
 {% block extra_js %}
 <!-- FullCalendar JS -->
 <script src='https://cdn.jsdelivr.net/npm/fullcalendar@5.10.1/main.min.js'></script>
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        var calendarEl = document.getElementById('availabilityCalendar');
-        var calendar = new FullCalendar.Calendar(calendarEl, {
-            initialView: 'dayGridMonth',
-            headerToolbar: {
-                left: 'prev,next today',
-                center: 'title',
-                right: ''
-            },
-            events: '/caterer/api/events?caterer_id={{ caterer.id }}',
-            height: 'auto',
-            dayMaxEvents: true,
-            eventDidMount: function (info) {
-                if (info.event.title === 'BLOCKED') {
-                    info.el.classList.add('blocked-date');
-                }
-            }
-        });
-        calendar.render();
-    });
-
-    function startBooking(catererId) {
-        window.location.href = `/bookings/start/${catererId}`;
-    }
-</script>
+<script src="{{ url_for('static', path='/js/customer/caterer_profile_view.js') }}"></script>
 {% endblock %}

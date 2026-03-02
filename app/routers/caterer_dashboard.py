@@ -58,6 +58,29 @@ async def manage_bookings(
         "active_page": "bookings"
     })
 
+@router.get("/bookings/{booking_id}/contract", response_class=HTMLResponse)
+async def view_contract_caterer(
+    booking_id: int,
+    request: Request,
+    db: Session = Depends(database.get_db),
+    user: models.User = Depends(caterer_only)
+):
+    booking = db.query(models.Booking).get(booking_id)
+    if not booking or booking.caterer_id != user.caterer_profile.id:
+        raise HTTPException(status_code=404, detail="Booking not found")
+
+    quotation = booking.quotation
+    if not quotation or quotation.status != 'signed':
+        raise HTTPException(status_code=404, detail="Contract not yet signed by customer")
+
+    return templates.TemplateResponse("caterer/contract_view.html", {
+        "request": request,
+        "user": user,
+        "booking": booking,
+        "quotation": quotation,
+        "active_page": "bookings"
+    })
+
 @router.get("/payments", response_class=HTMLResponse)
 async def caterer_payments(
     request: Request, 
@@ -71,6 +94,31 @@ async def caterer_payments(
         "bookings": user.caterer_profile.bookings,
         "active_page": "payments"
     })
+
+@router.post("/payments/{booking_id}/confirm")
+async def confirm_caterer_payment(
+    booking_id: int,
+    request: Request,
+    db: Session = Depends(database.get_db),
+    user: models.User = Depends(caterer_only)
+):
+    booking = db.query(models.Booking).get(booking_id)
+    if not booking or booking.caterer_id != user.caterer_profile.id:
+        raise HTTPException(status_code=404, detail="Booking not found")
+        
+    # Mark as paid
+    booking.payment_status = 'paid'
+    
+    # Also log history
+    history = models.BookingHistory(
+        booking_id=booking.id,
+        status="payment_received",
+        notes="Service provider confirmed payment manually."
+    )
+    db.add(history)
+    db.commit()
+    
+    return RedirectResponse(url="/caterer/payments", status_code=303)
 
 @router.get("/reviews", response_class=HTMLResponse)
 async def caterer_reviews(
@@ -412,7 +460,7 @@ async def add_package(
     request: Request,
     name: str = Form(...),
     description: str = Form(...),
-    price: float = Form(0.0), # Flat price (old field)
+    price: float = Form(0.0),
     min_guests: int = Form(...),
     max_guests: Optional[int] = Form(None),
     service_type: str = Form("General"),
@@ -423,13 +471,24 @@ async def add_package(
     overtime_fee: float = Form(0.0),
     location_coverage: Optional[str] = Form(None),
     inclusions: list[str] = Form([]),
+    image: Optional[UploadFile] = File(None),
     db: Session = Depends(database.get_db),
     user: models.User = Depends(caterer_only)
 ):
-    
+
     # Structure inclusions as JSON
     inclusions_data = {item: True for item in inclusions}
-    
+
+    # Handle package image upload
+    image_url = None
+    if image and image.filename:
+        file_ext = os.path.splitext(image.filename)[1]
+        file_name = f"pkg_{user.caterer_profile.id}_{uuid.uuid4().hex[:8]}{file_ext}"
+        file_path = os.path.join(UPLOAD_DIR, file_name)
+        with open(file_path, "wb") as buffer:
+            shutil.copyfileobj(image.file, buffer)
+        image_url = f"/static/uploads/caterer/{file_name}"
+
     new_package = models.CateringPackage(
         caterer_id=user.caterer_profile.id,
         name=name,
@@ -445,11 +504,12 @@ async def add_package(
         overtime_fee=overtime_fee,
         location_coverage=location_coverage,
         inclusions=inclusions_data,
+        image_url=image_url,
         status="active"
     )
     db.add(new_package)
     db.commit()
-    
+
     # Broadcast to all connected customers
     await manager.broadcast({
         "type": "new_package",
@@ -457,7 +517,88 @@ async def add_package(
         "package_name": name,
         "caterer_id": user.caterer_profile.id
     })
+
+    return RedirectResponse(url="/caterer/packages", status_code=303)
+
+@router.post("/packages/{pkg_id}/toggle")
+async def toggle_package_status(
+    pkg_id: int,
+    db: Session = Depends(database.get_db),
+    user: models.User = Depends(caterer_only)
+):
+    package = db.query(models.CateringPackage).get(pkg_id)
+    if not package or package.caterer_id != user.caterer_profile.id:
+        raise HTTPException(status_code=404, detail="Package not found")
     
+    package.is_active = not package.is_active
+    db.commit()
+    return {"status": "success", "is_active": package.is_active}
+
+@router.get("/packages/{pkg_id}/details")
+async def get_package_details_json(
+    pkg_id: int,
+    db: Session = Depends(database.get_db),
+    user: models.User = Depends(caterer_only)
+):
+    package = db.query(models.CateringPackage).get(pkg_id)
+    if not package or package.caterer_id != user.caterer_profile.id:
+        raise HTTPException(status_code=404, detail="Package not found")
+    
+    return {
+        "id": package.id,
+        "name": package.name,
+        "description": package.description,
+        "service_type": package.service_type,
+        "price_per_head": package.price_per_head,
+        "min_contract_amount": package.min_contract_amount,
+        "min_guests": package.min_guests,
+        "max_guests": package.max_guests,
+        "service_duration": package.service_duration,
+        "inclusions": package.inclusions or {}
+    }
+
+@router.post("/packages/{pkg_id}/update")
+async def update_package(
+    pkg_id: int,
+    name: str = Form(...),
+    description: str = Form(...),
+    min_guests: int = Form(...),
+    max_guests: Optional[int] = Form(None),
+    service_type: str = Form("General"),
+    price_per_head: Optional[float] = Form(None),
+    min_contract_amount: Optional[float] = Form(None),
+    service_duration: int = Form(4),
+    inclusions: list[str] = Form([]),
+    image: Optional[UploadFile] = File(None),
+    db: Session = Depends(database.get_db),
+    user: models.User = Depends(caterer_only)
+):
+    package = db.query(models.CateringPackage).get(pkg_id)
+    if not package or package.caterer_id != user.caterer_profile.id:
+        raise HTTPException(status_code=404, detail="Package not found")
+
+    package.name = name
+    package.description = description
+    package.min_guests = min_guests
+    package.max_guests = max_guests
+    package.service_type = service_type
+    package.price_per_head = price_per_head
+    package.min_contract_amount = min_contract_amount
+    package.service_duration = service_duration
+
+    # Structure inclusions as JSON
+    package.inclusions = {item: True for item in inclusions}
+
+    # Handle image update (only replace if a new image is uploaded)
+    if image and image.filename:
+        file_ext = os.path.splitext(image.filename)[1]
+        file_name = f"pkg_{pkg_id}_{uuid.uuid4().hex[:8]}{file_ext}"
+        file_path = os.path.join(UPLOAD_DIR, file_name)
+        with open(file_path, "wb") as buffer:
+            shutil.copyfileobj(image.file, buffer)
+        package.image_url = f"/static/uploads/caterer/{file_name}"
+
+    db.commit()
     return RedirectResponse(url="/caterer/packages", status_code=303)
 
 @router.get("/packages/{pkg_id}/menu")
@@ -484,7 +625,7 @@ async def get_package_menu(
         for i in package.menu_items
     ]
 
-@router.post("/packages/{pkg_id}/delete")
+@router.delete("/packages/{pkg_id}")
 async def delete_package(
     pkg_id: int,
     db: Session = Depends(database.get_db),
@@ -589,7 +730,6 @@ async def reject_booking(
     db: Session = Depends(database.get_db),
     user: models.User = Depends(caterer_only)
 ):
-    
     booking = db.query(models.Booking).get(booking_id)
     if not booking or booking.caterer_id != user.caterer_profile.id:
         raise HTTPException(status_code=404, detail="Booking not found")
@@ -600,6 +740,53 @@ async def reject_booking(
         booking_id=booking.id,
         status="cancelled",
         notes="Booking rejected by caterer"
+    )
+    db.add(history)
+    db.commit()
+    
+    return RedirectResponse(url="/caterer/bookings", status_code=303)
+
+@router.post("/bookings/{booking_id}/complete")
+async def complete_booking(
+    request: Request,
+    booking_id: int,
+    db: Session = Depends(database.get_db),
+    user: models.User = Depends(caterer_only)
+):
+    booking = db.query(models.Booking).get(booking_id)
+    if not booking or booking.caterer_id != user.caterer_profile.id:
+        raise HTTPException(status_code=404, detail="Booking not found")
+    
+    booking.status = "completed"
+    
+    history = models.BookingHistory(
+        booking_id=booking.id,
+        status="completed",
+        notes="Booking marked as completed by caterer"
+    )
+    db.add(history)
+    db.commit()
+    
+    return RedirectResponse(url="/caterer/bookings", status_code=303)
+
+@router.post("/bookings/{booking_id}/cancel")
+async def cancel_booking(
+    request: Request,
+    booking_id: int,
+    reason: str = Form(...),
+    db: Session = Depends(database.get_db),
+    user: models.User = Depends(caterer_only)
+):
+    booking = db.query(models.Booking).get(booking_id)
+    if not booking or booking.caterer_id != user.caterer_profile.id:
+        raise HTTPException(status_code=404, detail="Booking not found")
+    
+    booking.status = "cancelled"
+    
+    history = models.BookingHistory(
+        booking_id=booking.id,
+        status="cancelled",
+        notes=f"Booking cancelled by caterer. Reason: {reason}"
     )
     db.add(history)
     db.commit()

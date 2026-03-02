@@ -1,0 +1,181 @@
+/* Admin Payouts & Financials Styles */
+
+.payout-header-flex {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.payout-header-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    color: var(--text-dark);
+    margin-bottom: 0.5rem;
+}
+
+.payout-header-subtitle {
+    color: var(--text-light);
+}
+
+.payout-sections-container {
+    display: grid;
+    gap: 2rem;
+}
+
+.payout-admin-card {
+    background: white;
+    border-radius: 1rem;
+    padding: 1.5rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+.payout-card-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 0.75rem;
+}
+
+/* Table Styles */
+.payout-data-table {
+    width: 100%;
+    text-align: left;
+    border-collapse: collapse;
+}
+
+.payout-data-table thead tr {
+    border-bottom: 2px solid var(--border-color);
+    color: var(--text-light);
+    font-size: 0.85rem;
+    text-transform: uppercase;
+}
+
+.payout-data-table th,
+.payout-data-table td {
+    padding: 1rem;
+}
+
+.payout-txn-row {
+    border-bottom: 1px solid var(--border-color);
+}
+
+.payout-txn-row td {
+    vertical-align: middle;
+}
+
+.caterer-business-identity {
+    font-weight: 600;
+    color: var(--text-dark);
+}
+
+.caterer-contact-small {
+    font-size: 0.85rem;
+    color: var(--text-light);
+}
+
+.event-count-badge {
+    background: #e0e7ff;
+    color: #4338ca;
+    padding: 0.25rem 0.75rem;
+    border-radius: 1rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.net-due-amount {
+    font-weight: 700;
+    color: #10b981;
+}
+
+.btn-generate-payout {
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+/* Payout History Specifics */
+.payout-id-caterer {
+    font-weight: 600;
+}
+
+.payout-booking-count {
+    font-size: 0.8rem;
+    color: var(--text-light);
+}
+
+.payout-date-text {
+    font-size: 0.9rem;
+    color: var(--text-light);
+}
+
+.payout-amount-bold {
+    font-weight: 700;
+}
+
+.status-pill-payout {
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    font-size: 0.75rem;
+    font-weight: bold;
+}
+
+.status-pill-payout.paid {
+    background: #d1fae5;
+    color: #059669;
+}
+
+.status-pill-payout.processing {
+    background: #fef3c7;
+    color: #d97706;
+}
+
+.txn-ref-ref-text {
+    font-family: monospace;
+    font-size: 0.85rem;
+    color: var(--text-light);
+}
+
+.mark-paid-form-flex {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: flex-end;
+}
+
+.ref-input-fancy {
+    padding: 0.5rem;
+    border: 1px solid var(--border-color);
+    border-radius: 0.25rem;
+    font-size: 0.8rem;
+    width: 140px;
+}
+
+.btn-mark-sent {
+    background: #10b981;
+    color: white;
+    border: none;
+    padding: 0.5rem 0.75rem;
+    border-radius: 0.25rem;
+    cursor: pointer;
+    font-size: 0.8rem;
+    font-weight: bold;
+}
+
+.empty-state-container {
+    text-align: center;
+    padding: 3rem;
+    color: var(--text-light);
+}
+
+.empty-state-icon {
+    font-size: 3rem;
+    color: #10b981;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+}

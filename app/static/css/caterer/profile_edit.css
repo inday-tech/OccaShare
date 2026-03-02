@@ -1,0 +1,191 @@
+/* Caterer Profile Edit Styles */
+
+.profile-card {
+    background: var(--white);
+    padding: 3rem;
+    border-radius: 2rem;
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow-md);
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 3rem;
+}
+
+.profile-sidebar-logo {
+    width: 120px;
+    height: 120px;
+    border-radius: 1.5rem;
+    background: var(--accent-color);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3rem;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+    box-shadow: var(--shadow-md);
+}
+
+.sidebar-business-name {
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.sidebar-location {
+    color: var(--text-light);
+    margin-bottom: 2rem;
+}
+
+.sidebar-location i {
+    margin-right: 0.5rem;
+}
+
+.account-status-box {
+    background: #f1f5f9;
+    padding: 1.5rem;
+    border-radius: 1rem;
+}
+
+.status-label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    color: var(--text-light);
+    margin-bottom: 0.75rem;
+}
+
+.status-value {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #10b981;
+    font-weight: 700;
+}
+
+.view-public-profile-btn {
+    width: 100%;
+    display: block;
+    text-align: center;
+    margin-top: 1.5rem;
+    padding: 0.75rem;
+}
+
+.view-public-profile-btn i {
+    margin-right: 0.5rem;
+}
+
+/* Form Styles */
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: var(--secondary-color);
+}
+
+.form-group input,
+.form-group textarea {
+    width: 100%;
+    padding: 0.9rem 1.25rem;
+    border: 1px solid var(--border-color);
+    border-radius: 0.75rem;
+    font-family: inherit;
+    background: #f8fafc;
+    transition: all 0.2s ease;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+    background: white;
+    border-color: var(--primary-color);
+    outline: none;
+    box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
+}
+
+.form-row-two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+}
+
+.form-file-input {
+    padding: 0.5rem !important;
+}
+
+.form-section-title {
+    margin-top: 2rem;
+    color: var(--primary-color);
+    font-weight: 700;
+    margin-bottom: 1rem;
+}
+
+/* Gallery Styles */
+.gallery-management-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+    background: #f8fafc;
+    padding: 1.5rem;
+    border-radius: 1rem;
+}
+
+.gallery-item-wrapper {
+    position: relative;
+}
+
+.gallery-item-img {
+    width: 100%;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 0.75rem;
+}
+
+.delete-gallery-item-btn {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: #ef4444;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+}
+
+.delete-gallery-item-btn:hover {
+    background: #dc2626;
+    transform: scale(1.1);
+}
+
+/* Form Actions */
+.form-footer-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 2rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--border-color);
+}
+
+.btn-save-changes {
+    padding: 1rem 2.5rem;
+}
+
+.btn-discard-changes {
+    padding: 1rem 2rem;
+}
+
+@media (max-width: 992px) {
+    .profile-card {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+    }
+}

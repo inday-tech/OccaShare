@@ -1,0 +1,220 @@
+.payment-form {
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.payment-selection-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    margin-bottom: 2.5rem;
+}
+
+.method-card {
+    background: white;
+    border: 2px solid #e2e8f0;
+    border-radius: 1.5rem;
+    padding: 1.75rem;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    cursor: pointer;
+    position: relative;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.method-card:hover {
+    border-color: var(--primary-color);
+    transform: translateY(-4px);
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+}
+
+.method-card.active {
+    border-color: var(--primary-color);
+    background: #fdfdfb;
+    box-shadow: 0 10px 30px -10px rgba(var(--primary-rgb), 0.2);
+}
+
+.method-radio {
+    width: 24px;
+    height: 24px;
+    border: 2.5px solid #cbd5e1;
+    border-radius: 50%;
+    flex-shrink: 0;
+    position: relative;
+    transition: all 0.2s ease;
+}
+
+.method-card.active .method-radio {
+    background: rgba(var(--primary-rgb), 0.02);
+    box-shadow: 0 10px 25px -5px rgba(var(--primary-rgb), 0.15);
+}
+
+/* Method Card Specifics */
+.method-footer {
+    margin-top: auto;
+    padding-top: 1rem;
+    border-top: 1px solid #f1f5f9;
+    font-size: 0.75rem;
+    color: var(--text-light);
+}
+
+.redirect-hint i {
+    font-size: 0.7rem;
+    margin-right: 0.25rem;
+}
+
+[data-method="Paymongo"].active {
+    border-color: #3b82f6;
+    background: linear-gradient(to bottom right, rgba(59, 130, 246, 0.02), rgba(59, 130, 246, 0.05));
+}
+
+[data-method="Paymongo"].active .payment-icon-wrapper {
+    background: #3b82f6;
+    color: white;
+}
+
+[data-method="Paymongo"].active .selection-indicator-wizard {
+    color: #3b82f6;
+}
+
+[data-method="Cash"].active {
+    border-color: #10b981;
+    background: linear-gradient(to bottom right, rgba(16, 185, 129, 0.02), rgba(16, 185, 129, 0.05));
+}
+
+[data-method="Cash"].active .payment-icon-wrapper {
+    background: #10b981;
+    color: white;
+}
+
+[data-method="Cash"].active .selection-indicator-wizard {
+    color: #10b981;
+}
+
+.payment-icon-wrapper {
+    width: 56px;
+    height: 56px;
+    background: #f8fafc;
+    border-radius: 1.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    color: #64748b;
+    transition: all 0.3s ease;
+    margin-bottom: 0.5rem;
+}
+
+.method-card.active .payment-icon-wrapper {
+    box-shadow: 0 8px 15px -5px rgba(0, 0, 0, 0.2);
+}
+
+.payment-icon-wrapper i {
+    font-size: 1.4rem;
+}
+
+.payment-info {
+    flex: 1;
+}
+
+.payment-info h4 {
+    margin: 0 0 0.35rem 0;
+    font-size: 1.15rem;
+    color: var(--secondary-color);
+    font-weight: 700;
+}
+
+.payment-info p {
+    font-size: 0.9rem;
+    color: var(--text-light);
+    margin-bottom: 0.75rem;
+    line-height: 1.4;
+}
+
+.payment-methods-badges {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.payment-badge {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.75rem;
+    color: #64748b;
+    background: #f8fafc;
+    padding: 0.4rem 0.8rem;
+    border-radius: 2rem;
+    font-weight: 600;
+}
+
+.method-card.active .payment-badge {
+    background: white;
+    border: 1px solid rgba(var(--primary-rgb), 0.1);
+}
+
+.processing-container {
+    text-align: center;
+    margin: 2rem 0;
+    padding: 2rem;
+    background: #f8fafc;
+    border-radius: 1.5rem;
+}
+
+.loader {
+    border: 3px solid #e2e8f0;
+    border-top: 3px solid var(--primary-color);
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    animation: spin 0.8s linear infinite;
+    margin: 0 auto 1rem;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.btn-complete {
+    width: 100%;
+    padding: 1.25rem;
+    border-radius: 1rem;
+    font-weight: 700;
+    font-size: 1.1rem;
+    box-shadow: 0 4px 15px rgba(var(--primary-rgb), 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    transition: all 0.3s ease;
+}
+
+.btn-complete:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(var(--primary-rgb), 0.4);
+}
+
+.selection-indicator-wizard {
+    position: absolute;
+    top: 1.25rem;
+    right: 1.25rem;
+    color: var(--primary-color);
+    font-size: 1.25rem;
+    opacity: 0;
+    transform: scale(0.5);
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    z-index: 5;
+}
+
+.method-card.active .selection-indicator-wizard {
+    opacity: 1;
+    transform: scale(1);
+}

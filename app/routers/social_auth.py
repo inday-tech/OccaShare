@@ -1,12 +1,17 @@
 import os
-from fastapi import APIRouter, Request, HTTPException, status, Depends
-from fastapi.responses import RedirectResponse
+from fastapi import APIRouter, Request, HTTPException, status, Depends, Form
+from fastapi.responses import RedirectResponse, HTMLResponse
 from authlib.integrations.starlette_client import OAuth, OAuthError
 from sqlalchemy.orm import Session
-from datetime import timedelta
+from datetime import datetime, timedelta
+from jose import jwt, JWTError
+from fastapi.templating import Jinja2Templates
 from ..db import database, models
 from ..core import security as auth, utils
 from ..core.config import settings
+
+# Templates configuration
+templates = Jinja2Templates(directory="templates")
 
 # Initialize Router
 # NOTE: To use this REAL router, you must include it in main.py instead of the mock 'oauth' router.
@@ -23,7 +28,7 @@ oauth.register(
     access_token_url='https://graph.facebook.com/oauth/access_token',
     access_token_params=None,
     authorize_url='https://www.facebook.com/dialog/oauth',
-    authorize_params=None,
+    authorize_params={'auth_type': 'reauthenticate'},
     api_base_url='https://graph.facebook.com/',
     client_kwargs={'scope': 'email public_profile'},
 )
@@ -35,7 +40,7 @@ oauth.register(
     client_secret=settings.GOOGLE_CLIENT_SECRET,
     server_metadata_url='https://accounts.google.com/.well-known/openid-configuration',
     client_kwargs={'scope': 'openid email profile'},
-    authorize_params={'prompt': 'select_account'},
+    authorize_params={'prompt': 'select_account', 'access_type': 'offline'},
 )
 
 # Register Instagram
@@ -98,7 +103,7 @@ async def social_login(request: Request, provider: str):
 async def auth_callback(request: Request, provider: str, db: Session = Depends(database.get_db)):
     """
     Handles the callback from the provider, exchanges code for token,
-    and logs in/registers the user.
+    and automatically logs in/redirects via popup script.
     """
     try:
         # Authlib automatically retrieves state and redirect_uri from the session
@@ -199,7 +204,7 @@ async def auth_callback(request: Request, provider: str, db: Session = Depends(d
         if updated:
             db.commit()
 
-    # Create Session Token
+    # Create Final Session Token
     access_token_expires = timedelta(minutes=auth.ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = auth.create_access_token(
         data={"sub": user.email, "role": user.role},
@@ -207,12 +212,7 @@ async def auth_callback(request: Request, provider: str, db: Session = Depends(d
     )
     
     # Check if profile is complete
-    # Force onboarding if:
-    # 1. Role is pending (from old logic)
-    # 2. Email is a placeholder (missing from provider)
-    # 3. Customer is missing phone or address
     is_placeholder_email = user.email.endswith("@no-email.com")
-    
     if user.role == "pending" or is_placeholder_email or (user.role == "customer" and (not user.phone_number or not user.address)):
         redirect_url = "/auth/onboarding"
         if is_placeholder_email:
@@ -220,6 +220,24 @@ async def auth_callback(request: Request, provider: str, db: Session = Depends(d
     else:
         redirect_url = utils.get_dashboard_url(user.role)
 
-    response = RedirectResponse(url=redirect_url, status_code=status.HTTP_303_SEE_OTHER)
+    # Return a small HTML script to handle popup closing and parent redirect
+    # The cookie is set on this response, which the browser will use for the parent window redirect
+    html_content = f"""
+    <html>
+        <head><title>Logging in...</title></head>
+        <body>
+            <script>
+                if (window.opener && !window.opener.closed) {{
+                    window.opener.location.href = "{redirect_url}";
+                    window.close();
+                }} else {{
+                    window.location.href = "{redirect_url}";
+                }}
+            </script>
+            <p>Redirecting to dashboard... <a href="{redirect_url}">Click here</a> if nothing happens.</p>
+        </body>
+    </html>
+    """
+    response = HTMLResponse(content=html_content)
     response.set_cookie(key="access_token", value=f"Bearer {access_token}", httponly=True)
     return response

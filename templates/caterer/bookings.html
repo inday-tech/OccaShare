@@ -2,102 +2,126 @@
 
 {% block title %}Manage Bookings - Caterer Dashboard{% endblock %}
 
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', path='/css/caterer/bookings.css') }}">
+{% endblock %}
+
 {% block content %}
 <div class="page-header">
     <h1>Manage Bookings</h1>
     <p>View and update the status of your catering reservations.</p>
 </div>
 
-<div
-    style="background: var(--white); border-radius: 2rem; padding: 2.5rem; border: 1px solid var(--border-color); box-shadow: var(--shadow-md);">
+<div class="bookings-card-container">
     {% if bookings %}
-    <div style="overflow-x: auto;">
-        <table style="width: 100%; border-collapse: separate; border-spacing: 0 1rem;">
+    <div class="bookings-table-scroll-wrapper">
+        <table class="bookings-list-table">
             <thead>
-                <tr style="text-align: left; color: var(--text-light); font-size: 0.9rem; text-transform: uppercase;">
-                    <th style="padding: 0 1.5rem;">Event Date</th>
-                    <th style="padding: 0 1.5rem;">Customer</th>
-                    <th style="padding: 0 1.5rem;">Package</th>
-                    <th style="padding: 0 1.5rem;">Amount</th>
-                    <th style="padding: 0 1.5rem;">Status</th>
-                    <th style="padding: 0 1.5rem; text-align: right;">Actions</th>
+                <tr>
+                    <th>Event Date</th>
+                    <th>Event Name</th>
+                    <th>Booked On</th>
+                    <th>Customer</th>
+                    <th>Package</th>
+                    <th>Guests</th>
+                    <th>Amount</th>
+                    <th>Status</th>
+                    <th style="text-align: right;">Actions</th>
                 </tr>
             </thead>
             <tbody>
                 {% for booking in bookings %}
-                <tr style="background: #f8fafc; border-radius: 1rem;">
-                    <td style="padding: 1.5rem; border-radius: 1rem 0 0 1rem;">
-                        <div style="font-weight: 700;">{{ booking.event_date.strftime('%b %d, %Y') }}</div>
-                        <div style="font-size: 0.8rem; color: var(--text-light);">{{
-                            booking.event_time.strftime('%H:%M') if booking.event_time else 'TBD' }}</div>
+                <tr class="booking-row-item">
+                    <td class="booking-cell-padding booking-cell-first">
+                        <div class="event-date-main">{{ booking.event_date.strftime('%b %d, %Y') }}</div>
+                        <div class="event-time-sub">{{ booking.event_time.strftime('%I:%M %p') if booking.event_time
+                            else 'TBD' }}</div>
                     </td>
-                    <td style="padding: 1.5rem;">
-                        <div style="font-weight: 600;">{{ booking.user.first_name }} {{ booking.user.last_name }}</div>
-                        <div style="font-size: 0.85rem; color: var(--text-light);">{{ booking.user.email }}</div>
+                    <td class="booking-cell-padding">
+                        <div class="event-name-display">{{ booking.event_name or 'N/A' }}</div>
                     </td>
-                    <td style="padding: 1.5rem;">
-                        <div style="font-weight: 600;">{{ booking.package.name if booking.package else 'Custom Menu' }}
+                    <td class="booking-cell-padding">
+                        <div class="booked-on-date">{{ booking.created_at.strftime('%b %d, %Y') }}</div>
+                    </td>
+                    <td class="booking-cell-padding">
+                        <div class="customer-name-bold">{{ booking.user.first_name }} {{ booking.user.last_name }}</div>
+                        <div class="customer-email-sub">{{ booking.user.email }}</div>
+                    </td>
+                    <td class="booking-cell-padding">
+                        <div class="package-name-bold">{{ booking.package.name if booking.package else 'Custom Menu' }}
                         </div>
                         {% if booking.selected_items %}
-                        <div style="margin-top: 0.5rem;">
-                            <span
-                                style="font-size: 0.75rem; color: var(--primary-color); cursor: pointer; text-decoration: underline;"
-                                onclick="showMenuDetails('{{ booking.id }}')">
-                                View Selection ({{ booking.selected_items|length }} items)
-                            </span>
+                        <div class="view-selection-trigger" onclick="showMenuDetails('{{ booking.id }}')">
+                            View Selection ({{ booking.selected_items|length }} items)
                         </div>
                         <!-- Hidden data for modal -->
                         <div id="booking-items-{{ booking.id }}" style="display: none;">
                             {% for b_item in booking.selected_items %}
-                            <div class="menu-item-row"
-                                style="display: flex; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px solid #f1f5f9;">
+                            <div class="menu-item-row-modal">
                                 <span>{{ b_item.menu_item.name }} {% if b_item.is_add_on %}(Add-on){% endif %}</span>
-                                <span style="font-weight: 600;">{% if b_item.is_add_on %}₱{{
+                                <span class="customer-name-bold">{% if b_item.is_add_on %}₱{{
                                     "{:,.2f}".format(b_item.price) }}{% else %}Included{% endif %}</span>
                             </div>
                             {% endfor %}
-                            <div style="margin-top: 1rem; padding-top: 1rem; border-top: 2px dashed #e2e8f0;">
-                                <div style="display: flex; justify-content: space-between;">
+                            <div class="total-summary-row">
+                                <div class="flex-between">
                                     <span>Base Package Price</span>
                                     <span>₱{{ "{:,.2f}".format(booking.total_price -
                                         booking.selected_items|selectattr('is_add_on')|map(attribute='price')|sum) if
                                         booking.total_price else '0.00' }}</span>
                                 </div>
-                                <div
-                                    style="display: flex; justify-content: space-between; font-weight: 700; margin-top: 0.5rem; color: var(--secondary-color);">
-                                    <span>Grand Total</span>
+                                <div class="flex-between font-bold mt-0-5">
+                                    <span>Total Amount</span>
                                     <span>₱{{ "{:,.2f}".format(booking.total_price or booking.total_amount) }}</span>
                                 </div>
-                                {% endif %}
+                            </div>
+                        </div>
+                        {% endif %}
                     </td>
-                    <td style="padding: 1.5rem; font-weight: 700; color: var(--secondary-color);">
+                    <td class="booking-cell-padding guest-count-bold">
+                        {{ booking.guest_count }}
+                    </td>
+                    <td class="booking-cell-padding total-amount-bold">
                         ₱{{ "{:,.2f}".format(booking.total_price or booking.total_amount) }}
                     </td>
-                    <td style="padding: 1.5rem;">
-                        {% set status_colors = {
-                        'pending': '#92400e; background: #fef3c7;',
-                        'confirmed': '#166534; background: #dcfce7;',
-                        'completed': '#1e40af; background: #dbeafe;',
-                        'cancelled': '#991b1b; background: #fee2e2;'
-                        } %}
-                        {% set style = status_colors.get(booking.status, '#374151; background: #f1f5f9;') %}
-                        <span
-                            style="padding: 0.5rem 1rem; border-radius: 2rem; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; {{ style }}">
+                    <td class="booking-cell-padding">
+                        {% set status_class = {
+                        'pending': 'status-pending-bookings',
+                        'confirmed': 'status-confirmed-bookings',
+                        'completed': 'status-completed-bookings',
+                        'cancelled': 'status-cancelled-bookings'
+                        }.get(booking.status, 'status-default-bookings') %}
+                        <span class="status-badge-bookings {{ status_class }}">
                             {{ booking.status }}
                         </span>
                     </td>
-                    <td style="padding: 1.5rem; border-radius: 0 1rem 1rem 0; text-align: right;">
-                        <button class="btn-outline view-details" data-id="{{ booking.id }}"
+                    <td class="booking-cell-padding booking-cell-last">
+                        <button class="btn-outline btn-details-bookings view-details" data-id="{{ booking.id }}"
                             data-event-name="{{ booking.event_name or 'N/A' }}"
                             data-event-type="{{ booking.event_type or 'N/A' }}"
                             data-venue="{{ booking.venue_address or 'TBD' }}"
                             data-requests="{{ booking.special_requests or 'None' }}"
                             data-customer="{{ booking.user.first_name }} {{ booking.user.last_name }}"
-                            data-email="{{ booking.user.email }}" data-amount="₱{{ " {:,.2f}".format(booking.total_price
-                            or booking.total_amount) }}" data-status="{{ booking.status }}"
-                            style="padding: 0.5rem 1rem; font-size: 0.8rem;">
+                            data-email="{{ booking.user.email }}"
+                            data-amount="₱{{ '{:,.2f}'.format(booking.total_price or booking.total_amount) }}"
+                            data-status="{{ booking.status }}" data-payment-status="{{ booking.payment_status }}"
+                            data-payment-method="{{ booking.payment_method or 'TBD' }}"
+                            data-booked-on="{{ booking.created_at.strftime('%B %d, %Y %H:%M') }}"
+                            data-guest-count="{{ booking.guest_count }}"
+                            data-has-contract="{{ 'true' if booking.quotation and booking.quotation.status == 'signed' else 'false' }}">
                             Details
                         </button>
+
+                        <!-- Hidden History for modal -->
+                        <div id="booking-history-{{ booking.id }}" style="display: none;">
+                            {% for log in booking.history|sort(attribute='created_at', reverse=True) %}
+                            <div class="history-log-item">
+                                <div class="history-log-date">{{ log.created_at.strftime('%b %d, %Y %H:%M') }}</div>
+                                <div class="history-log-status">{{ log.status|upper }}</div>
+                                <div class="history-log-notes">{{ log.notes }}</div>
+                            </div>
+                            {% endfor %}
+                        </div>
                     </td>
                 </tr>
                 {% endfor %}
@@ -105,150 +129,107 @@
         </table>
     </div>
     {% else %}
-    <div style="text-align: center; padding: 4rem;">
-        <p style="color: var(--text-light);">No bookings yet. They will appear here once customers book your services.
-        </p>
+    <div class="no-bookings-empty">
+        <p>No bookings yet. They will appear here once customers book your services.</p>
     </div>
     {% endif %}
 </div>
 
 <!-- Booking Detail Modal -->
-<div id="bookingDetailModal" class="modal"
-    style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.5); backdrop-filter: blur(4px);">
-    <div
-        style="background-color: #fefefe; margin: 5% auto; padding: 2.5rem; border: 1px solid #888; width: 600px; border-radius: 2rem; box-shadow: var(--shadow-lg);">
-        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 2rem;">
+<div id="bookingDetailModal" class="modal-overlay-p">
+    <div class="modal-content-p">
+        <!-- Modal Header -->
+        <div class="modal-header-p">
             <div>
-                <h2 id="modalBookingId" style="font-size: 1.5rem; margin-bottom: 0.5rem;">Booking #</h2>
-                <span id="modalStatus"
-                    style="padding: 0.4rem 0.8rem; border-radius: 1rem; font-size: 0.8rem; font-weight: 700; text-transform: uppercase;"></span>
+                <h2 id="modalBookingId" class="modal-title-p">Booking Details</h2>
+                <div class="modal-header-meta">
+                    <span id="modalStatus" class="modal-status-badge"></span>
+                    <span class="modal-booked-on-text" id="modalBookedOn"></span>
+                </div>
             </div>
-            <span onclick="closeModal()"
-                style="color: #aaa; font-size: 28px; font-weight: bold; cursor: pointer;">&times;</span>
+            <button onclick="closeModal()" class="btn-close-modal-p">
+                <i class="fas fa-times"></i>
+            </button>
         </div>
 
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 2rem;">
-            <div>
-                <label style="font-size: 0.75rem; color: #64748b; font-weight: 800; text-transform: uppercase;">Customer
-                    Info</label>
-                <div id="modalCustomer" style="font-weight: 600; margin-top: 0.5rem;"></div>
-                <div id="modalEmail" style="font-size: 0.9rem; color: #64748b;"></div>
+        <!-- Modal Body (Scrollable) -->
+        <div class="modal-body-p">
+            <div class="modal-summary-grid">
+                <!-- Customer Card -->
+                <div class="modal-info-card">
+                    <div class="modal-card-label"><i class="fas fa-user-circle"></i> Customer Information</div>
+                    <div id="modalCustomer" class="modal-card-value-main"></div>
+                    <div id="modalEmail" class="modal-card-value-sub"></div>
+                </div>
+
+                <!-- Event Details Card -->
+                <div class="modal-info-card">
+                    <div class="modal-card-label"><i class="fas fa-calendar-alt"></i> Event Specifics</div>
+                    <div id="modalEventName" class="modal-card-value-main"></div>
+                    <div class="flex-between align-center">
+                        <span id="modalEventType" class="modal-card-value-sub"></span>
+                        <span id="modalGuestCount" class="modal-guest-count-badge"></span>
+                    </div>
+                </div>
             </div>
-            <div>
-                <label style="font-size: 0.75rem; color: #64748b; font-weight: 800; text-transform: uppercase;">Event
-                    Details</label>
-                <div id="modalEventName" style="font-weight: 600; margin-top: 0.5rem;"></div>
-                <div id="modalEventType" style="font-size: 0.9rem; color: #64748b;"></div>
+
+            <!-- Venue & Requests -->
+            <div class="mb-2-5">
+                <h3 class="modal-section-title">Location & Venue</h3>
+                <div id="modalVenue" class="modal-venue-text"></div>
+            </div>
+
+            <div class="mb-2-5">
+                <h3 class="modal-section-title">Special Requests / Notes</h3>
+                <div id="modalRequests" class="modal-requests-box"></div>
+            </div>
+
+            <!-- Menu Selection -->
+            <div id="modalMenuSection" class="mb-2-5">
+                <h3 class="modal-section-title">Menu & Add-ons</h3>
+                <div id="modalMenuItems" class="modal-menu-container"></div>
+            </div>
+
+            <!-- Financials & Timeline -->
+            <div class="financials-grid-p">
+                <!-- Payment Summary -->
+                <div>
+                    <h3 class="modal-section-title">Financial Summary</h3>
+                    <div class="flex-column gap-0-75">
+                        <div class="financial-stat-box">
+                            <span class="financial-stat-label">Total Amount</span>
+                            <span id="modalTotalAmount" class="financial-stat-value"></span>
+                        </div>
+                        <div class="payment-details-box">
+                            <div class="payment-row-p">
+                                <span class="payment-label-p">Payment Status</span>
+                                <span id="modalPaymentStatus" class="payment-value-p"></span>
+                            </div>
+                            <div class="payment-row-p">
+                                <span class="payment-label-p">Payment Method</span>
+                                <span id="modalPaymentMethod" class="payment-value-method-p"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Timeline / History -->
+                <div>
+                    <h3 class="modal-section-title">Activity Logs</h3>
+                    <div id="modalHistory" class="activity-logs-container-p"></div>
+                </div>
             </div>
         </div>
 
-        <div style="margin-bottom: 2rem;">
-            <label style="font-size: 0.75rem; color: #64748b; font-weight: 800; text-transform: uppercase;">Venue
-                Address</label>
-            <div id="modalVenue" style="margin-top: 0.5rem; line-height: 1.4;"></div>
-        </div>
-
-        <div style="margin-bottom: 2rem;">
-            <label style="font-size: 0.75rem; color: #64748b; font-weight: 800; text-transform: uppercase;">Special
-                Requests</label>
-            <div id="modalRequests" style="margin-top: 0.5rem; font-style: italic; color: #4b5563;"></div>
-        </div>
-
-        <div id="modalMenuSection">
-            <label style="font-size: 0.75rem; color: #64748b; font-weight: 800; text-transform: uppercase;">Menu
-                Selection</label>
-            <div id="modalMenuItems" style="margin-top: 1rem; background: #f8fafc; padding: 1rem; border-radius: 1rem;">
-                <!-- Menu items injected here -->
-            </div>
-        </div>
-
-        <div style="margin-top: 2.5rem; display: flex; justify-content: flex-end; gap: 1rem;">
-            <button onclick="closeModal()" class="btn-outline" style="padding: 0.75rem 1.5rem;">Close</button>
-            <div id="modalActions">
-                <!-- Action buttons based on status -->
-            </div>
+        <!-- Modal Footer (Sticky) -->
+        <div class="modal-footer-p">
+            <button onclick="closeModal()" class="btn-outline btn-close-view">Close View</button>
+            <div id="modalActions" class="modal-actions-container-p"></div>
         </div>
     </div>
 </div>
-
 {% endblock %}
 
 {% block extra_js %}
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        // Add click listeners to all detail buttons
-        document.querySelectorAll('.view-details').forEach(btn => {
-            btn.addEventListener('click', function () {
-                showBookingDetails(this);
-            });
-        });
-    });
-
-    function showBookingDetails(btn) {
-        const data = btn.dataset;
-        document.getElementById('modalBookingId').innerText = 'Booking #' + data.id;
-        document.getElementById('modalCustomer').innerText = data.customer;
-        document.getElementById('modalEmail').innerText = data.email;
-        document.getElementById('modalEventName').innerText = data.eventName;
-        document.getElementById('modalEventType').innerText = data.eventType;
-        document.getElementById('modalVenue').innerText = data.venue;
-        document.getElementById('modalRequests').innerText = data.requests;
-
-        // Status styling
-        const statusEl = document.getElementById('modalStatus');
-        statusEl.innerText = data.status;
-        const statusColors = {
-            'pending': { color: '#92400e', bg: '#fef3c7' },
-            'confirmed': { color: '#166534', bg: '#dcfce7' },
-            'completed': { color: '#1e40af', bg: '#dbeafe' },
-            'cancelled': { color: '#991b1b', bg: '#fee2e2' }
-        };
-        const style = statusColors[data.status] || { color: '#374151', bg: '#f1f5f9' };
-        statusEl.style.color = style.color;
-        statusEl.style.backgroundColor = style.bg;
-
-        // Menu items
-        const menuSource = document.getElementById('booking-items-' + data.id);
-        const menuTarget = document.getElementById('modalMenuItems');
-        if (menuSource) {
-            menuTarget.innerHTML = menuSource.innerHTML;
-            document.getElementById('modalMenuSection').style.display = 'block';
-        } else {
-            menuTarget.innerHTML = '<p style="color: #64748b; font-size: 0.9rem;">No menu items selected.</p>';
-        }
-
-        // Actions
-        const actionsEl = document.getElementById('modalActions');
-        actionsEl.innerHTML = '';
-        if (data.status === 'pending') {
-            actionsEl.innerHTML = `
-                <form action="/caterer/bookings/${data.id}/accept" method="POST" style="display:inline;">
-                    <button type="submit" style="padding: 0.75rem 1.5rem; background: #10b981; color: white; border: none; border-radius: 0.5rem; font-weight: 700; cursor: pointer;">Accept</button>
-                </form>
-                <form action="/caterer/bookings/${data.id}/reject" method="POST" style="display:inline;">
-                    <button type="submit" style="padding: 0.75rem 1.5rem; background: #ef4444; color: white; border: none; border-radius: 0.5rem; font-weight: 700; cursor: pointer;">Reject</button>
-                </form>
-            `;
-        }
-
-        document.getElementById('bookingDetailModal').style.display = 'block';
-    }
-
-    function showMenuDetails(bookingId) {
-        const btn = document.querySelector(`.view-details[data-id="${bookingId}"]`);
-        if (btn) showBookingDetails(btn);
-    }
-
-    function closeModal() {
-        document.getElementById('bookingDetailModal').style.display = 'none';
-    }
-
-    // Close when clicking outside
-    window.onclick = function (event) {
-        const modal = document.getElementById('bookingDetailModal');
-        if (event.target == modal) {
-            closeModal();
-        }
-    }
-</script>
+<script src="{{ url_for('static', path='/js/caterer/bookings.js') }}"></script>
 {% endblock %}

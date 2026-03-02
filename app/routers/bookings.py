@@ -58,9 +58,6 @@ async def start_booking(request: Request, caterer_id: int, package_id: Optional[
     if not user:
         return RedirectResponse(url=f"/auth/login?next=/bookings/start/{caterer_id}")
     
-    # NEW: Check if user is already KYC verified? (Optional logic here)
-    # Check if user.is_kyc_complete
-    
     # Initialize/Reset booking session data
     request.session["booking_data"] = {
         "caterer_id": caterer_id,
@@ -74,6 +71,44 @@ async def start_booking(request: Request, caterer_id: int, package_id: Optional[
     
     # Always go to Phase 1 (Details) if package is already selected
     return RedirectResponse(url="/bookings/step/details", status_code=303)
+
+@router.get("/continue/{booking_id}")
+async def continue_draft_booking(booking_id: int, request: Request, db: Session = Depends(database.get_db)):
+    user = get_current_user_from_session(request, db)
+    if not user:
+        return RedirectResponse(url=f"/auth/login?next=/bookings/continue/{booking_id}")
+        
+    booking = db.query(models.Booking).get(booking_id)
+    if not booking or booking.user_id != user.id:
+        return RedirectResponse(url="/customer/dashboard?error=booking_not_found", status_code=303)
+        
+    if booking.status != 'draft':
+        return RedirectResponse(url=f"/customer/bookings/manage/{booking.id}", status_code=303)
+        
+    # Re-populate session so back-navigation works
+    request.session["booking_data"] = {
+        "booking_id": booking.id,
+        "caterer_id": booking.caterer_id,
+        "package_id": booking.package_id,
+        "user_id": user.id
+    }
+    
+    # Step logic routing
+    # 1. Does user need KYC?
+    if not user.is_verified and not user.is_kyc_complete:
+        return RedirectResponse(url=f"/bookings/step/kyc/{booking.id}", status_code=303)
+        
+    # 2. Is there a Quotation yet?
+    if not booking.quotation:
+        # User hasn't finished quotation step
+        return RedirectResponse(url=f"/bookings/step/quotation/{booking.id}", status_code=303)
+        
+    # 3. Has the Quotation been signed?
+    if booking.quotation.status == 'signed':
+        return RedirectResponse(url=f"/bookings/step/payment/{booking.id}", status_code=303)
+        
+    # Default fallback to Quotation
+    return RedirectResponse(url=f"/bookings/step/quotation/{booking.id}", status_code=303)
 
 # New: Package Selection Step (If not selected from Marketplace)
 @router.get("/step/menu/{caterer_id}", response_class=HTMLResponse)
@@ -230,6 +265,8 @@ async def step_quotation_page(booking_id: int, request: Request, db: Session = D
     return templates.TemplateResponse("customer/booking_wizard/step_quotation.html", {
         "request": request,
         "quotation": quotation,
+        "booking": booking,
+        "package": booking.package,
         "user": user,
         "current_step": 3,
         "active_page": "bookings"
@@ -250,19 +287,105 @@ async def step_payment_v2_page(booking_id: int, request: Request, db: Session = 
         "active_page": "bookings"
     })
 
-@router.post("/step/payment/{booking_id}")
+@router.post("/step/payment/{path_booking_id}")
+@router.post("/step/payment")
 async def step_payment_submit(
-    booking_id: int,
     request: Request,
-    payment_method: str = Form(...),
+    path_booking_id: Optional[int] = None, # Matches URL path if present
     db: Session = Depends(database.get_db)
 ):
-    booking = db.query(models.Booking).get(booking_id)
+    # Support URL path variable or Form body
+    try:
+        form_data = await request.form()
+        booking_id_str = form_data.get("booking_id")
+        booking_id = int(booking_id_str) if booking_id_str else None
+        payment_method = form_data.get("payment_method", "GCash")
+    except Exception:
+        booking_id = None
+        payment_method = "GCash"
+        
+    actual_booking_id = path_booking_id or booking_id
+    
+    if not actual_booking_id:
+        # Emergency fallback: Try to get from session if all else fails
+        session_data = request.session.get("booking_data", {})
+        actual_booking_id = session_data.get("id")
+        
+    if not actual_booking_id:
+        raise HTTPException(status_code=400, detail="Booking ID is missing from request")
+
+    booking = db.query(models.Booking).get(actual_booking_id)
     if not booking:
         raise HTTPException(status_code=404, detail="Booking not found")
 
-    # Simulate payment processing
-    # In a real app, this would redirect to a payment gateway or handle response
+    # Handle Cash Payment
+    if payment_method == "Cash":
+        booking.payment_method = "Cash"
+        booking.payment_status = "pending" # Paid upon physical meeting or specific caterer terms
+        booking.status = "pending"       # Now waiting for caterer to accept
+        
+        # Save to history
+        history = models.BookingHistory(
+            booking_id=booking.id,
+            status="pending",
+            notes=f"Reservation requested with Cash Payment. Transaction to be settled per caterer's terms."
+        )
+        db.add(history)
+        db.commit()
+        return RedirectResponse(url=f"/bookings/success/{booking.id}", status_code=303)
+
+    import os
+    import httpx
+    
+    paymongo_secret = os.getenv("PAYMONGO_SECRET_KEY")
+    if paymongo_secret:
+        # Generate Paymongo Checkout Link
+        url = "https://api.paymongo.com/v1/links"
+        amount_cents = int((booking.reservation_fee or 0) * 100)
+        
+        # Paymongo requires at least 100 PHP (10000 cents) usually, but we assume reservation_fee is valid
+        if amount_cents >= 10000:
+            base_url = os.getenv("SITE_URL", "http://localhost:8000")
+            payload = {
+                "data": {
+                    "attributes": {
+                        "amount": amount_cents,
+                        "description": f"Reservation Fee for Booking #{booking.id}",
+                        "remarks": f"booking_id:{booking.id}",
+                        "redirect": {
+                            "success": f"{base_url}/bookings/my?payment=success",
+                            "failed": f"{base_url}/bookings/my?payment=failed"
+                        }
+                    }
+                }
+            }
+            
+            async with httpx.AsyncClient() as client:
+                try:
+                    response = await client.post(url, json=payload, auth=(paymongo_secret, ""))
+                    if response.status_code == 200:
+                        data = response.json()
+                        checkout_url = data["data"]["attributes"]["checkout_url"]
+                        reference_number = data["data"]["attributes"]["reference_number"]
+                        
+                        booking.payment_method = payment_method
+                        booking.status = "pending_payment" # Wait for webhook
+                        
+                        history = models.BookingHistory(
+                            booking_id=booking.id,
+                            status="pending_payment",
+                            notes=f"Redirected to Paymongo ({reference_number})"
+                        )
+                        db.add(history)
+                        db.commit()
+                        
+                        return RedirectResponse(url=checkout_url, status_code=303)
+                    else:
+                        print("Paymongo API Error:", response.text)
+                except Exception as e:
+                    print("Paymongo Request Error:", str(e))
+
+    # Simulate payment processing (Fallback for other methods)
     booking.payment_method = payment_method
     booking.payment_status = "paid"  # Simulating successful payment
     booking.status = "pending"       # Now waiting for caterer to accept
@@ -271,12 +394,100 @@ async def step_payment_submit(
     history = models.BookingHistory(
         booking_id=booking.id,
         status="pending",
-        notes=f"Payment of reservation fee completed via {payment_method}. Booking is now pending caterer approval."
+        notes=f"Payment of reservation fee completed via {payment_method}. (Simulated)"
     )
     db.add(history)
     db.commit()
 
     return RedirectResponse(url=f"/bookings/success/{booking.id}", status_code=303)
+
+@router.post("/pay-balance/{booking_id}")
+async def pay_balance_submit(
+    booking_id: int,
+    request: Request,
+    payment_method: str = Form("Paymongo"),
+    db: Session = Depends(database.get_db)
+):
+    user = get_current_user_from_session(request, db)
+    if not user: raise HTTPException(status_code=401)
+    
+    booking = db.query(models.Booking).get(booking_id)
+    if not booking or booking.user_id != user.id:
+        raise HTTPException(status_code=404, detail="Booking not found")
+        
+    if booking.status != 'confirmed':
+        raise HTTPException(status_code=400, detail="Only confirmed bookings can have balances paid.")
+
+    outstanding_balance = float(booking.total_amount or 0) - float(booking.reservation_fee or 0)
+    
+    if outstanding_balance <= 0:
+        return RedirectResponse(url=f"/customer/bookings/manage/{booking.id}?info=balance_zero", status_code=303)
+
+    # Handle Cash Payment for Balance
+    if payment_method == "Cash":
+        # Keep status as confirmed, but perhaps add a note
+        history = models.BookingHistory(
+            booking_id=booking.id,
+            status="confirmed",
+            notes=f"Outstanding balance of ₱{outstanding_balance:,.2f} marked for Cash Payment."
+        )
+        db.add(history)
+        db.commit()
+        return RedirectResponse(url=f"/customer/bookings/manage/{booking.id}?success=payment_marked_cash", status_code=303)
+
+    import os
+    import httpx
+    
+    paymongo_secret = os.getenv("PAYMONGO_SECRET_KEY")
+    if paymongo_secret:
+        url = "https://api.paymongo.com/v1/links"
+        amount_cents = int(outstanding_balance * 100)
+        
+        if amount_cents >= 10000:
+            base_url = os.getenv("SITE_URL", "http://localhost:8000")
+            payload = {
+                "data": {
+                    "attributes": {
+                        "amount": amount_cents,
+                        "description": f"Outstanding Balance for Booking #{booking.id}",
+                        "remarks": f"booking_id:{booking.id}_balance",
+                        "redirect": {
+                            "success": f"{base_url}/customer/bookings/manage/{booking.id}?payment=success",
+                            "failed": f"{base_url}/customer/bookings/manage/{booking.id}?payment=failed"
+                        }
+                    }
+                }
+            }
+            
+            async with httpx.AsyncClient() as client:
+                try:
+                    response = await client.post(url, json=payload, auth=(paymongo_secret, ""))
+                    if response.status_code == 200:
+                        data = response.json()
+                        checkout_url = data["data"]["attributes"]["checkout_url"]
+                        
+                        history = models.BookingHistory(
+                            booking_id=booking.id,
+                            status="confirmed",
+                            notes=f"Redirected to Paymongo for balance payment (₱{outstanding_balance:,.2f})"
+                        )
+                        db.add(history)
+                        db.commit()
+                        return RedirectResponse(url=checkout_url, status_code=303)
+                except Exception as e:
+                    print("Paymongo Balance Payment Error:", str(e))
+
+    # Fallback/Simulation
+    booking.payment_status = "paid"
+    history = models.BookingHistory(
+        booking_id=booking.id,
+        status="confirmed",
+        notes=f"Outstanding balance of ₱{outstanding_balance:,.2f} successfully paid via {payment_method}. (Simulated)"
+    )
+    db.add(history)
+    db.commit()
+
+    return RedirectResponse(url=f"/customer/bookings/manage/{booking.id}?success=balance_paid", status_code=303)
 
 @router.get("/success/{booking_id}", response_class=HTMLResponse)
 async def booking_success_page(request: Request, booking_id: int, db: Session = Depends(database.get_db)):
@@ -326,48 +537,7 @@ async def submit_review(
     # Actually, let's just commit.
     
     db.commit()
-    return RedirectResponse(url="/customer/dashboard?success=review_submitted")
+    return RedirectResponse(url="/customer/dashboard?success=review_submitted", status_code=303)
 
-@router.post("/{booking_id}/contract/sign")
-async def sign_contract(
-    booking_id: int, 
-    signature_data: str = Form(...), 
-    guest_count: Optional[int] = Form(None),
-    db: Session = Depends(database.get_db)
-):
-    quotation = db.query(models.Quotation).filter(models.Quotation.booking_id == booking_id).first()
-    booking = db.query(models.Booking).get(booking_id)
-    
-    if not quotation or not booking:
-        return {"success": False, "error": "Quotation or Booking not found"}
-        
-    # If guest count was adjusted in the UI, update the quotation and booking
-    if guest_count and guest_count != quotation.package_details.get("guest_count"):
-        from decimal import Decimal
-        unit_price = Decimal(str(quotation.package_details.get("unit_price", 0)))
-        new_guest_count = int(guest_count)
-        
-        # Calculate new base amount
-        new_base_amount = unit_price * new_guest_count
-        
-        # Calculate new total (base + existing addons total)
-        addon_total = sum(Decimal(str(a.get("price", 0))) for a in quotation.addons)
-        new_total = new_base_amount + addon_total
-        
-        # Update Quotation JSON details
-        details = quotation.package_details.copy()
-        details["guest_count"] = new_guest_count
-        details["base_amount"] = float(new_base_amount)
-        quotation.package_details = details
-        quotation.total_amount = float(new_total)
-        
-        # Update Booking
-        booking.guest_count = new_guest_count
-        booking.total_amount = float(new_total)
-        booking.reservation_fee = new_total * Decimal(str(quotation.downpayment_percent / 100))
 
-    quotation.status = "signed"
-    # signature_data could be saved here if needed
-    
-    db.commit()
-    return {"success": True}
+# Note: Contract signing logic has been moved to quotations.py router.
