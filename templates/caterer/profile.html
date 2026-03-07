@@ -6,6 +6,98 @@
 <!-- FullCalendar CSS -->
 <link href='https://cdn.jsdelivr.net/npm/fullcalendar@5.10.1/main.min.css' rel='stylesheet' />
 <link rel="stylesheet" href="{{ url_for('static', path='/css/caterer/profile.css') }}">
+<style>
+    :root {
+        --profile-primary: {
+                {
+                caterer.primary_color or '#10b981'
+            }
+        }
+
+        ;
+
+        --profile-secondary: {
+                {
+                caterer.secondary_color or '#064e3b'
+            }
+        }
+
+        ;
+
+        --profile-accent: {
+                {
+                caterer.accent_color or '#f59e0b'
+            }
+        }
+
+        ;
+    }
+
+    .gallery-grid-premium {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 1.5rem;
+        margin-top: 2rem;
+    }
+
+    .gallery-item-premium {
+        border-radius: 1rem;
+        overflow: hidden;
+        height: 200px;
+        cursor: pointer;
+        transition: transform 0.3s;
+    }
+
+    .gallery-item-premium:hover {
+        transform: scale(1.05);
+    }
+
+    .gallery-item-premium img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .inquiry-form-card {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 1.5rem;
+        padding: 2rem;
+        margin-top: 2rem;
+    }
+
+    .inquiry-form-card h3 {
+        font-size: 1.25rem;
+        margin-bottom: 1.5rem;
+        color: var(--profile-secondary);
+    }
+
+    .form-group-premium {
+        margin-bottom: 1.25rem;
+    }
+
+    .form-group-premium label {
+        display: block;
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: #64748b;
+        margin-bottom: 0.5rem;
+    }
+
+    .form-control-premium {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border: 1px solid #cbd5e1;
+        border-radius: 0.5rem;
+        font-family: inherit;
+        transition: border-color 0.2s;
+    }
+
+    .form-control-premium:focus {
+        outline: none;
+        border-color: var(--profile-primary);
+    }
+</style>
 {% endblock %}
 
 {% block content %}
@@ -137,6 +229,41 @@
             </div>
         </section>
 
+        <!-- Gallery Section -->
+        {% if gallery_items %}
+        <section class="mb-4">
+            <h2 class="section-title-premium">Event Gallery</h2>
+            <div class="gallery-grid-premium">
+                {% for item in gallery_items %}
+                <div class="gallery-item-premium">
+                    <img src="{{ item.media_url }}" alt="{{ item.caption or 'Gallery Item' }}">
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+        {% endif %}
+
+        <!-- Menu Section (Simplified) -->
+        <section class="mb-4">
+            <h2 class="section-title-premium">Signature Menus</h2>
+            {% for pkg in packages %}
+            <div class="card-premium mb-2">
+                <h3 style="font-size: 1.25rem; color: var(--profile-primary); margin-bottom: 1rem;">{{ pkg.name }} Menu
+                </h3>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                    {% for item in pkg.menu_items %}
+                    <div style="padding: 1rem; background: #f8fafc; border-radius: 0.75rem;">
+                        <h4 style="font-size: 1rem; margin-bottom: 0.25rem;">{{ item.name }}</h4>
+                        <p style="font-size: 0.8125rem; color: #64748b; margin: 0;">{{ item.category }}</p>
+                    </div>
+                    {% else %}
+                    <p class="text-muted">No specific menu items listed for this package.</p>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endfor %}
+        </section>
+
         <!-- Terms -->
         <section>
             <h2 class="section-title-premium">Policies & Terms</h2>
@@ -204,7 +331,8 @@
                 <div class="flex-column gap-1">
                     <div class="flex-between font-size-0-9">
                         <span class="text-muted">Member Since</span>
-                        <span class="font-600">2024</span>
+                        <span class="font-600">{{ caterer.created_at.strftime('%Y') if caterer.created_at else '2024'
+                            }}</span>
                     </div>
                     <div class="flex-between font-size-0-9">
                         <span class="text-muted">Response Time</span>
@@ -212,9 +340,33 @@
                     </div>
                     <div class="flex-between font-size-0-9">
                         <span class="text-muted">Catering Type</span>
-                        <span class="font-600">Full Service</span>
+                        <span class="font-600">{{ caterer.business_type or 'Full Service' }}</span>
                     </div>
                 </div>
+            </div>
+
+            <!-- Inquiry Form -->
+            <div class="inquiry-form-card">
+                <h3>Direct Inquiry</h3>
+                <form id="inquiryForm">
+                    <input type="hidden" name="caterer_id" value="{{ caterer.id }}">
+                    <div class="form-group-premium">
+                        <label>Your Name</label>
+                        <input type="text" name="name" class="form-control-premium" placeholder="John Doe" required>
+                    </div>
+                    <div class="form-group-premium">
+                        <label>Email Address</label>
+                        <input type="email" name="email" class="form-control-premium" placeholder="john@example.com"
+                            required>
+                    </div>
+                    <div class="form-group-premium">
+                        <label>Message</label>
+                        <textarea name="message" class="form-control-premium" rows="4"
+                            placeholder="How can we help you?" required></textarea>
+                    </div>
+                    <button type="submit" class="btn-primary"
+                        style="width: 100%; border-radius: 0.5rem; justify-content: center;">Send Inquiry</button>
+                </form>
             </div>
         </div>
     </aside>

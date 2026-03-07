@@ -63,3 +63,31 @@ def get_caterer_profile(request: Request, caterer_id: int, db: Session = Depends
         "reviews": caterer.reviews,
         "user": user
     })
+
+@router.get("/caterer/{slug}", response_class=HTMLResponse)
+def get_caterer_by_slug(request: Request, slug: str, db: Session = Depends(database.get_db)):
+    caterer = db.query(models.CatererProfile).filter(models.CatererProfile.slug == slug).first()
+    if not caterer:
+        # Fallback: check if slug is actually an ID
+        if slug.isdigit():
+            caterer = crud.get_caterer(db, caterer_id=int(slug))
+    
+    if not caterer:
+        raise HTTPException(status_code=404, detail="Caterer not found")
+
+    token = request.cookies.get("access_token")
+    user = None
+    if token:
+        try:
+            scheme, param = token.split()
+            user = auth.verify_token(param, db)
+        except: pass
+
+    return templates.TemplateResponse("caterer/profile.html", {
+        "request": request, 
+        "caterer": caterer,
+        "packages": caterer.packages,
+        "gallery_items": caterer.gallery_items,
+        "reviews": caterer.reviews,
+        "user": user
+    })

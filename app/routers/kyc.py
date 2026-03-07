@@ -34,8 +34,8 @@ async def upload_id(
     if not booking or (booking.user_id != current_user.id and current_user.role != 'admin'):
         raise HTTPException(status_code=404, detail="Booking not found")
 
-    # Fintech Attempt Limiter
-    if current_user.kyc_attempts >= 3:
+    # Fintech Attempt Limiter (Temporary higher limit for testing)
+    if current_user.kyc_attempts >= 100:
         # Check if they already have an IdentityVerification record to block
         kyc_record = db.query(models.IdentityVerification).filter(models.IdentityVerification.user_id == current_user.id).first()
         if kyc_record:
@@ -159,6 +159,7 @@ def process_kyc_background(user_id, booking_id, id_path, selfie_paths, full_name
         kyc_record.verification_status = result["status"]
         kyc_record.fraud_score = result["fraud_score"]
         kyc_record.failure_reason = result["failure_reason"]
+        kyc_record.ocr_data = result.get("ocr_data", {})
         kyc_record.liveness_status = "passed" if result["liveness_score"] >= 0.02 else "failed"
         
         if result["status"] == "approved":

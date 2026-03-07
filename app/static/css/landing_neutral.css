@@ -1,0 +1,129 @@
+:root {
+    --bg-white: #ffffff;
+    --bg-light: #f8fafc;
+    --text-main: #1e293b;
+    --text-muted: #64748b;
+    --primary-blue: #3b82f6;
+    --primary-light: #eff6ff;
+    --border-neutral: #e2e8f0;
+    --shadow-soft: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+}
+
+.landing-container {
+    background-color: var(--bg-white);
+    color: var(--text-main);
+    font-family: 'Inter', sans-serif;
+}
+
+.hero-clean {
+    padding: 8rem 0;
+    background: radial-gradient(circle at top right, var(--primary-light), var(--bg-white));
+    text-align: center;
+}
+
+.hero-clean h1 {
+    font-size: 4rem;
+    font-weight: 800;
+    letter-spacing: -0.025em;
+    color: var(--text-main);
+    margin-bottom: 1.5rem;
+}
+
+.hero-clean p {
+    font-size: 1.25rem;
+    color: var(--text-muted);
+    max-width: 42rem;
+    margin: 0 auto 2.5rem;
+}
+
+.btn-cta-main {
+    background-color: var(--text-main);
+    color: white;
+    padding: 1rem 2.5rem;
+    border-radius: 9999px;
+    font-weight: 600;
+    transition: all 0.2s;
+    box-shadow: var(--shadow-soft);
+}
+
+.btn-cta-main:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+}
+
+.section-clean {
+    padding: 6rem 0;
+}
+
+.section-clean h2 {
+    font-size: 2.25rem;
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.caterer-grid-new {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+}
+
+.caterer-card-new {
+    background: var(--bg-white);
+    border: 1px solid var(--border-neutral);
+    border-radius: 1rem;
+    padding: 2rem;
+    transition: all 0.2s;
+}
+
+.caterer-card-new:hover {
+    border-color: var(--primary-blue);
+    box-shadow: var(--shadow-soft);
+}
+
+.step-card-new {
+    background: var(--bg-light);
+    border-radius: 1rem;
+    padding: 2.5rem;
+    text-align: center;
+}
+
+.step-number-new {
+    width: 3rem;
+    height: 3rem;
+    background: var(--text-main);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    margin: 0 auto 1.5rem;
+}
+
+.testimonial-card-new {
+    background: var(--bg-light);
+    border-radius: 1rem;
+    padding: 2rem;
+    font-style: italic;
+    color: var(--text-main);
+    position: relative;
+}
+
+.category-pill {
+    padding: 0.5rem 1.5rem;
+    background: var(--bg-light);
+    border: 1px solid var(--border-neutral);
+    border-radius: 9999px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    transition: all 0.2s;
+}
+
+.category-pill:hover,
+.category-pill.active {
+    background: var(--text-main);
+    color: white;
+    border-color: var(--text-main);
+}

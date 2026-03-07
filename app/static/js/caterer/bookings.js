@@ -49,30 +49,36 @@ function showBookingDetails(btn) {
     const actionsEl = document.getElementById('modalActions');
     actionsEl.innerHTML = '';
 
+    // Always show View Contract if it exists
+    if (data.hasContract === 'true') {
+        const viewLink = document.createElement('a');
+        viewLink.href = `/caterer/bookings/${data.id}/contract`;
+        viewLink.className = 'btn-action-modal btn-status-confirm';
+        viewLink.style.textDecoration = 'none';
+        viewLink.style.textAlign = 'center';
+        viewLink.style.lineHeight = '1.2';
+        viewLink.style.display = 'flex';
+        viewLink.style.alignItems = 'center';
+        viewLink.style.justifyContent = 'center';
+        viewLink.style.background = '#1e293b';
+        viewLink.innerText = 'View Contract';
+        actionsEl.appendChild(viewLink);
+    }
+
     if (data.status === 'pending') {
-        actionsEl.innerHTML = `
+        actionsEl.innerHTML += `
             <form action="/caterer/bookings/${data.id}/accept" method="POST" style="flex: 1; display: flex;">
                 <button type="submit" class="btn-action-modal btn-status-confirm">Accept</button>
             </form>
             <button onclick="promptCancel('${data.id}')" class="btn-action-modal btn-status-reject">Reject</button>
         `;
     } else if (data.status === 'confirmed') {
-        actionsEl.innerHTML = `
+        actionsEl.innerHTML += `
             <form action="/caterer/bookings/${data.id}/complete" method="POST" style="flex: 1; display: flex;">
                 <button type="submit" class="btn-action-modal btn-status-complete">Mark as Completed</button>
             </form>
             <button onclick="promptCancel('${data.id}')" class="btn-action-modal btn-status-cancel">Cancel Booking</button>
         `;
-    }
-
-    // Add 'View Contract' button if contract exists
-    if (data.hasContract === 'true') {
-        const contractBtn = document.createElement('a');
-        contractBtn.href = `/caterer/bookings/${data.id}/contract`;
-        contractBtn.target = '_blank';
-        contractBtn.className = 'btn-contract-view-p';
-        contractBtn.innerHTML = '<i class="fas fa-file-contract"></i> View Contract';
-        actionsEl.appendChild(contractBtn);
     }
 
     // Payment info

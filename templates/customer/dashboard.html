@@ -114,6 +114,9 @@
                                 Booking</a>
                             <a href="/bookings/step/details" class="btn-icon-action" title="Edit Booking Info"><i
                                     class="fas fa-edit"></i></a>
+                            {% elif booking.needs_signing %}
+                            <a href="/contracts/{{ booking.id }}/sign" class="btn-primary btn-status-action"
+                                style="background-color: #1e293b;">Sign Contract</a>
                             {% else %}
                             <a href="/customer/bookings/manage/{{ booking.id }}" class="btn-icon-action"
                                 title="View Details"><i class="fas fa-eye"></i></a>

@@ -28,7 +28,7 @@ oauth.register(
     access_token_url='https://graph.facebook.com/oauth/access_token',
     access_token_params=None,
     authorize_url='https://www.facebook.com/dialog/oauth',
-    authorize_params={'auth_type': 'reauthenticate'},
+    authorize_params=None,
     api_base_url='https://graph.facebook.com/',
     client_kwargs={'scope': 'email public_profile'},
 )
@@ -40,7 +40,7 @@ oauth.register(
     client_secret=settings.GOOGLE_CLIENT_SECRET,
     server_metadata_url='https://accounts.google.com/.well-known/openid-configuration',
     client_kwargs={'scope': 'openid email profile'},
-    authorize_params={'prompt': 'select_account', 'access_type': 'offline'},
+    authorize_params={'access_type': 'offline'},
 )
 
 # Register Instagram
@@ -60,20 +60,22 @@ async def social_login(request: Request, provider: str):
     Redirects the user to the social provider's login page.
     Real OAuth flow using Authlib.
     """
-    # Fix for Mismatching State (CSRF): Domain Consistency Check
-    # If user is on localhost but SITE_URL is set to ngrok, redirect them to ngrok first.
-    # Browsers cannot share session cookies between localhost and ngrok.
-    current_host = request.base_url.hostname
-    target_host = settings.SITE_URL.split("//")[-1].split("/")[0].split(":")[0]
+    # --- DOMAIN CONSISTENCY FIX ---
+    # Ensure current host matches SITE_URL for consistent session cookies
+    current_host = str(request.base_url.hostname)
+    site_url_obj = settings.SITE_URL.split("//")[-1].split("/")[0].split(":")[0]
     
-    if (current_host == "127.0.0.1" or current_host == "localhost") and "ngrok-free.dev" in target_host:
-        # Construct the target URL on the ngrok domain
-        new_url = f"{settings.SITE_URL.rstrip('/')}{request.url.path}"
-        query_params = str(request.query_params)
-        if query_params:
-            new_url += f"?{query_params}"
-        print(f"DEBUG DOMAIN FIX: Redirecting from {current_host} to {new_url}")
-        return RedirectResponse(url=new_url)
+    # If the user is on 127.0.0.1 but the config is localhost (or vice versa), 
+    # redirect them to the configured SITE_URL first.
+    if current_host != site_url_obj:
+        # Build the full target URL
+        target_base = settings.SITE_URL.rstrip('/')
+        full_target_url = f"{target_base}{request.url.path}"
+        if request.query_params:
+            full_target_url += f"?{request.query_params}"
+        
+        print(f"DEBUG DOMAIN MISMATCH: Redirecting from {current_host} to {full_target_url}")
+        return RedirectResponse(url=full_target_url)
 
     client = oauth.create_client(provider)
     
@@ -122,12 +124,14 @@ async def auth_callback(request: Request, provider: str, db: Session = Depends(d
     picture = None
     
     if provider == 'facebook':
-        # Request specific fields from Facebook
-        resp = await oauth.facebook.get('me?fields=id,name,email,picture', token=token)
+        # Request specific fields from Facebook for higher accuracy and larger picture
+        resp = await oauth.facebook.get('me?fields=id,name,email,first_name,last_name,picture.type(large)', token=token)
         user_info = resp.json()
         social_id = user_info.get('id')
-        email = user_info.get('email') # Might be None if user didn't grant email permission
+        email = user_info.get('email')
         name = user_info.get('name')
+        first_name = user_info.get('first_name')
+        last_name = user_info.get('last_name')
         picture = user_info.get('picture', {}).get('data', {}).get('url')
         
     elif provider == 'google':
@@ -138,7 +142,12 @@ async def auth_callback(request: Request, provider: str, db: Session = Depends(d
         social_id = user_info.get('sub')
         email = user_info.get('email')
         name = user_info.get('name')
+        first_name = user_info.get('given_name')
+        last_name = user_info.get('family_name')
         picture = user_info.get('picture')
+        # Request higher resolution if it's a standard Google profile photo
+        if picture and "googleusercontent.com" in picture and "=s96-c" in picture:
+            picture = picture.replace("=s96-c", "=s400-c")
 
     elif provider == 'instagram':
         resp = await oauth.instagram.get('me?fields=id,username', token=token)
@@ -173,8 +182,8 @@ async def auth_callback(request: Request, provider: str, db: Session = Depends(d
         user = models.User(
             email=final_email,
             password_hash=auth.get_password_hash(os.urandom(16).hex()), # Unusable random password
-            first_name=name.split(" ")[0] if name else "User",
-            last_name=name.split(" ")[-1] if name and " " in name else "",
+            first_name=first_name if first_name else (name.split(" ")[0] if name else "User"),
+            last_name=last_name if last_name else (name.split(" ")[-1] if name and " " in name else ""),
             role="customer", # Default role as requested
             status="active",
             is_email_verified=True if email else False, # Verified if we got it from provider
@@ -211,33 +220,16 @@ async def auth_callback(request: Request, provider: str, db: Session = Depends(d
         expires_delta=access_token_expires
     )
     
-    # Check if profile is complete
-    is_placeholder_email = user.email.endswith("@no-email.com")
-    if user.role == "pending" or is_placeholder_email or (user.role == "customer" and (not user.phone_number or not user.address)):
-        redirect_url = "/auth/onboarding"
-        if is_placeholder_email:
-            redirect_url += "?reason=missing_email"
-    else:
-        redirect_url = utils.get_dashboard_url(user.role)
+    # --- 4. DESTINATION CALCULATION ---
+    # For social users, we enforce the 'customer' role as requested
+    if user.role == "pending" or user.role is None:
+        user.role = "customer"
+        db.commit()
+    
+    # User wants to skip onboarding and go straight to dashboard for social login
+    redirect_url = utils.get_dashboard_url(user.role)
 
-    # Return a small HTML script to handle popup closing and parent redirect
-    # The cookie is set on this response, which the browser will use for the parent window redirect
-    html_content = f"""
-    <html>
-        <head><title>Logging in...</title></head>
-        <body>
-            <script>
-                if (window.opener && !window.opener.closed) {{
-                    window.opener.location.href = "{redirect_url}";
-                    window.close();
-                }} else {{
-                    window.location.href = "{redirect_url}";
-                }}
-            </script>
-            <p>Redirecting to dashboard... <a href="{redirect_url}">Click here</a> if nothing happens.</p>
-        </body>
-    </html>
-    """
-    response = HTMLResponse(content=html_content)
+    # Redirect user to the calculated destination
+    response = RedirectResponse(url=redirect_url, status_code=status.HTTP_303_SEE_OTHER)
     response.set_cookie(key="access_token", value=f"Bearer {access_token}", httponly=True)
     return response

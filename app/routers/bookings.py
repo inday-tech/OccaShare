@@ -492,9 +492,12 @@ async def pay_balance_submit(
 @router.get("/success/{booking_id}", response_class=HTMLResponse)
 async def booking_success_page(request: Request, booking_id: int, db: Session = Depends(database.get_db)):
     booking = db.query(models.Booking).get(booking_id)
+    user = get_current_user_from_session(request, db)
     return templates.TemplateResponse("customer/booking_success.html", {
         "request": request,
-        "booking": booking
+        "booking": booking,
+        "user": user,
+        "active_page": "bookings"
     })
 
 @router.post("/review")

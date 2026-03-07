@@ -70,8 +70,8 @@ async def view_contract_caterer(
         raise HTTPException(status_code=404, detail="Booking not found")
 
     quotation = booking.quotation
-    if not quotation or quotation.status != 'signed':
-        raise HTTPException(status_code=404, detail="Contract not yet signed by customer")
+    if not quotation:
+        raise HTTPException(status_code=404, detail="Quotation not found for this booking")
 
     return templates.TemplateResponse("caterer/contract_view.html", {
         "request": request,
@@ -376,6 +376,9 @@ async def caterer_profile_update(
     description: str = Form(...),
     city: str = Form(...),
     contact_phone: str = Form(...),
+    primary_color: str = Form("#2D3748"),
+    secondary_color: str = Form("#4A5568"),
+    accent_color: str = Form("#48BB78"),
     logo: Optional[UploadFile] = File(None),
     cover_image: Optional[UploadFile] = File(None),
     gallery: Optional[list[UploadFile]] = File(None),
@@ -388,6 +391,9 @@ async def caterer_profile_update(
     profile.description = description
     profile.city = city
     profile.contact_phone = contact_phone
+    profile.primary_color = primary_color
+    profile.secondary_color = secondary_color
+    profile.accent_color = accent_color
     
     # Handle Logo Upload
     if logo and logo.filename:

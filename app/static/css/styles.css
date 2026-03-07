@@ -1,15 +1,15 @@
 /* Global Styles */
 :root {
-    --primary-color: #99cc66;
-    --primary-hover: #88bb55;
-    --secondary-color: #254222;
-    /* Forest Green */
+    --primary-color: #a3d674;
+    --primary-hover: #92c563;
+    --secondary-color: #2D3748;
+    /* Deep Gray-Blue for better contrast */
     --accent-color: #eae2b7;
     /* Cream */
-    --background-soft: #cae4c5;
-    /* Mint Soft */
-    --text-color: #254222;
-    --text-light: #5a7a56;
+    --background-soft: #f0f7e9;
+    /* Lighter Mint */
+    --text-color: #2D3748;
+    --text-light: #718096;
     --background-light: #fdfdfb;
     /* Professional White */
     --white: #ffffff;
@@ -76,7 +76,7 @@ h6 {
     background-color: var(--primary-color);
     color: var(--white);
     padding: 0.875rem 2rem;
-    border-radius: 1rem;
+    border-radius: 9999px;
     font-weight: 600;
     display: inline-flex;
     align-items: center;
@@ -97,7 +97,7 @@ h6 {
     background-color: white;
     color: var(--secondary-color);
     padding: 0.875rem 2rem;
-    border-radius: 1rem;
+    border-radius: 9999px;
     font-weight: 600;
     display: inline-flex;
     align-items: center;
@@ -212,17 +212,18 @@ h6 {
 
 /* Navbar Refinement */
 .navbar {
-    background-color: rgba(255, 255, 255, 0.85);
-    backdrop-filter: blur(16px);
-    border-bottom: 1px solid var(--border-color);
+    background-color: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
     position: fixed;
     top: 0;
     width: 100%;
     z-index: 1000;
-    height: 80px;
+    height: 72px;
     display: flex;
     align-items: center;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02);
+    transition: var(--transition);
 }
 
 .nav-container {
@@ -234,9 +235,10 @@ h6 {
 
 .logo {
     font-family: var(--font-heading);
-    font-size: 1.75rem;
+    font-size: 1.625rem;
     font-weight: 700;
     color: var(--primary-color);
+    letter-spacing: -0.01em;
 }
 
 .nav-menu {
@@ -252,8 +254,15 @@ h6 {
 
 .nav-links a {
     font-weight: 500;
-    color: var(--secondary-color);
-    font-size: 0.95rem;
+    color: var(--text-color);
+    font-size: 1rem;
+    opacity: 0.85;
+    transition: opacity 0.2s;
+}
+
+.nav-links a:hover {
+    opacity: 1;
+    color: var(--primary-color);
 }
 
 .nav-links a:hover,
@@ -311,15 +320,19 @@ h6 {
 .nav-auth {
     display: flex;
     align-items: center;
-    gap: 1rem;
+    gap: 1.25rem;
     padding-left: 1.5rem;
-    border-left: 1px solid var(--border-color);
+    border-left: 1px solid rgba(0, 0, 0, 0.05);
 }
 
 .lang-selector {
-    font-size: 0.9rem;
-    color: var(--text-light);
+    font-size: 0.95rem;
+    color: var(--text-color);
     margin-right: 0.5rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
 }
 
 .hamburger {

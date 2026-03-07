@@ -85,6 +85,7 @@ class QuotationService:
         db.refresh(quotation)
         return quotation
 
+
     def get_quotation_by_booking(self, db: Session, booking_id: int) -> models.Quotation:
         return db.query(models.Quotation).filter(models.Quotation.booking_id == booking_id).first()
 

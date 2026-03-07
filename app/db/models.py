@@ -83,6 +83,11 @@ class CatererProfile(Base):
     permit_url = Column(String, nullable=True)
     gov_id_url = Column(String, nullable=True)
     
+    # NEW: Brand Customization Fields
+    primary_color = Column(String, default="#2D3748") # Deep Blue/Gray
+    secondary_color = Column(String, default="#4A5568") # Gray
+    accent_color = Column(String, default="#48BB78") # Green
+    
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     user = relationship("User", back_populates="caterer_profile")
@@ -392,9 +397,13 @@ class Quotation(Base):
     addons = Column(JSONB)
     total_amount = Column(DECIMAL)
     downpayment_percent = Column(Integer) # CHECK (downpayment_percent BETWEEN 30 AND 50) - handle in app logic or custom CheckConstraint
-    contract_url = Column(String) # signed PDF
-    status = Column(String(20), default='draft') # draft, sent, signed
+    contract_url = Column(String, nullable=True) # signed PDF
+    status = Column(String(20), default='draft') # draft, sent, signed, rejected
+    
+    # Digital Signatures (Base64 or URL to image)
+    
     created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
     booking = relationship("Booking", back_populates="quotation")
 

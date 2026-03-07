@@ -231,7 +231,9 @@
                     </button>
                 </form>
 
-                {% elif booking.status == 'confirmed' %}
+                {% elif booking.status == 'confirmed' or booking.status == 'awaiting_payment' or booking.status ==
+                'paid' %}
+
                 <div class="alert-banner alert-success">
                     <p><i class="fas fa-check-circle"></i> Reservation Confirmed</p>
                 </div>

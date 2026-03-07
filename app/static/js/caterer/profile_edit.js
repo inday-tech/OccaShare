@@ -28,3 +28,16 @@ async function deleteGalleryItem(itemId) {
         alert('An unexpected error occurred.');
     }
 }
+
+// Update hex code labels when color pickers change
+document.addEventListener('DOMContentLoaded', function () {
+    const colorPickers = document.querySelectorAll('input[type="color"]');
+    colorPickers.forEach(picker => {
+        picker.addEventListener('input', function () {
+            const codeLabel = this.nextElementSibling;
+            if (codeLabel && codeLabel.tagName === 'CODE') {
+                codeLabel.textContent = this.value.toUpperCase();
+            }
+        });
+    });
+});

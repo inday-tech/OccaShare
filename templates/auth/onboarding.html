@@ -220,6 +220,11 @@
                 <p>Welcome to OccaServe. Tell us how you'd like to use our platform.</p>
             </div>
 
+            {% if request.query_params.get('social') == 'true' or user.auth_provider != 'email' %}
+            <div id="socialNotice" class="welcome-header" style="margin-bottom: 1.5rem;">
+                <p>Please provide your contact details to complete your registration as a <strong>Customer</strong>.</p>
+            </div>
+            {% else %}
             <div class="role-selection">
                 <div class="role-card" onclick="selectRole('customer')" id="role-customer">
                     <i class="fas fa-user-circle"></i>
@@ -232,6 +237,7 @@
                     <p>I want to list my business and reach more clients.</p>
                 </div>
             </div>
+            {% endif %}
 
             <div id="customerForm" class="onboarding-form">
                 <form action="/auth/onboarding" method="post">
@@ -267,15 +273,26 @@
 <script>
     function selectRole(role) {
         document.querySelectorAll('.role-card').forEach(c => c.classList.remove('active'));
-        document.getElementById(`role-${role}`).classList.add('active');
+        const card = document.getElementById(`role-${role}`);
+        if (card) card.classList.add('active');
 
         if (role === 'customer') {
             document.getElementById('customerForm').classList.add('active');
-            document.getElementById('catererNotice').classList.remove('active');
+            const notice = document.getElementById('catererNotice');
+            if (notice) notice.classList.remove('active');
         } else {
             document.getElementById('customerForm').classList.remove('active');
-            document.getElementById('catererNotice').classList.add('active');
+            const notice = document.getElementById('catererNotice');
+            if (notice) notice.classList.add('active');
         }
     }
+
+    // Auto-select customer if social user
+    document.addEventListener('DOMContentLoaded', function () {
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('social') === 'true' || "{{ user.auth_provider }}" !== 'email') {
+            selectRole('customer');
+        }
+    });
 </script>
 {% endblock %}

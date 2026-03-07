@@ -3,342 +3,137 @@
 {% block title %}OccaServe - Book the Best Catering Services Near You{% endblock %}
 
 {% block head %}
-<link rel="stylesheet" href="{{ url_for('static', path='/css/index.css') }}">
-
+<link rel="stylesheet" href="{{ url_for('static', path='/css/landing_neutral.css') }}">
 {% endblock %}
 
 {% block content %}
-<!-- Hero Section -->
-<header id="home" class="hero">
-    <div class="hero-bg"></div>
-    <div class="container">
-        <div class="hero-content">
-            <h1>Elevate Every Occasion</h1>
-            <p>OccaServe connects you with the Philippines' most elite caterers. Professional service, masterful
-                flavors, and effortless booking for your most meaningful moments.</p>
+<div class="landing-container">
+    <!-- Hero Section -->
+    <header class="hero-clean">
+        <div class="container">
+            <h1>Elevate Your Events with Elite Catering</h1>
+            <p>Connect with the finest professional caterers for your most meaningful moments. Seamless booking,
+                exceptional flavors, and masterful service.</p>
             <div class="hero-buttons">
-                <a href="#caterers" class="btn-primary">Book a Caterer <i class="fas fa-arrow-right"></i></a>
-                <a href="/auth/register" class="btn-secondary">Become a Caterer</a>
+                <a href="#caterers" class="btn-cta-main">Browse Caterers</a>
+                <a href="/auth/register" class="btn-secondary" style="border-radius: 9999px; padding: 1rem 2.5rem;">Join
+                    as a Caterer</a>
             </div>
         </div>
-    </div>
-</header>
+    </header>
 
-<!-- Featured Caterers Section -->
-<section id="caterers" class="section">
-    <div class="container">
-        <div class="section-header">
+    <!-- Featured Caterers Section -->
+    <section id="caterers" class="section-clean">
+        <div class="container">
             <h2>Featured Professionals</h2>
-            <p>Discover top-tier caterers vetted for quality, reliability, and exceptional cuisine.</p>
-        </div>
-        <div class="caterers-grid">
-            {% for caterer in caterers %}
-            <div class="caterer-card"
-                data-category="{{ caterer.event_types|join(',')|lower if caterer.event_types else '' }}"
-                data-name="{{ caterer.business_name|lower if caterer.business_name else '' }}"
-                data-description="{{ caterer.description|lower if caterer.description else '' }}">
-                <div class="caterer-logo">
-                    <img src="{{ caterer.logo_url if caterer.logo_url else 'https://ui-avatars.com/api/?name=' ~ (caterer.business_name or 'Caterer') ~ '&background=random' }}"
-                        alt="{{ caterer.business_name or 'Caterer' }}">
-                </div>
-                <div class="caterer-info">
-                    <h3>{{ caterer.business_name }} {% if caterer.is_verified %}<i
-                            class="fas fa-check-circle verified-badge" style="color: var(--primary-color);"
-                            title="Verified Caterer"></i>{% endif %}
-                    </h3>
-                    <p class="tagline">{{ (caterer.description or '')[:80] }}{% if (caterer.description or
-                        '')|length > 80 %}...{%
-                        endif %}</p>
-                    <div class="rating">
-                        <i class="fas fa-star"></i> {{ caterer.rating }} <span>({{ caterer.review_count }}
-                            Reviews)</span>
-                    </div>
-                    <a href="/caterers/{{ caterer.id }}" class="btn-primary"
-                        style="width: 100%; border-radius: 0.75rem;">View Profile</a>
-                </div>
-            </div>
-            {% else %}
-            <div style="grid-column: 1/-1; text-align: center; padding: 4rem;">
-                <p style="color: var(--text-light);">No caterers found at this time.</p>
-            </div>
-            {% endfor %}
-        </div>
-        <div class="center-btn" style="text-align: center;">
-            <a href="/caterers" class="btn-text-arrow">View All Partners <i class="fas fa-arrow-right"></i></a>
-        </div>
-    </div>
-</section>
-
-<!-- How It Works Section -->
-<section id="how-it-works" class="section section-alt">
-    <div class="container">
-        <div class="section-header">
-            <h2>How It Works</h2>
-            <p>Booking the perfect caterer has never been easier. Follow these simple steps to elevate your event.</p>
-        </div>
-        <div class="steps-container">
-            <div class="step">
-                <div class="step-icon"><i class="fas fa-search"></i></div>
-                <div
-                    style="font-size: 0.65rem; color: #48bb78; font-weight: 800; text-transform: uppercase; margin-bottom: 0.5rem;">
-                    <i class="fas fa-circle" style="font-size: 0.5rem; animation: pulse-green 2s infinite;"></i>
-                    Real-Time Discovery
-                </div>
-                <h4>1. Discover</h4>
-                <p>Browse our curated list of professional caterers and find the perfect match for your event.</p>
-            </div>
-            <div class="step">
-                <div class="step-icon"><i class="fas fa-id-card"></i></div>
-                <div
-                    style="font-size: 0.65rem; color: #48bb78; font-weight: 800; text-transform: uppercase; margin-bottom: 0.5rem;">
-                    <i class="fas fa-circle" style="font-size: 0.5rem; animation: pulse-green 2s infinite;"></i> Fast
-                    KYC verification
-                </div>
-                <h4>2. Verify Identity</h4>
-                <p>Quick 3-frame selfie verification to ensure a secure booking environment for all.</p>
-            </div>
-            <div class="step">
-                <div class="step-icon"><i class="fas fa-credit-card"></i></div>
-                <div
-                    style="font-size: 0.65rem; color: #48bb78; font-weight: 800; text-transform: uppercase; margin-bottom: 0.5rem;">
-                    <i class="fas fa-circle" style="font-size: 0.5rem; animation: pulse-green 2s infinite;"></i> Secure
-                    PayMongo
-                </div>
-                <h4>3. Book Securely</h4>
-                <p>Confirm your date with a secure downpayment via GCash, Maya, or Credit Card.</p>
-            </div>
-            <div class="step">
-                <div class="step-icon"><i class="fas fa-glass-cheers"></i></div>
-                <div
-                    style="font-size: 0.65rem; color: #48bb78; font-weight: 800; text-transform: uppercase; margin-bottom: 0.5rem;">
-                    <i class="fas fa-circle" style="font-size: 0.5rem; animation: pulse-green 2s infinite;"></i>
-                    Real-time tracking
-                </div>
-                <h4>4. Relax & Enjoy</h4>
-                <p>Let our professionals handle the rest while you focus on celebrating with your guests.</p>
-            </div>
-        </div>
-        <div style="text-align:center; margin-top:3.5rem;">
-            <a href="/how-it-works" class="btn-text-arrow">Learn More About Our Process <i
-                    class="fas fa-arrow-right"></i></a>
-        </div>
-    </div>
-</section>
-
-<!-- Categories Section with Image Cards -->
-<section id="categories" class="section">
-    <div class="container">
-        <div class="section-header">
-            <h2>Catering for Every Occasion</h2>
-            <p>Click any category to filter our caterers, or describe your unique event below.</p>
-        </div>
-
-        <!-- Category Grid with Images -->
-        <div class="categories-grid" id="categoryGrid">
-            <!-- Static "All" card -->
-            <div class="category-card active-category" data-filter="all">
-                <div class="category-image-wrapper">
-                    <div class="category-image"
-                        style="background-color: var(--primary-light); display: flex; align-items: center; justify-content: center;">
-                        <i class="fas fa-utensils" style="font-size: 4rem; color: var(--primary-color);"></i>
-                    </div>
-                </div>
-                <div class="category-info">
-                    <div class="category-icon"><i class="fas fa-utensils"></i></div>
-                    <h3>All Events</h3>
-                    <p>Browse every caterer in our network.</p>
-                </div>
-            </div>
-
-            <!-- Dynamic categories from backend -->
-            {% for category in categories %}
-            <div class="category-card" data-filter="{{ category.name|lower }}">
-                <div class="category-image-wrapper">
-                    {% if category.image_url %}
-                    <div class="category-image" style="background-image: url('{{ category.image_url }}');"></div>
-                    {% else %}
-                    <div class="category-image"
-                        style="background-color: var(--background-light); display: flex; align-items: center; justify-content: center;">
-                        <i class="{{ category.icon_class }}"
-                            style="font-size: 4rem; color: var(--primary-color); opacity: 0.2;"></i>
-                    </div>
-                    {% endif %}
-                    {% if loop.index == 1 %}<div class="category-badge">Premium</div>{% endif %}
-                </div>
-                <div class="category-info">
-                    <div class="category-icon"><i class="{{ category.icon_class }}"></i></div>
-                    <h3>{{ category.name }}</h3>
-                    <p>{{ category.description }}</p>
-                </div>
-            </div>
-            {% else %}
-            <!-- Fallback static categories if backend has none -->
-            <div class="category-card" data-filter="wedding">
-                <div class="category-image-wrapper">
-                    <div class="category-image"
-                        style="background-color: #f8d7da; display: flex; align-items: center; justify-content: center;">
-                        <i class="fas fa-ring" style="font-size: 4rem; color: #e83e8c;"></i>
-                    </div>
-                </div>
-                <div class="category-info">
-                    <div class="category-icon"><i class="fas fa-ring"></i></div>
-                    <h3>Wedding</h3>
-                    <p>Romantic, elegant catering for your special day.</p>
-                </div>
-            </div>
-            <div class="category-card" data-filter="birthday">
-                <div class="category-image-wrapper">
-                    <div class="category-image"
-                        style="background-color: #fff3cd; display: flex; align-items: center; justify-content: center;">
-                        <i class="fas fa-birthday-cake" style="font-size: 4rem; color: #ffc107;"></i>
-                    </div>
-                </div>
-                <div class="category-info">
-                    <div class="category-icon"><i class="fas fa-birthday-cake"></i></div>
-                    <h3>Birthday</h3>
-                    <p>Fun and delicious celebrations for all ages.</p>
-                </div>
-            </div>
-            <div class="category-card" data-filter="corporate">
-                <div class="category-image-wrapper">
-                    <div class="category-image"
-                        style="background-color: #d1e7dd; display: flex; align-items: center; justify-content: center;">
-                        <i class="fas fa-building" style="font-size: 4rem; color: #198754;"></i>
-                    </div>
-                </div>
-                <div class="category-info">
-                    <div class="category-icon"><i class="fas fa-building"></i></div>
-                    <h3>Corporate</h3>
-                    <p>Professional, impressive catering for business events.</p>
-                </div>
-            </div>
-            <div class="category-card" data-filter="school">
-                <div class="category-image-wrapper">
-                    <div class="category-image"
-                        style="background-color: #cfe2ff; display: flex; align-items: center; justify-content: center;">
-                        <i class="fas fa-school" style="font-size: 4rem; color: #0d6efd;"></i>
-                    </div>
-                </div>
-                <div class="category-info">
-                    <div class="category-icon"><i class="fas fa-school"></i></div>
-                    <h3>School Event</h3>
-                    <p>Nutritious and exciting options for students and staff.</p>
-                </div>
-            </div>
-            <div class="category-card" data-filter="religious">
-                <div class="category-image-wrapper">
-                    <div class="category-image"
-                        style="background-color: #e2d5f1; display: flex; align-items: center; justify-content: center;">
-                        <i class="fas fa-church" style="font-size: 4rem; color: #6f42c1;"></i>
-                    </div>
-                </div>
-                <div class="category-info">
-                    <div class="category-icon"><i class="fas fa-church"></i></div>
-                    <h3>Religious Event</h3>
-                    <p>Respectful, communal meals for faith‑based gatherings.</p>
-                </div>
-            </div>
-            {% endfor %}
-        </div>
-
-        <!-- Others search field -->
-        <div class="filter-others">
-            <input type="text" id="othersInput" placeholder="Other (specify) – search by name or description" />
-            <button id="othersFilterBtn">Apply</button>
-        </div>
-        <p style="text-align: center; color: var(--text-light); margin-top: 0.5rem;">
-            Click a category card to instantly see matching caterers.
-        </p>
-        <div style="text-align:center; margin-top:2rem;">
-            <a href="/event-categories" class="btn-text-arrow">All Event Categories <i
-                    class="fas fa-arrow-right"></i></a>
-        </div>
-    </div>
-</section>
-
-<!-- Testimonials Section -->
-<section id="testimonials" class="section section-alt">
-    <div class="container">
-        <div class="section-header">
-            <h2>Client Stories</h2>
-            <p>Hear from hosts who transformed their events with OccaServe's curated catering.</p>
-        </div>
-        <div class="testimonials-grid">
-            {% for review in highlighted_reviews %}
-            <div class="testimonial-card">
-                <p class="review">"{{ review.comment }}"</p>
-                <div class="reviewer">
-                    <img src="{{ review.user.profile_image_url if review.user.profile_image_url else 'https://ui-avatars.com/api/?name=' ~ review.user.first_name ~ '+' ~ review.user.last_name ~ '&background=random' }}"
-                        alt="{{ review.user.first_name }}">
-                    <div>
-                        <h5 style="margin: 0; font-weight: 700;">{{ review.user.first_name }} {{ review.user.last_name
-                            }}</h5>
-                        <div class="stars">
-                            {% for _ in range(review.rating) %}<i class="fas fa-star"></i>{% endfor %}
-                            {% for _ in range(5 - review.rating) %}<i class="far fa-star"></i>{% endfor %}
+            <div class="caterer-grid-new">
+                {% for caterer in caterers %}
+                <div class="caterer-card-new">
+                    <div style="display: flex; gap: 1.5rem; align-items: center; margin-bottom: 1.5rem;">
+                        <img src="{{ caterer.logo_url if caterer.logo_url else 'https://ui-avatars.com/api/?name=' ~ (caterer.business_name or 'Caterer') ~ '&background=random' }}"
+                            alt="{{ caterer.business_name }}"
+                            style="width: 64px; height: 64px; border-radius: 0.75rem; object-fit: cover; border: 1px solid var(--border-neutral);">
+                        <div>
+                            <h3 style="margin: 0; font-size: 1.25rem;">{{ caterer.business_name }}</h3>
+                            <div style="color: #fbbf24; font-size: 0.875rem;">
+                                <i class="fas fa-star"></i> {{ caterer.rating }} <span
+                                    style="color: var(--text-muted);">({{ caterer.review_count }})</span>
+                            </div>
                         </div>
-                        <div class="text-muted small" style="margin-top: 2px;">Caterer: {{ review.caterer.business_name
-                            }}</div>
                     </div>
+                    <p style="color: var(--text-muted); font-size: 0.9375rem; margin-bottom: 2rem; line-height: 1.6;">
+                        {{ (caterer.description or '')[:100] }}{% if (caterer.description or '')|length > 100 %}...{%
+                        endif %}
+                    </p>
+                    <a href="/caterers/{{ caterer.id }}" class="btn-cta-main"
+                        style="display: block; text-align: center; border-radius: 0.75rem;">View Profile</a>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+
+    <!-- Event Categories -->
+    <section class="section-clean" style="background-color: var(--bg-light);">
+        <div class="container text-center">
+            <h2 style="margin-bottom: 1rem;">Catering for Every Occasion</h2>
+            <p style="color: var(--text-muted); margin-bottom: 3rem; text-align: center;">Discover specialized menus for
+                your unique celebration.</p>
+            <div style="display: flex; flex-wrap: wrap; gap: 1rem; justify-content: center; margin-bottom: 4rem;">
+                <button class="category-pill active">All Occasions</button>
+                <button class="category-pill">Wedding</button>
+                <button class="category-pill">Birthday</button>
+                <button class="category-pill">Corporate</button>
+                <button class="category-pill">Debut</button>
+                <button class="category-pill">Baptism</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works (3 steps) -->
+    <section class="section-clean">
+        <div class="container">
+            <h2 style="margin-bottom: 4rem;">How It Works</h2>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 3rem;">
+                <div class="step-card-new">
+                    <div class="step-number-new">1</div>
+                    <h3 style="font-size: 1.5rem; margin-bottom: 1rem;">Discover</h3>
+                    <p style="color: var(--text-muted);">Browse our curated list of professional caterers and filter by
+                        event type or cuisine.</p>
+                </div>
+                <div class="step-card-new">
+                    <div class="step-number-new">2</div>
+                    <h3 style="font-size: 1.5rem; margin-bottom: 1rem;">Customize</h3>
+                    <p style="color: var(--text-muted);">View menus, packages, and past event galleries to find the
+                        perfect fit for your vision.</p>
+                </div>
+                <div class="step-card-new">
+                    <div class="step-number-new">3</div>
+                    <h3 style="font-size: 1.5rem; margin-bottom: 1rem;">Book</h3>
+                    <p style="color: var(--text-muted);">Secure your date with a small reservation fee through our
+                        protected payment gateway.</p>
                 </div>
             </div>
-            {% else %}
-            <div class="testimonial-card">
-                <p class="review">"OccaServe removed the stress from our wedding planning. The food was the highlight of
-                    our night!"</p>
-                <div class="reviewer">
-                    <img src="https://ui-avatars.com/api/?name=Sarah+J&background=random" alt="Sarah J">
-                    <div>
-                        <h5 style="margin: 0; font-weight: 700;">Sarah Jenkins</h5>
-                        <div class="stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i
-                                class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
-                    </div>
-                </div>
-            </div>
-            <div class="testimonial-card">
-                <p class="review">"The corporate catering was flawless. Professional, on-time, and exceeded our
-                    expectations."</p>
-                <div class="reviewer">
-                    <img src="https://ui-avatars.com/api/?name=Mike+R&background=random" alt="Mike R">
-                    <div>
-                        <h5 style="margin: 0; font-weight: 700;">Mike Ross</h5>
-                        <div class="stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i
-                                class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i>
+        </div>
+    </section>
+
+    <!-- Testimonials -->
+    <section class="section-clean" style="background-color: var(--bg-light);">
+        <div class="container">
+            <h2 style="margin-bottom: 4rem;">What Our Clients Say</h2>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem;">
+                {% for review in highlighted_reviews %}
+                <div class="testimonial-card-new">
+                    <p style="margin-bottom: 1.5rem; line-height: 1.7;">"{{ review.comment }}"</p>
+                    <div style="display: flex; align-items: center; gap: 1rem;">
+                        <img src="{{ review.user.profile_image_url if review.user.profile_image_url else 'https://ui-avatars.com/api/?name=' ~ review.user.first_name ~ '+' ~ review.user.last_name ~ '&background=random' }}"
+                            style="width: 48px; height: 48px; border-radius: 50%;">
+                        <div>
+                            <h5 style="margin: 0;">{{ review.user.first_name }} {{ review.user.last_name }}</h5>
+                            <span style="font-size: 0.8125rem; color: var(--text-muted);">{{
+                                review.caterer.business_name }}</span>
                         </div>
                     </div>
                 </div>
+                {% endfor %}
             </div>
-            <div class="testimonial-card">
-                <p class="review">"Exceptional variety. We found a vegan caterer that our guests are still talking
-                    about."</p>
-                <div class="reviewer">
-                    <img src="https://ui-avatars.com/api/?name=Emily+C&background=random" alt="Emily C">
-                    <div>
-                        <h5 style="margin: 0; font-weight: 700;">Emily Clark</h5>
-                        <div class="stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i
-                                class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
-                    </div>
-                </div>
-            </div>
-            {% endfor %}
         </div>
-    </div>
-</section>
+    </section>
 
-<!-- CTA Section -->
-<section class="cta-section">
-    <div class="container">
-        <div class="cta-content">
-            <h2>Ready to Host an Unforgettable Event?</h2>
-            <p>Join thousands of happy hosts who trust OccaServe for their catering needs. Whether you're a host or
-                a caterer, we have the tools to help you succeed.</p>
-            <div class="cta-buttons">
-                <a href="/auth/register" class="btn-primary">Get Started Now</a>
-                <a href="/auth/register?role=caterer" class="btn-outline-white">Join as a Caterer</a>
-            </div>
+    <!-- Final CTA -->
+    <section class="section-clean">
+        <div class="container text-center"
+            style="background: var(--text-main); padding: 5rem 2rem; border-radius: 2rem; color: white;">
+            <h2 style="color: white; font-size: 3rem; margin-bottom: 1.5rem;">Ready to Browse Caterers?</h2>
+            <p
+                style="font-size: 1.25rem; opacity: 0.8; margin-bottom: 3rem; max-width: 32rem; margin-left: auto; margin-right: auto;">
+                Start planning your event today and find the perfect partner for your feast.
+            </p>
+            <a href="/caterers" class="btn-cta-main"
+                style="background: white; color: var(--text-main); font-size: 1.25rem;">Explore Marketplace</a>
         </div>
-    </div>
-</section>
+    </section>
+</div>
 {% endblock %}
 
 {% block scripts %}

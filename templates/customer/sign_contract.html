@@ -1,0 +1,147 @@
+{% extends "customer/layout.html" %}
+
+{% block title %}Sign Contract - OccaServe{% endblock %}
+
+{% block extra_css %}
+<style>
+    .signing-container {
+        max-width: 900px;
+        margin: 1rem auto;
+        background: white;
+        padding: 3rem;
+        border-radius: 1.5rem;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+    }
+
+    .contract-preview {
+        border: 1px solid #e2e8f0;
+        padding: 2.5rem;
+        border-radius: 1rem;
+        background: #fdfdfd;
+        margin-bottom: 2rem;
+        max-height: 450px;
+        overflow-y: auto;
+    }
+
+    .signature-area {
+        text-align: center;
+        border-top: 2px solid #f1f5f9;
+        padding-top: 2rem;
+    }
+
+    .signature-pad-wrapper {
+        border: 2px dashed #cbd5e1;
+        border-radius: 1rem;
+        background: #f8fafc;
+        margin-bottom: 1rem;
+    }
+
+    canvas#signature-pad {
+        width: 100%;
+        height: 200px;
+        cursor: crosshair;
+    }
+
+    .btn-sign {
+        background: #1e293b;
+        color: white !important;
+        border: none;
+        padding: 1rem 2.5rem;
+        border-radius: 1rem;
+        font-weight: 800;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        margin: 0 auto;
+        gap: 0.75rem;
+        box-shadow: 0 10px 20px rgba(30, 41, 59, 0.2);
+    }
+
+    .caterer-signature-img {
+        max-width: 150px;
+        border-bottom: 2px solid #1e293b;
+        margin-top: 1rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="signing-container">
+    <div class="text-center mb-5">
+        <h2 class="font-playfair" style="font-size: 2.25rem;">Review & Sign Contract</h2>
+        <p class="text-slate">Please review the final terms from <strong>{{ booking.caterer.business_name }}</strong>
+            and sign below.</p>
+    </div>
+
+    <div class="contract-preview">
+        <!-- Reusing same sections as caterer for consistency -->
+        <div class="mb-5">
+            <h4 class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-3">Event Details</h4>
+            <p class="text-lg"><strong>{{ booking.event_name }}</strong> ({{ booking.event_type }})<br>
+                Date: {{ booking.event_date.strftime('%B %d, %Y') }}<br>
+                Venue: {{ booking.venue_address }}</p>
+        </div>
+
+        <div class="mb-5">
+            <h4 class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-3">Service & Pricing</h4>
+            <p class="text-lg">Package: {{ quotation.package_details.name }}<br>
+                Guest Count: {{ booking.guest_count }} pax<br>
+                Total Bill: <strong>₱{{ "{:,.2f}".format(quotation.total_amount) }}</strong></p>
+        </div>
+
+        <div class="mb-5">
+            <h4 class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-3">Required Payment</h4>
+            <div class="p-4 bg-slate-50 border-1 border-slate-200 rounded-xl">
+                <p class="mb-0">Estimated Reservation Fee: <span class="text-xl font-bold text-slate-900">₱{{
+                        "{:,.2f}".format(booking.reservation_fee) }}</span></p>
+                <p class="text-sm text-slate-500 mt-1">Due upon signing this contract.</p>
+            </div>
+        </div>
+
+        <div class="mt-5 pt-4 border-t border-slate-100">
+            <p class="text-sm font-bold text-slate-600">CATERER SIGNATURE (ELECTRONIC)</p>
+            {% if quotation.caterer_signature %}
+            <img src="{{ quotation.caterer_signature }}" class="caterer-signature-img" alt="Caterer Signature">
+            <p class="text-xs text-slate-400 mt-1">Signed on {{ quotation.caterer_signed_at.strftime('%B %d, %Y') }}</p>
+            {% else %}
+            <p class="text-slate-400 italic">Awaiting caterer signature...</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="signature-area">
+        <h3 class="mb-3">YOUR SIGNATURE (CUSTOMER)</h3>
+        <p class="text-sm text-slate-500 mb-4">By signing, you agree to the terms provided by the caterer.</p>
+
+        <div class="signature-pad-wrapper">
+            <canvas id="signature-pad"></canvas>
+        </div>
+
+        <div class="d-flex justify-content-center gap-3 mt-3">
+            <button type="button" class="btn btn-light" onclick="signaturePad.clear()">Clear</button>
+            <form id="signature-form" action="/contracts/{{ booking.id }}/submit-signature" method="POST">
+                <input type="hidden" name="signature" id="signature-input">
+                <button type="submit" class="btn-sign">
+                    Confirm & Proceed to Payment <i class="fas fa-check"></i>
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', path='/js/signature_pad.js') }}"></script>
+<script>
+    const signaturePad = new SignaturePad('signature-pad');
+
+    document.getElementById('signature-form').onsubmit = function (e) {
+        if (signaturePad.isEmpty()) {
+            e.preventDefault();
+            alert("Pakipirma muna ang contract bago mag-submit.");
+            return false;
+        }
+        document.getElementById('signature-input').value = signaturePad.getSignatureData();
+    };
+</script>
+{% endblock %}

@@ -62,6 +62,39 @@
                 required>{{ profile.description }}</textarea>
         </div>
 
+        <!-- Brand Customization -->
+        <div class="form-section-title">Brand Customization</div>
+        <p style="font-size: 0.875rem; color: #64748b; margin-bottom: 1.5rem;">These colors will automatically be
+            applied to your public profile page.</p>
+
+        <div
+            style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1.5rem; margin-bottom: 2.5rem;">
+            <div class="form-group">
+                <label>Primary Color</label>
+                <div style="display: flex; gap: 0.75rem; align-items: center;">
+                    <input type="color" name="primary_color" value="{{ profile.primary_color or '#2D3748' }}"
+                        style="width: 50px; height: 50px; border: none; border-radius: 8px; cursor: pointer;">
+                    <code style="font-size: 0.8125rem;">{{ profile.primary_color or '#2D3748' }}</code>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Secondary Color</label>
+                <div style="display: flex; gap: 0.75rem; align-items: center;">
+                    <input type="color" name="secondary_color" value="{{ profile.secondary_color or '#4A5568' }}"
+                        style="width: 50px; height: 50px; border: none; border-radius: 8px; cursor: pointer;">
+                    <code style="font-size: 0.8125rem;">{{ profile.secondary_color or '#4A5568' }}</code>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Accent Color</label>
+                <div style="display: flex; gap: 0.75rem; align-items: center;">
+                    <input type="color" name="accent_color" value="{{ profile.accent_color or '#48BB78' }}"
+                        style="width: 50px; height: 50px; border: none; border-radius: 8px; cursor: pointer;">
+                    <code style="font-size: 0.8125rem;">{{ profile.accent_color or '#48BB78' }}</code>
+                </div>
+            </div>
+        </div>
+
         <div class="form-row-two-col">
             <div class="form-group">
                 <label>City / Location</label>

@@ -108,7 +108,7 @@
                             data-payment-method="{{ booking.payment_method or 'TBD' }}"
                             data-booked-on="{{ booking.created_at.strftime('%B %d, %Y %H:%M') }}"
                             data-guest-count="{{ booking.guest_count }}"
-                            data-has-contract="{{ 'true' if booking.quotation and booking.quotation.status == 'signed' else 'false' }}">
+                            data-has-contract="{{ 'true' if booking.quotation else 'false' }}">
                             Details
                         </button>
 
@@ -189,6 +189,9 @@
                 <h3 class="modal-section-title">Menu & Add-ons</h3>
                 <div id="modalMenuItems" class="modal-menu-container"></div>
             </div>
+
+
+            <!-- Financials & Timeline -->
 
             <!-- Financials & Timeline -->
             <div class="financials-grid-p">
